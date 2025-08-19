@@ -9,13 +9,13 @@ An interactive web-based programming tutorial that teaches programming concepts 
 - **Preserved Pedagogy**: Maintains the original book's language, analogies, and teaching sequence
 - **Safe Execution Environment**: Containerized code execution with security restrictions
 - **Progressive Learning**: Structured content with navigation and progress tracking
+- **Modern Vue.js Interface**: Clean, responsive UI built with Vue 3 and TypeScript
 
 ## Development Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- Docker and Docker Compose
 - npm or yarn
 
 ### Quick Start
@@ -23,7 +23,7 @@ An interactive web-based programming tutorial that teaches programming concepts 
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   npm run install:all
+   npm run install:frontend
    ```
 
 3. Start development environment:
@@ -31,27 +31,20 @@ An interactive web-based programming tutorial that teaches programming concepts 
    npm run dev
    ```
 
-This will start:
-- Frontend React app on http://localhost:5173
-- Backend API on http://localhost:3001
-- Language runtime containers for code execution
-
-### Using Docker Compose
-
-For a fully containerized development environment:
-
-```bash
-docker-compose -f docker-compose.dev.yml up
-```
+This will start the Vue.js frontend application on http://localhost:5173
 
 ## Project Structure
 
 ```
-├── frontend/          # React TypeScript frontend
-├── backend/           # Node.js/Express API
-├── Book/             # Source tutorial content
-├── runtime-volumes/  # Docker volumes for code execution
-└── docker-compose.dev.yml
+├── frontend-vue/      # Vue 3 + TypeScript frontend application
+│   ├── src/          # Source code
+│   ├── public/       # Static assets
+│   └── package.json  # Frontend dependencies
+├── Book/             # Source tutorial content and images
+│   ├── Files/        # Tutorial images and assets
+│   └── *.md          # Markdown tutorial content
+├── package.json      # Root project configuration
+└── README.md         # This file
 ```
 
 ## Supported Languages
@@ -64,20 +57,26 @@ docker-compose -f docker-compose.dev.yml up
 ## Development Commands
 
 ```bash
-# Install all dependencies
-npm run install:all
+# Install frontend dependencies
+npm run install:frontend
 
-# Start development servers
+# Start development server
 npm run dev
-
-# Run tests
-npm test
 
 # Build for production
 npm run build
 
+# Preview production build
+npm run preview
+
 # Lint code
 npm run lint
+
+# Format code
+npm run format
+
+# Type checking
+npm run type-check
 ```
 
 ## Architecture
@@ -87,7 +86,15 @@ The system consists of:
 1. **Content Management System** - Processes tutorial content and manages translations
 2. **Code Translation Service** - Converts code examples between languages
 3. **Multi-Language REPL Engine** - Provides safe, containerized code execution
-4. **Interactive UI** - React-based interface with integrated Monaco Editor
+4. **Interactive UI** - Vue.js-based interface with integrated Monaco Editor
+
+## Technology Stack
+
+- **Frontend**: Vue 3, TypeScript, Vite
+- **UI Components**: Custom Vue components
+- **Code Execution**: MathJS for JavaScript, WASM-based runtimes for other languages
+- **Content**: Markdown with custom processing
+- **Styling**: CSS with modern design principles
 
 ## Contributing
 
@@ -95,6 +102,7 @@ The system consists of:
 2. Write tests for new functionality
 3. Ensure all languages are supported for new code examples
 4. Test with the target age group (10+ years) in mind
+5. Use TypeScript for type safety
 
 ## License
 
