@@ -3,26 +3,38 @@
  */
 
 import type { Language, ExecutionResult } from '@/types'
+import { mathJSREPL } from './mathJSREPL'
 
-// Extend Window interface for Pyodide
+// Extend Window interface for Pyodide and Opal
 declare global {
   interface Window {
-    loadPyodide: any
+    // Pyodide attaches a function to window for bootstrapping the runtime
+    loadPyodide?: (options: { indexURL: string }) => Promise<PyodideLike>
+    // Opal is no longer used, keep for forward-compat if needed
+    Opal?: unknown
   }
+}
+
+interface PyodideLike {
+  runPythonAsync: (code: string) => Promise<unknown>
+  globals: Record<string, unknown> & { print?: (...args: unknown[]) => void }
 }
 
 // Runtime state for each language
 interface RuntimeState {
-  variables: Record<string, any>
-  functions: Record<string, any>
+  variables: Record<string, unknown>
+  functions: Record<string, unknown>
   imports: string[]
   executionHistory: string[]
 }
 
 class LanguageRuntimeService {
   private runtimes: Map<string, RuntimeState> = new Map()
-  private pyodide: any = null
+  private pyodide: PyodideLike | null = null
   private isInitialized = false
+  private rubyWasmVM: { eval: (code: string) => unknown } | null = null;
+  private rubyWasmLoaded = false;
+  private rubyWasmCapture: string[] | null = null;
 
   /**
    * Initialize the language runtime service
@@ -31,26 +43,14 @@ class LanguageRuntimeService {
     if (this.isInitialized) return
 
     try {
-      // Load Pyodide for Python execution from CDN
-      if (typeof window !== 'undefined') {
-        // Load Pyodide script dynamically
-        await this.loadPyodideScript()
-
-        // @ts-ignore - Pyodide is loaded globally
-        if (window.loadPyodide) {
-          this.pyodide = await window.loadPyodide({
-            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.28.0/full/'
-          })
-        } else {
-          throw new Error('Pyodide failed to load')
-        }
-      }
+      // Defer heavy runtime loads to per-language initializers
+      // Keep this method lightweight so non-Python languages are not blocked
 
       this.isInitialized = true
-      console.log('Language runtime service initialized')
     } catch (error) {
-      console.error('Failed to initialize language runtime:', error)
-      throw new Error('Failed to initialize code execution environment')
+      // Do not block non-Python languages if Pyodide (or any init) fails here
+      console.error('Initialization warning (non-fatal):', error)
+      this.isInitialized = true
     }
   }
 
@@ -73,18 +73,82 @@ class LanguageRuntimeService {
     })
   }
 
+  // Opal loader removed in favor of CRuby WASM for reliability.
+
+  /**
+   * Load ruby.wasm (CRuby on WebAssembly) once per page
+   */
+  private async loadRubyWasm(): Promise<void> {
+    if (this.rubyWasmLoaded && this.rubyWasmVM) return
+
+    // Dynamic import to keep initial bundle small (use browser build for WASI polyfill)
+    const wasmModule = await import('@ruby/wasm-wasi/dist/browser')
+    // Import wasm asset URL via Vite '?url' loader from versioned package
+    const wasmUrl = (await import('@ruby/3.2-wasm-wasi/dist/ruby+stdlib.wasm?url')).default as string
+
+    const response = await fetch(wasmUrl)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ruby.wasm: ${response.status}`)
+    }
+    const buffer = await response.arrayBuffer()
+    const module = await WebAssembly.compile(buffer)
+
+    interface RubyWasmVM {
+      eval: (code: string) => unknown
+    }
+    type DefaultRubyVMFn = (m: WebAssembly.Module, opts: { print: (s: string) => void; printErr: (s: string) => void }) => Promise<{ vm: RubyWasmVM }>
+    const { DefaultRubyVM } = wasmModule as unknown as { DefaultRubyVM: DefaultRubyVMFn }
+    const { vm } = await DefaultRubyVM(module, {
+      print: (s: string) => {
+        if (this.rubyWasmCapture) {
+          this.rubyWasmCapture.push(String(s))
+        } else {
+          console.log(s)
+        }
+      },
+      printErr: (s: string) => {
+        if (this.rubyWasmCapture) {
+          this.rubyWasmCapture.push(`ERR: ${String(s)}`)
+        } else {
+          console.error(s)
+        }
+      }
+    })
+
+    this.rubyWasmVM = vm
+    this.rubyWasmLoaded = true
+  }
+
   /**
    * Create a new runtime session for a language
    */
   async createSession(language: Language): Promise<string> {
     await this.initialize()
 
+    // Use MathJS REPL for JavaScript sessions
+    if (language.id === 'javascript') {
+      return await mathJSREPL.createSession(language)
+    }
+
+    // Use a synthetic session for Ruby WASM (and treat 'ruby' as an alias)
+    if (language.id === 'ruby-wasm' || language.id === 'ruby') {
+      const sessionId = `rubywasm_${Date.now()}_${Math.random().toString(36).slice(2)}`
+      this.runtimes.set(sessionId, {
+        variables: {},
+        functions: {},
+        imports: [],
+        executionHistory: [],
+      })
+      await this.initializeLanguageRuntime(language, sessionId)
+      return sessionId
+    }
+
     const sessionId = `${language.id}_${Date.now()}`
     this.runtimes.set(sessionId, {
       variables: {},
       functions: {},
       imports: [],
-      executionHistory: []
+      executionHistory: [],
     })
 
     // Initialize language-specific runtime
@@ -102,6 +166,17 @@ class LanguageRuntimeService {
 
     switch (language.id) {
       case 'python':
+        // Lazy-load Pyodide only when Python is first used
+        if (!this.pyodide) {
+          if (typeof window !== 'undefined') {
+            await this.loadPyodideScript()
+            if (window.loadPyodide) {
+              this.pyodide = await window.loadPyodide({
+                indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.28.0/full/',
+              })
+            }
+          }
+        }
         if (this.pyodide) {
           // Initialize Python runtime with some basic imports
           await this.pyodide.runPythonAsync(`
@@ -119,7 +194,7 @@ import datetime
           console: console,
           Math: Math,
           Date: Date,
-          JSON: JSON
+          JSON: JSON,
         }
         break
       case 'typescript':
@@ -128,45 +203,61 @@ import datetime
           console: console,
           Math: Math,
           Date: Date,
-          JSON: JSON
+          JSON: JSON,
         }
         break
       case 'ruby':
-        // For Ruby, we'd need to load ruby.wasm
-        // For now, we'll simulate it
-        console.log('Ruby runtime not yet implemented')
-        break
+        // Treat classic 'ruby' as CRuby WASM as well to avoid fragile CDNs
+        await this.loadRubyWasm()
+        break;
+      case 'ruby-wasm':
+        // Load CRuby (ruby.wasm) runtime
+        await this.loadRubyWasm()
+        break;
     }
   }
 
-    /**
+  /**
    * Execute code in the specified language
    */
   async executeCode(code: string, language: Language, sessionId: string): Promise<ExecutionResult> {
     await this.initialize()
-
-    const runtime = this.runtimes.get(sessionId)
-    if (!runtime) {
-      throw new Error('Invalid session')
-    }
 
     const startTime = Date.now()
 
     try {
       let output = ''
       let error: string | undefined
-      let variables: Record<string, any> = {}
+      let variables: Record<string, unknown> = {}
+
+      // Handle MathJS sessions separately
+      if (sessionId.startsWith('mathjs_')) {
+        const result = await mathJSREPL.executeCode(code, language, sessionId)
+        return {
+          output: result.output,
+          error: result.error,
+          variables: result.variables,
+          executionTime: Date.now() - startTime,
+          timestamp: new Date()
+        }
+      }
+
+      // Handle other language sessions
+      const runtime = this.runtimes.get(sessionId)
+      if (!runtime) {
+        throw new Error('Invalid session')
+      }
 
       switch (language.id) {
         case 'python':
           if (this.pyodide) {
-                                    try {
+            try {
               // Capture print output by overriding the print function
               const capturedOutput: string[] = []
 
               // Create a custom print function that captures output
-              this.pyodide.globals.print = (...args: any[]) => {
-                const outputStr = args.map(arg => String(arg)).join(' ')
+              this.pyodide.globals.print = (...args: unknown[]) => {
+                const outputStr = args.map((arg) => String(arg)).join(' ')
                 capturedOutput.push(outputStr)
                 // Also log to console for debugging
                 console.log('Python print:', ...args)
@@ -194,84 +285,149 @@ import datetime
                   variables[key] = value
                 }
               }
-            } catch (pyError: any) {
-              error = pyError.message || 'Python execution error'
+            } catch (pyError: unknown) {
+              error = pyError instanceof Error ? pyError.message : 'Python execution error'
             }
           } else {
             error = 'Python runtime not available'
           }
           break
 
-                case 'javascript':
-          try {
-            // Capture console.log output
-            const capturedOutput: string[] = []
-            const customConsole = {
-              ...console,
-              log: (...args: any[]) => {
-                const outputStr = args.map(arg => String(arg)).join(' ')
-                capturedOutput.push(outputStr)
-                // Also call the original console.log
-                console.log(...args)
-              }
-            }
 
-            // Create a safe execution context
-            const safeEval = new Function('console', 'Math', 'Date', 'JSON', code)
-            const result = safeEval(customConsole, Math, Date, JSON)
-
-            // Combine captured console output with return value
-            if (capturedOutput.length > 0) {
-              output = capturedOutput.join('\n')
-              if (result !== undefined) {
-                output += '\n' + String(result)
-              }
-            } else {
-              output = result !== undefined ? String(result) : ''
-            }
-
-            // Note: Capturing variables in JavaScript is more complex
-            // For now, we'll just return the output
-          } catch (jsError: any) {
-            error = jsError.message || 'JavaScript execution error'
-          }
-          break
 
         case 'typescript':
           try {
-            // TypeScript code runs as JavaScript
+            // Execute TypeScript by stripping type annotations (basic) and evaluating as JS
             const capturedOutput: string[] = []
             const customConsole = {
               ...console,
-              log: (...args: any[]) => {
-                const outputStr = args.map(arg => String(arg)).join(' ')
+              log: (...args: unknown[]) => {
+                const outputStr = args.map((arg) => String(arg)).join(' ')
                 capturedOutput.push(outputStr)
                 // Also call the original console.log
                 console.log(...args)
-              }
+              },
             }
 
-            const safeEval = new Function('console', 'Math', 'Date', 'JSON', code)
-            const result = safeEval(customConsole, Math, Date, JSON)
+            // Initialize the global scope if it doesn't exist
+            type GlobalScope = {
+              console: Console
+              Math: Math
+              Date: DateConstructor
+              JSON: JSON
+              _vars: Record<string, unknown>
+            }
+            const runtimeVars = runtime.variables as Record<string, unknown>
+            if (!(runtimeVars as Record<string, unknown>)._globalScope) {
+              ;(runtimeVars as Record<string, unknown>)._globalScope = { _vars: {} } as Partial<GlobalScope>
+            }
+
+            // Create a persistent global object for this session
+            const globalScope = (runtimeVars as Record<string, unknown>)._globalScope as GlobalScope
+
+            // Add built-in objects to the global scope
+            globalScope.console = customConsole
+            globalScope.Math = Math
+            globalScope.Date = Date
+            globalScope.JSON = JSON
+
+            // Create a global variables object for this session if it doesn't exist
+            if (!globalScope._vars) globalScope._vars = {}
+
+            // Parse the code to detect variable declarations
+            const varDeclarations = this.extractVariableDeclarations(code)
+
+            console.log('Variable declarations found:', varDeclarations)
+            console.log('Current variables:', Object.keys(globalScope._vars))
+
+            // Very naive TS-to-JS: remove type annotations and interfaces (best-effort)
+            const transpiledCode = code
+              // remove : type annotations
+              .replace(/: \s*[A-Za-z_][A-Za-z0-9_<>\[\]|,&? ]*/g, '')
+              // remove interface and type blocks
+              .replace(/interface\s+[A-Za-z_][A-Za-z0-9_]*\s*\{[\s\S]*?\}/g, '')
+              .replace(/type\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*[\s\S]*?;/g, '')
+
+            // Create a simple execution script that uses a global object for variables
+            const executionScript = `
+              (function() {
+                // Restore existing variables to the global scope
+                ${Object.entries(globalScope._vars)
+                  .map(([key, value]) => `var ${key} = ${JSON.stringify(value)};`)
+                  .join('\n')}
+
+                // Execute the user code
+                ${transpiledCode}
+
+                // Capture any new variables that were declared
+                const newVars = {};
+                ${varDeclarations
+                  .map(
+                    (varName) => `
+                  if (typeof ${varName} !== 'undefined') {
+                    newVars['${varName}'] = ${varName};
+                  }
+                `,
+                  )
+                  .join('\n')}
+
+                return newVars;
+              })()
+            `
+
+            // Execute the script with the custom console
+            const func = new Function('console', 'Math', 'Date', 'JSON', executionScript)
+
+            const result = func(customConsole, Math, Date, JSON)
+
+            // Update the global scope with any new variables
+            if (result && typeof result === 'object') {
+              Object.assign(globalScope._vars, result as Record<string, unknown>)
+              console.log('Updated variables:', Object.keys(globalScope._vars))
+            }
 
             // Combine captured console output with return value
             if (capturedOutput.length > 0) {
               output = capturedOutput.join('\n')
-              if (result !== undefined) {
-                output += '\n' + String(result)
-              }
             } else {
-              output = result !== undefined ? String(result) : ''
+              output = ''
             }
-          } catch (tsError: any) {
-            error = tsError.message || 'TypeScript execution error'
+
+            // Update the variables in the result
+            variables = { ...globalScope }
+          } catch (tsError: unknown) {
+            error = tsError instanceof Error ? tsError.message : 'TypeScript execution error'
           }
           break
 
         case 'ruby':
-          // For now, simulate Ruby execution
-          output = `Ruby execution: ${code}`
-          break
+        case 'ruby-wasm':
+          try {
+            await this.loadRubyWasm()
+            if (!this.rubyWasmVM) {
+              throw new Error('Ruby (WASM) runtime not available')
+            }
+            // Capture output printed by Ruby VM
+            this.rubyWasmCapture = []
+            let evalResult: unknown
+            try {
+              evalResult = this.rubyWasmVM.eval(code)
+            } finally {
+              // no special teardown required
+            }
+            const captured = this.rubyWasmCapture
+            this.rubyWasmCapture = null
+            if (captured && captured.length > 0) {
+              output = captured.join('\n')
+            }
+            if (evalResult !== undefined && evalResult !== null) {
+              const resultStr = String(evalResult)
+              output = output ? output + '\n' + resultStr : resultStr
+            }
+          } catch (rbwErr: unknown) {
+            error = rbwErr instanceof Error ? rbwErr.message : 'Ruby (WASM) execution error'
+          }
+          break;
 
         default:
           error = `Unsupported language: ${language.name}`
@@ -284,17 +440,16 @@ import datetime
         error,
         variables,
         executionTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       }
-
-    } catch (error: any) {
+    } catch (error: unknown) {
       const executionTime = Date.now() - startTime
       return {
         output: '',
-        error: error.message || 'Execution failed',
+        error: error instanceof Error ? error.message : 'Execution failed',
         variables: {},
         executionTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       }
     }
   }
@@ -303,6 +458,20 @@ import datetime
    * Get runtime state for a session
    */
   getRuntimeState(sessionId: string): RuntimeState | null {
+    // Check if it's a MathJS session
+    if (sessionId.startsWith('mathjs_')) {
+      const mathJSState = mathJSREPL.getRuntimeState(sessionId)
+      if (mathJSState) {
+        return {
+          variables: mathJSState.variables,
+          functions: mathJSState.functions,
+          imports: mathJSState.imports,
+          executionHistory: mathJSState.executionHistory,
+        }
+      }
+      return null
+    }
+
     return this.runtimes.get(sessionId) || null
   }
 
@@ -310,14 +479,41 @@ import datetime
    * Clear a runtime session
    */
   clearSession(sessionId: string): void {
-    this.runtimes.delete(sessionId)
+    // Check if it's a MathJS session
+    if (sessionId.startsWith('mathjs_')) {
+      mathJSREPL.clearSession(sessionId)
+    } else {
+      this.runtimes.delete(sessionId)
+    }
+  }
+
+  /**
+   * Extract variable declarations from JavaScript code
+   */
+  private extractVariableDeclarations(code: string): string[] {
+    const declarations: string[] = []
+
+    // Simple regex to match let, const, and var declarations
+    const patterns = [
+      /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,
+      /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*;/g,
+    ]
+
+    for (const pattern of patterns) {
+      let match
+      while ((match = pattern.exec(code)) !== null) {
+        declarations.push(match[1])
+      }
+    }
+
+    return declarations
   }
 
   /**
    * Check if a language is supported
    */
   isLanguageSupported(language: Language): boolean {
-    return ['python', 'javascript', 'typescript'].includes(language.id)
+    return ['python', 'javascript', 'typescript', 'ruby', 'ruby-wasm'].includes(language.id);
   }
 }
 

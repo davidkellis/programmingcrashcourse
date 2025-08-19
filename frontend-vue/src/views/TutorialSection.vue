@@ -65,6 +65,7 @@ import MarkdownIt from 'markdown-it'
 
 interface Props {
   sectionId: string
+  currentLanguage?: string
 }
 
 const props = defineProps<Props>()
@@ -85,7 +86,7 @@ const md = new MarkdownIt({
 
 // Custom renderer for code blocks to make them interactive
 const originalFence = md.renderer.rules.fence
-md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+md.renderer.rules.fence = (tokens: any[], idx: number, options: any, env: any, self: any) => {
   const token = tokens[idx]
   const language = token.info || ''
   const code = token.content
@@ -120,7 +121,9 @@ const loadSection = async () => {
     isLoading.value = true
     error.value = null
 
-    const sectionData = await localContentService.getSection(props.sectionId, 'python')
+    // Get the current language from props or default to python
+    const currentLanguage = props.currentLanguage || 'python'
+    const sectionData = await localContentService.getSection(props.sectionId, currentLanguage)
     if (sectionData) {
       section.value = sectionData
     } else {
@@ -163,6 +166,13 @@ onUnmounted(() => {
 // Watch for route changes to reload section content
 watch(() => props.sectionId, (newSectionId) => {
   if (newSectionId) {
+    loadSection()
+  }
+})
+
+// Watch for language changes to reload section content
+watch(() => props.currentLanguage, () => {
+  if (props.sectionId) {
     loadSection()
   }
 })

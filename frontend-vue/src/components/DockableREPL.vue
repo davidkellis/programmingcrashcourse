@@ -36,11 +36,28 @@
 
     <div class="repl-content">
       <div class="repl-history" ref="historyContainer">
+        <div v-if="!isSessionReady" class="repl-banner">
+          <div class="banner-text">Preparing runtime… please wait.</div>
+        </div>
         <!-- Python banner -->
-        <div v-if="history.length === 0" class="python-banner">
+        <div v-if="history.length === 0" class="repl-banner">
           <div class="banner-text">
-            Python 3.13.5 (main, Jun 12 2025, 12:40:22) [Clang 20.1.4 ] on linux<br>
-            Type "help", "copyright", "credits" or "license" for more information.
+            <span v-if="props.language?.id === 'python'">
+              Python 3.13.5 (main, Jun 12 2025, 12:40:22) [Clang 20.1.4 ] on linux<br>
+              Type "help", "copyright", "credits" or "license" for more information.
+            </span>
+            <span v-else-if="props.language?.id === 'javascript'">
+              JavaScript REPL with MathJS v{{ mathJSVersion }}<br>
+              Type "help" for available functions, or try: sin(PI/2), mean([1,2,3,4,5])
+            </span>
+            <span v-else-if="props.language?.id === 'ruby-wasm'">
+              Ruby (CRuby WASM) REPL<br>
+              Larger download, initializing in-browser CRuby…
+            </span>
+            <span v-else>
+              {{ props.language?.name || 'Unknown' }} REPL<br>
+              Ready for code execution.
+            </span>
           </div>
         </div>
 
@@ -65,17 +82,17 @@
             ref="inputTextarea"
             v-model="currentInput"
             class="repl-input"
-            placeholder=""
+            :placeholder="isSessionReady ? '' : 'Initializing runtime…'"
             @keydown="handleKeydown"
             @input="autoResize"
-            :disabled="isExecuting"
+            :disabled="isExecuting || !isSessionReady"
             rows="1"
           ></textarea>
           <button
             @click="executeCode"
             class="run-button"
-            :disabled="isExecuting || !currentInput.trim()"
-            title="Run code (Ctrl+Enter)"
+            :disabled="isExecuting || !currentInput.trim() || !isSessionReady"
+            :title="isSessionReady ? 'Run code (Ctrl+Enter)' : 'Runtime not ready'"
           >
             Run
           </button>
@@ -86,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, nextTick, computed, watch } from 'vue'
 import type { Language, ExecutionRecord } from '@/types'
 
 interface Props {
@@ -98,6 +115,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const isSessionReady = computed(() => !!props.sessionId)
 
 const emit = defineEmits<{
   execute: [code: string]
@@ -111,9 +129,12 @@ const historyContainer = ref<HTMLElement>()
 const replContainer = ref<HTMLElement>()
 const inputTextarea = ref<HTMLTextAreaElement>()
 
-// Python REPL state
+// REPL state
 const currentPrompt = ref('>>> ')
 const isMultiLine = ref(false)
+
+// MathJS version for display
+const mathJSVersion = ref('11.11.0')
 
 // Resize state
 const size = ref({ width: 350, height: 300 })
@@ -181,7 +202,6 @@ const executeCode = async () => {
   if (!currentInput.value.trim() || props.isExecuting) return
 
   const code = currentInput.value.trim()
-  const inputLines = parseInputLines(code)
 
   // Reset input and prompt
   currentInput.value = ''
@@ -203,19 +223,13 @@ const executeCode = async () => {
   })
 }
 
-const parseInputLines = (code: string): Array<{ prompt: string; text: string }> => {
-  const lines = code.split('\n')
-  return lines.map((line, index) => ({
-    prompt: index === 0 ? '>>> ' : '... ',
-    text: line
-  }))
-}
+
 
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Enter' && event.ctrlKey) {
     // Ctrl+Enter submits the expression
     event.preventDefault()
-    executeCode()
+    if (isSessionReady.value) executeCode()
   } else if (event.key === 'Enter') {
     // Regular Enter always adds a newline
     event.preventDefault()
@@ -280,11 +294,9 @@ watch(() => currentInput.value, () => {
   })
 })
 
-// Cleanup event listeners on unmount
-onUnmounted(() => {
-  document.removeEventListener('mousemove', handleResize)
-  document.removeEventListener('mouseup', stopResize)
-})
+
+
+// No iframe needed for JavaScript REPL anymore
 </script>
 
 <style scoped>
@@ -425,7 +437,7 @@ onUnmounted(() => {
   line-height: 1.4;
 }
 
-.python-banner {
+.repl-banner {
   color: #60a5fa;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875rem;

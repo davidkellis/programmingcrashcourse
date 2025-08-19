@@ -13,7 +13,10 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@ruby/wasm-wasi": "^2.6.1",
+    "@ruby/3.2-wasm-wasi": "^2.6.1",
     "markdown-it": "^14.1.0",
+    "mathjs": "^14.5.3",
     "pinia": "^3.0.3",
     "prismjs": "^1.30.0",
     "vue": "^3.5.17",

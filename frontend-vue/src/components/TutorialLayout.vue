@@ -57,7 +57,10 @@
         </header>
 
         <div class="content-wrapper">
-          <RouterView @run-code="handleRunCode" />
+          <RouterView
+            :current-language="uiState.selectedLanguage?.id"
+            @run-code="handleRunCode"
+          />
         </div>
       </div>
     </main>
@@ -159,6 +162,10 @@ const handleLanguageChange = async (language: Language) => {
   localStorage.setItem(STORAGE_KEYS.SELECTED_LANGUAGE, language.id)
   uiState.value.selectedLanguage = language
   replState.value.sessionId = null
+
+  // Reload sections for the new language
+  await loadSections()
+
   await createREPLSession(language)
 }
 
@@ -240,7 +247,8 @@ const handleClickOutside = (event: Event) => {
 
 const loadSections = async () => {
   try {
-    const sectionsData = await localContentService.getAllSections('python')
+    const languageId = uiState.value.selectedLanguage?.id || 'python'
+    const sectionsData = await localContentService.getAllSections(languageId)
     sections.value = sectionsData
   } catch (error) {
     console.error('Failed to load sections:', error)
@@ -275,6 +283,9 @@ onMounted(async () => {
 
   // Load sections for TOC
   await loadSections()
+
+  // Create REPL session for the selected language
+  await createREPLSession(language)
 
   // Add click outside handler for TOC
   document.addEventListener('click', handleClickOutside)
