@@ -3,228 +3,355 @@ import type { TutorialSection } from '@/types'
 export const JAVASCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
   {
     id: 'introduction',
-    title: 'Introduction to Programming',
+    title: 'Introduction',
     order: 1,
-    content: `# Introduction to Programming
+    content: `# JavaScript Programming Introduction
 
-Welcome to the world of programming! Programming is like giving instructions to a computer, similar to how you might give directions to a friend.
+Welcome to JavaScript programming! This tutorial will teach you the fundamentals of JavaScript through interactive examples.
 
-## What is Programming?
+JavaScript is a versatile programming language that powers the web. It's used for creating interactive websites, web applications, and much more. Let's start exploring the basic building blocks of JavaScript programming.
 
-Programming is the process of creating instructions for computers to follow. Think of it like writing a recipe - you need to be very specific about each step.
-
-## Your First Program
-
-Let's start with a simple example. In most programming languages, we can display text on the screen:
+Let's begin with your first JavaScript program:
 
 \`\`\`javascript
 console.log("Hello, World!");
-\`\`\`
-
-This tells the computer to display the text "Hello, World!" on the screen.
-
-## Variables - Storing Information
-
-Variables are like labeled boxes where we can store information. Think of them as containers with names:
-
-\`\`\`javascript
-let name = "Alice";
-let age = 25;
-\`\`\`
-
-Here we're storing the text "Alice" in a variable called \`name\`, and the number 25 in a variable called \`age\`.
-`,
-    codeSnippets: [
-      {
-        id: 'hello-world',
-        code: 'console.log("Hello, World!");',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'First program example',
-        explanation: 'This displays text on the screen'
-      },
-      {
-        id: 'variables-example',
-        code: 'let name = "Alice";\nlet age = 25;\nconsole.log(`My name is ${name} and I am ${age} years old`);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Variables example',
-        explanation: 'Shows how to store and use variables'
-      }
-    ],
-    nextSection: 'data-types'
+console.log("Welcome to JavaScript programming!");
+\`\`\``,
+    codeSnippets: [],
+    nextSection: 'comments'
   },
   {
-    id: 'data-types',
-    title: 'Understanding Data Types',
+    id: 'comments',
+    title: 'Comments',
     order: 2,
-    content: `# Understanding Data Types
+    content: `# Comments
 
-Just like in real life, information comes in different types. In programming, we call these **data types**.
+* lines that start with // are comments
+* comments are just explanations about something
+* comments are ignored by the JavaScript interpreter
 
-## Numbers
-
-JavaScript has one number type that handles both integers and decimals:
-
-\`\`\`javascript
-let age = 15;
-let height = 5.8;
-\`\`\`
-
-## Text (Strings)
-
-Text in programming is called a "string" - imagine letters strung together like beads on a string:
-
-\`\`\`javascript
-let firstName = "John";
-let lastName = "Doe";
-let fullName = firstName + " " + lastName;
-console.log(fullName);
-\`\`\`
-
-## Boolean Values (True/False)
-
-Sometimes we need to store yes/no or true/false information:
-
-\`\`\`javascript
-let isStudent = true;
-let isAdult = false;
-\`\`\`
-
-## Arrays - Collections of Items
-
-Arrays are like shopping lists - they can hold multiple items:
-
-\`\`\`javascript
-let fruits = ["apple", "banana", "orange"];
-let numbers = [1, 2, 3, 4, 5];
-console.log(fruits[0]); // This prints "apple"
-\`\`\`
-`,
-    codeSnippets: [
-      {
-        id: 'numbers-example',
-        code: 'let age = 15;\nlet height = 5.8;\nconsole.log(`Age: ${age}, Height: ${height}`);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Numbers example',
-        explanation: 'Shows numbers in JavaScript'
-      },
-      {
-        id: 'strings-example',
-        code: 'let firstName = "John";\nlet lastName = "Doe";\nlet fullName = firstName + " " + lastName;\nconsole.log(fullName);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'String concatenation',
-        explanation: 'Shows how to combine strings'
-      },
-      {
-        id: 'boolean-example',
-        code: 'let isStudent = true;\nlet isAdult = false;\nconsole.log(`Student: ${isStudent}, Adult: ${isAdult}`);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Boolean values',
-        explanation: 'Shows true/false values'
-      },
-      {
-        id: 'arrays-example',
-        code: 'let fruits = ["apple", "banana", "orange"];\nconsole.log(fruits[0]);\nconsole.log(`I have ${fruits.length} fruits`);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Arrays example',
-        explanation: 'Shows how to work with arrays'
-      }
-    ],
+// this line is a comment
+// everything to the right of a // symbol is a comment and is ignored by the JavaScript interpreter`,
+    codeSnippets: [],
     previousSection: 'introduction',
+    nextSection: 'values'
+  },
+  {
+    id: 'values',
+    title: 'Values',
+    order: 3,
+    content: `# Values
+
+A value is either:
+
+* a number, for example:
+   * \`1\`
+   * \`1.4\`
+   * \`3.141592653589793\`
+   * \`1000\`
+   * \`1000000\`
+   * \`1_000_000 // numbers may not have commas in them, but may use underscores instead\`
+* a quoted string, for example:
+   * \`"my name is David"\`
+   * \`"I ate a sleeve of cookies"\`
+   * \`"I had to exercise"\`
+* a boolean true or false value, for example:
+   * \`true\`
+   * \`false\`
+* an array of values, for example:
+   * \`[1, 3, 5, 7, 9]\`
+   * \`[3.141592653589793, "pi", "pie"]\`
+   * \`[1000, "cookies", true]\`
+   * \`[0, "cookies", false]\`
+* an object is a collection of associated key/value pairs, for example:
+   * \`{1: "one", 2: "two", 3: "three"}\`
+   * \`{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}\`
+* an instance of a class (more on this later)
+
+Let's see how these values evaluate in the JavaScript REPL:
+
+\`\`\`javascript
+1
+1.4
+3.141592653589793
+1000
+1000000
+1_000_000
+"my name is David"
+"I ate a sleeve of cookies"
+"I had to exercise"
+true
+false
+[1, 3, 5, 7, 9]
+[3.141592653589793, "pi", "pie"]
+[1000, "cookies", true]
+[0, "cookies", false]
+{1: "one", 2: "two", 3: "three"}
+{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
+\`\`\``,
+    codeSnippets: [],
+    previousSection: 'comments',
+    nextSection: 'sets'
+  },
+  {
+    id: 'sets',
+    title: 'Sets',
+    order: 4,
+    content: `# Sets
+
+A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+
+In other words, a set is a group of values where every value is different; there cannot be two of anything.
+
+This is a set of three numbers:
+
+* \`1\`
+* \`2\`
+* \`3\`
+
+This is a set of two names:
+
+* \`"Jack"\`
+* \`"Jill"\`
+
+This is a set of different kinds of things:
+
+* \`1\`
+* \`3.141592653589793\`
+* \`"Steve"\`
+* \`true\`
+
+This is **not** a set (because some values are repeated):
+
+* \`1\`
+* \`1\`
+* \`3.141592653589793\`
+
+Sets in JavaScript are created using the Set constructor:
+
+* \`new Set([1,2,3])\`
+* \`new Set(["Jack", "Jill"])\`
+* \`new Set([1, 3.141592653589793, "Steve", true])\``,
+    codeSnippets: [],
+    previousSection: 'values',
+    nextSection: 'types'
+  },
+  {
+    id: 'types',
+    title: 'Types',
+    order: 5,
+    content: `# Types
+
+A type is a named set of values; it's a set that we give a name to.
+
+We can name a set of values however we want. For example:
+
+* We could call the set \`[1,2,3]\` **TinyNumber**
+* We could call the set \`[4,5,6,7,8,9]\` **SmallNumber**
+* We could call the set \`[10,11,12,13,14,15,16,17,18,19]\` **MediumNumber**
+
+Or we could give them different names:
+
+* We could call the set \`[1,2,3]\` **AwesomeNumber**
+* We could call the set \`[4,5,6,7,8,9]\` **CoolNumber**
+* We could call the set \`[10,11,12,13,14,15,16,17,18,19]\` **SuperNumber**
+
+JavaScript has some built-in types that are commonly used:
+
+* \`number\` - numbers
+* \`string\` - strings
+* \`boolean\` - boolean
+* \`object\` - objects (including arrays)
+* \`undefined\` - undefined values
+* \`function\` - functions`,
+    codeSnippets: [],
+    previousSection: 'sets',
+    nextSection: 'variables'
+  },
+  {
+    id: 'variables',
+    title: 'Variables and Assignment',
+    order: 6,
+    content: `# Variables and Assignment
+
+A variable is a name that points at a particular value.
+
+There are two simple ways to think about a variable:
+
+1. A variable is a labeled box, and we can put values in the box
+2. A variable is a name tag, and we can stick the name tag on different values
+
+For example, we can create a variable named \`my_age\` and assign the value \`25\` to it:
+
+\`my_age = 25\`
+
+In this example, \`my_age\` is the variable name, and \`25\` is the value.
+
+Here is what this looks like in the JavaScript REPL:
+
+\`\`\`
+> let my_age = 25
+undefined
+> my_age
+25
+\`\`\`
+
+In this code snippet, we are running the JavaScript interpreter in its interactive mode (called the read-evaluate-print-loop, or REPL for short), and assigning the value \`25\` to the variable named \`my_age\`, and then we read the value stored in the \`my_age\` variable by entering the name of the variable by itself and pressing enter; the REPL shows us that the value \`25\` is currently stored in the variable named \`my_age\`.`,
+    codeSnippets: [],
+    previousSection: 'types',
+    nextSection: 'expressions'
+  },
+  {
+    id: 'expressions',
+    title: 'Expressions',
+    order: 7,
+    content: `# Expressions
+
+So far, we have seen several different kinds of expression:
+
+* value literal expressions
+   * \`123\` - number literal expressions
+   * \`"Hello"\` - string literal expressions
+   * \`true\` - boolean literal expressions
+   * \`[1, 2, 3]\` - array literal expressions
+* variable expressions
+   * \`my_age\` - variable expressions
+* assignment expressions
+   * \`my_age = 25\` - assignment expressions
+
+An expression is a piece of code that can be evaluated (or computed) to produce a value.
+
+For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`.
+
+When we evaluate the expression \`my_age\`, we compute whatever value is currently stored in the variable named \`my_age\`.
+
+When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hello"\`.`,
+    codeSnippets: [],
+    previousSection: 'variables',
     nextSection: 'functions'
   },
   {
     id: 'functions',
-    title: 'Functions - Reusable Code',
-    order: 3,
-    content: `# Functions - Reusable Code
+    title: 'Functions',
+    order: 8,
+    content: `# Functions
 
-Functions are like recipes in a cookbook. Once you write a recipe (function), you can use it over and over again!
+A function is like a recipe. A recipe has a name and a list of instructions to follow.
 
-## What is a Function?
+For example, here is a recipe for making a peanut butter sandwich:
 
-A function is a block of code that performs a specific task. Think of it like a machine:
-- You put something in (input)
-- The machine does something with it
-- You get something out (output)
+**Make Peanut Butter Sandwich:**
+1. Get two slices of bread
+2. Get jar of peanut butter
+3. Get a knife
+4. Open the jar of peanut butter
+5. Use the knife to scoop peanut butter from the jar
+6. Spread the peanut butter on one slice of bread
+7. Put the two slices of bread together
+8. Clean the knife
+9. Put away the jar of peanut butter
 
-## Creating Your First Function
-
-\`\`\`javascript
-function greet(name) {
-    return \`Hello, \${name}!\`;
-}
-
-// Using the function
-let message = greet("Alice");
-console.log(message);
-\`\`\`
-
-## Functions with Multiple Parameters
-
-Functions can take multiple inputs:
+A function in JavaScript is similar. Here is a function for printing a message:
 
 \`\`\`javascript
-function addNumbers(a, b) {
-    let result = a + b;
-    return result;
+function print_hello() {
+  console.log("Hello");
 }
-
-let sum = addNumbers(5, 3);
-console.log(\`5 + 3 = \${sum}\`);
 \`\`\`
 
-## Functions That Don't Return Values
+This function has a name (\`print_hello\`) and a list of instructions to follow (print "Hello").
 
-Some functions just do something without giving back a result:
+Functions can also accept parameters (inputs). Here is a function that accepts one parameter:
 
 \`\`\`javascript
-function sayHello() {
-    console.log("Hello there!");
-    console.log("How are you today?");
+function print_my_age(age) {
+  console.log("I am", age, "years old");
 }
-
-sayHello();
 \`\`\`
 
-## Why Use Functions?
+This function has no parameters:
 
-1. **Avoid Repetition**: Write once, use many times
-2. **Organization**: Keep your code tidy and organized
-3. **Testing**: Easier to test small pieces of code
-4. **Sharing**: Other people can use your functions
-`,
-    codeSnippets: [
-      {
-        id: 'simple-function',
-        code: 'function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nlet message = greet("Alice");\nconsole.log(message);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Simple function example',
-        explanation: 'Shows how to create and use a basic function'
-      },
-      {
-        id: 'function-with-parameters',
-        code: 'function addNumbers(a, b) {\n    let result = a + b;\n    return result;\n}\n\nlet sum = addNumbers(5, 3);\nconsole.log(`5 + 3 = ${sum}`);',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Function with multiple parameters',
-        explanation: 'Shows functions that take multiple inputs'
-      },
-      {
-        id: 'function-no-return',
-        code: 'function sayHello() {\n    console.log("Hello there!");\n    console.log("How are you today?");\n}\n\nsayHello();',
-        language: 'javascript',
-        isExecutable: true,
-        context: 'Function without return value',
-        explanation: 'Shows functions that perform actions without returning values'
-      }
-    ],
-    previousSection: 'data-types'
+\`\`\`javascript
+function print_hello() {
+  console.log("Hello");
+}
+\`\`\``,
+    codeSnippets: [],
+    previousSection: 'expressions',
+    nextSection: 'function-invocation'
+  },
+  {
+    id: 'function-invocation',
+    title: 'Function Invocation',
+    order: 9,
+    content: `# Function Invocation or Function Calling
+
+You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
+
+A function may be called, or invoked, by typing the name of the function, followed by parenthesis. If the function was defined to accept parameters, then you must supply values for those parameters.
+
+For example, to call the \`print_hello\` function:
+
+\`print_hello()\`
+
+To call the \`print_my_age\` function, we must supply a value for the \`age\` parameter:
+
+\`print_my_age(8)\`
+
+Here is what this looks like in the JavaScript REPL:
+
+\`\`\`
+> function print_hello() {
+...   console.log("Hello");
+... }
+undefined
+> print_hello()
+Hello
+undefined
+> function print_my_age(age) {
+...   console.log("I am", age, "years old");
+... }
+undefined
+> print_my_age(8)
+I am 8 years old
+undefined
+\`\`\`
+
+Functions can also return values. Here is a function that returns a value:
+
+\`\`\`
+> function add_five(value) {
+...   return value + 5;
+... }
+undefined
+> let three_plus_five = add_five(3);
+undefined
+> three_plus_five
+8
+\`\`\``,
+    codeSnippets: [],
+    previousSection: 'functions',
+    nextSection: 'conditionals'
+  },
+  {
+    id: 'conditionals',
+    title: 'Conditional Expressions',
+    order: 10,
+    content: `# Conditional or Branching Expressions
+
+The primary conditional or branching expression is the \`if\` / \`else if\` / \`else\` expression.
+
+There are three variations:
+
+* \`if\`
+   * \`if (i_am_hungry) { console.log("I'm starving!"); }\`
+* \`if\` / \`else\`
+   * \`if (i_am_hungry) { console.log("I'm starving!"); } else { console.log("I am full."); }\`
+* \`if\` / \`else if\` / \`else\`
+   * \`if (age < 5) { console.log("You are younger than five years old."); } else if (age < 10) { console.log("You are five to nine years old."); } else { console.log("You are ten or older"); }\`
+
+In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
+    codeSnippets: [],
+    previousSection: 'function-invocation'
   }
 ]

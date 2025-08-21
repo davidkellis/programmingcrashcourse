@@ -32,7 +32,7 @@ export const SUPPORTED_LANGUAGES: Language[] = [
     dockerImage: 'node:18-slim'
   },
   {
-    id: 'ruby-wasm',
+    id: 'ruby',
     name: 'Ruby',
     fileExtension: '.rb',
     replCommand: 'ruby',

@@ -12,6 +12,9 @@ declare global {
     loadPyodide?: (options: { indexURL: string }) => Promise<PyodideLike>
     // Opal is no longer used, keep for forward-compat if needed
     Opal?: unknown
+    // Ruby (WASM) stdout/stderr bridges, set when Ruby VM is initialized
+    __rubyReplStdoutWrite?: (s: string) => void
+    __rubyReplStderrWrite?: (s: string) => void
   }
 }
 
@@ -99,6 +102,7 @@ class LanguageRuntimeService {
     type DefaultRubyVMFn = (m: WebAssembly.Module, opts: { print: (s: string) => void; printErr: (s: string) => void }) => Promise<{ vm: RubyWasmVM }>
     const { DefaultRubyVM } = wasmModule as unknown as { DefaultRubyVM: DefaultRubyVMFn }
     const { vm } = await DefaultRubyVM(module, {
+      // Fallbacks in case $stdout/$stderr are not overridden yet
       print: (s: string) => {
         if (this.rubyWasmCapture) {
           this.rubyWasmCapture.push(String(s))
@@ -117,6 +121,47 @@ class LanguageRuntimeService {
 
     this.rubyWasmVM = vm
     this.rubyWasmLoaded = true
+
+    // Install JS bridges for Ruby's $stdout/$stderr so that `puts` and friends
+    // are captured in the REPL and also logged to the browser console.
+    // This mirrors the pattern described in ruby.wasm's FAQ where $stdout is
+    // set to an object implementing a `write` method.
+    window.__rubyReplStdoutWrite = (s: string) => {
+      if (this.rubyWasmCapture) {
+        this.rubyWasmCapture.push(String(s))
+      }
+      // Always log to console for developer visibility
+      console.log(String(s))
+    }
+    window.__rubyReplStderrWrite = (s: string) => {
+      if (this.rubyWasmCapture) {
+        this.rubyWasmCapture.push(`ERR: ${String(s)}`)
+      }
+      console.error(String(s))
+    }
+
+    // Configure $stdout and $stderr inside the Ruby VM to call our JS bridges.
+    // If the JS bridges are missing for any reason, Ruby will still fallback to
+    // the VM-level print/printErr handlers above.
+    try {
+      vm.eval(`
+        require "js"
+        $stdout = Object.new.tap do |obj|
+          def obj.write(str)
+            JS.global.call(:__rubyReplStdoutWrite, str.to_s)
+          end
+        end
+
+        $stderr = Object.new.tap do |obj|
+          def obj.write(str)
+            JS.global.call(:__rubyReplStderrWrite, str.to_s)
+          end
+        end
+      `)
+    } catch (e) {
+      // Non-fatal: continue with default print hooks if customization fails
+      console.warn('Failed to configure Ruby $stdout/$stderr bridges:', e)
+    }
   }
 
   /**
@@ -502,7 +547,10 @@ import datetime
     for (const pattern of patterns) {
       let match
       while ((match = pattern.exec(code)) !== null) {
-        declarations.push(match[1])
+        const name = match[1]
+        if (typeof name === 'string' && name.length > 0) {
+          declarations.push(name)
+        }
       }
     }
 

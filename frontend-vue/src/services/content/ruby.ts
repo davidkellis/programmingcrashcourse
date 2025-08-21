@@ -1,21 +1,21 @@
 import type { TutorialSection } from '@/types'
 
-export const TYPESCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
+export const RUBY_TUTORIAL_SECTIONS: TutorialSection[] = [
   {
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `# TypeScript Programming Introduction
+    content: `# Ruby Programming Introduction
 
-Welcome to TypeScript programming! This tutorial will teach you the fundamentals of TypeScript through interactive examples.
+Welcome to Ruby programming! This tutorial will teach you the fundamentals of Ruby through interactive examples.
 
-TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale. It adds static type definitions to JavaScript, making your code more reliable and easier to maintain. Let's start exploring the basic building blocks of TypeScript programming.
+Ruby is a dynamic, open source programming language with a focus on simplicity and productivity. It has an elegant syntax that is natural to read and easy to write. Let's start exploring the basic building blocks of Ruby programming.
 
-Let's begin with your first TypeScript program:
+Let's begin with your first Ruby program:
 
-\`\`\`typescript
-console.log("Hello, World!");
-console.log("Welcome to TypeScript programming!");
+\`\`\`ruby
+puts "Hello, World!"
+puts "Welcome to Ruby programming!"
 \`\`\``,
     codeSnippets: [],
     nextSection: 'comments'
@@ -26,12 +26,12 @@ console.log("Welcome to TypeScript programming!");
     order: 2,
     content: `# Comments
 
-* lines that start with // are comments
+* lines that start with # are comments
 * comments are just explanations about something
-* comments are ignored by the TypeScript compiler
+* comments are ignored by the Ruby interpreter
 
-// this line is a comment
-// everything to the right of a // symbol is a comment and is ignored by the TypeScript compiler`,
+# this line is a comment
+# everything to the right of a # symbol is a comment and is ignored by the Ruby interpreter`,
     codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values'
@@ -50,7 +50,7 @@ A value is either:
    * \`3.141592653589793\`
    * \`1000\`
    * \`1000000\`
-   * \`1_000_000 // numbers may not have commas in them, but may use underscores instead\`
+   * \`1_000_000 # numbers may not have commas in them, but may use underscores instead\`
 * a quoted string, for example:
    * \`"my name is David"\`
    * \`"I ate a sleeve of cookies"\`
@@ -63,14 +63,14 @@ A value is either:
    * \`[3.141592653589793, "pi", "pie"]\`
    * \`[1000, "cookies", true]\`
    * \`[0, "cookies", false]\`
-* an object is a collection of associated key/value pairs, for example:
-   * \`{1: "one", 2: "two", 3: "three"}\`
-   * \`{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}\`
+* a hash is a collection of associated key/value pairs, for example:
+   * \`{1 => "one", 2 => "two", 3 => "three"}\`
+   * \`{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}\`
 * an instance of a class (more on this later)
 
-Let's see how these values evaluate in the TypeScript REPL:
+Let's see how these values evaluate in the Ruby REPL (IRB):
 
-\`\`\`typescript
+\`\`\`ruby
 1
 1.4
 3.141592653589793
@@ -86,8 +86,8 @@ false
 [3.141592653589793, "pi", "pie"]
 [1000, "cookies", true]
 [0, "cookies", false]
-{1: "one", 2: "two", 3: "three"}
-{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
+{1 => "one", 2 => "two", 3 => "three"}
+{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}
 \`\`\``,
     codeSnippets: [],
     previousSection: 'comments',
@@ -127,11 +127,11 @@ This is **not** a set (because some values are repeated):
 * \`1\`
 * \`3.141592653589793\`
 
-Sets in TypeScript are created using the Set constructor with type annotations:
+Sets in Ruby are created using the Set class (you need to require 'set' first):
 
-* \`new Set<number>([1,2,3])\`
-* \`new Set<string>(["Jack", "Jill"])\`
-* \`new Set<number | string | boolean>([1, 3.141592653589793, "Steve", true])\``,
+* \`Set[1,2,3]\`
+* \`Set["Jack", "Jill"]\`
+* \`Set[1, 3.141592653589793, "Steve", true]\``,
     codeSnippets: [],
     previousSection: 'values',
     nextSection: 'types'
@@ -156,18 +156,16 @@ Or we could give them different names:
 * We could call the set \`[4,5,6,7,8,9]\` **CoolNumber**
 * We could call the set \`[10,11,12,13,14,15,16,17,18,19]\` **SuperNumber**
 
-TypeScript has some built-in types that are commonly used:
+Ruby has some built-in types (classes) that are commonly used:
 
-* \`number\` - numbers
-* \`string\` - strings
-* \`boolean\` - boolean values
-* \`object\` - objects
-* \`undefined\` - undefined values
-* \`null\` - null values
-* \`any\` - any type (use sparingly)
-* \`void\` - no return value (for functions)
-* \`Array<T>\` - arrays of type T
-* \`Set<T>\` - sets of type T`,
+* \`Integer\` - whole numbers
+* \`Float\` - floating point numbers (numbers with a decimal point)
+* \`String\` - strings
+* \`TrueClass\` / \`FalseClass\` - boolean values
+* \`Array\` - arrays
+* \`Hash\` - hashes (key-value pairs)
+* \`Set\` - sets (requires 'set' library)
+* \`NilClass\` - nil (Ruby's null value)`,
     codeSnippets: [],
     previousSection: 'sets',
     nextSection: 'variables'
@@ -187,20 +185,20 @@ There are two simple ways to think about a variable:
 
 For example, we can create a variable named \`my_age\` and assign the value \`25\` to it:
 
-\`let my_age: number = 25\`
+\`my_age = 25\`
 
-In this example, \`my_age\` is the variable name, \`number\` is the type annotation, and \`25\` is the value.
+In this example, \`my_age\` is the variable name, and \`25\` is the value.
 
-Here is what this looks like in the TypeScript REPL:
+Here is what this looks like in the Ruby REPL (IRB):
 
 \`\`\`
-> let my_age: number = 25
-undefined
-> my_age
-25
+irb(main):001:0> my_age = 25
+=> 25
+irb(main):002:0> my_age
+=> 25
 \`\`\`
 
-In this code snippet, we are running the TypeScript interpreter in its interactive mode (called the read-evaluate-print-loop, or REPL for short), and assigning the value \`25\` to the variable named \`my_age\` with a type annotation of \`number\`, and then we read the value stored in the \`my_age\` variable by entering the name of the variable by itself and pressing enter; the REPL shows us that the value \`25\` is currently stored in the variable named \`my_age\`.`,
+In this code snippet, we are running the Ruby interpreter in its interactive mode (called IRB for Interactive Ruby), and assigning the value \`25\` to the variable named \`my_age\`, and then we read the value stored in the \`my_age\` variable by entering the name of the variable by itself and pressing enter; IRB shows us that the value \`25\` is currently stored in the variable named \`my_age\`.`,
     codeSnippets: [],
     previousSection: 'types',
     nextSection: 'expressions'
@@ -214,7 +212,7 @@ In this code snippet, we are running the TypeScript interpreter in its interacti
 So far, we have seen several different kinds of expression:
 
 * value literal expressions
-   * \`123\` - number literal expressions
+   * \`123\` - integer literal expressions
    * \`"Hello"\` - string literal expressions
    * \`true\` - boolean literal expressions
    * \`[1, 2, 3]\` - array literal expressions
@@ -255,30 +253,30 @@ For example, here is a recipe for making a peanut butter sandwich:
 8. Clean the knife
 9. Put away the jar of peanut butter
 
-A function in TypeScript is similar. Here is a function for printing a message:
+A function in Ruby is called a method. Here is a method for printing a message:
 
-\`\`\`typescript
-function print_hello(): void {
-  console.log("Hello");
-}
+\`\`\`ruby
+def print_hello
+  puts "Hello"
+end
 \`\`\`
 
-This function has a name (\`print_hello\`), a return type (\`void\`), and a list of instructions to follow (print "Hello").
+This method has a name (\`print_hello\`) and a list of instructions to follow (print "Hello").
 
-Functions can also accept parameters (inputs) with type annotations. Here is a function that accepts one parameter:
+Methods can also accept parameters (inputs). Here is a method that accepts one parameter:
 
-\`\`\`typescript
-function print_my_age(age: number): void {
-  console.log("I am", age, "years old");
-}
+\`\`\`ruby
+def print_my_age(age)
+  puts "I am #{age} years old"
+end
 \`\`\`
 
-This function has no parameters:
+This method has no parameters:
 
-\`\`\`typescript
-function print_hello(): void {
-  console.log("Hello");
-}
+\`\`\`ruby
+def print_hello
+  puts "Hello"
+end
 \`\`\``,
     codeSnippets: [],
     previousSection: 'expressions',
@@ -290,48 +288,48 @@ function print_hello(): void {
     order: 9,
     content: `# Function Invocation or Function Calling
 
-You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
+You can use a method by calling it, or invoking it. Calling a method is the same thing as invoking it.
 
-A function may be called, or invoked, by typing the name of the function, followed by parenthesis. If the function was defined to accept parameters, then you must supply values for those parameters.
+A method may be called, or invoked, by typing the name of the method, optionally followed by parenthesis. If the method was defined to accept parameters, then you must supply values for those parameters.
 
-For example, to call the \`print_hello\` function:
+For example, to call the \`print_hello\` method:
 
-\`print_hello()\`
+\`print_hello\` or \`print_hello()\`
 
-To call the \`print_my_age\` function, we must supply a value for the \`age\` parameter:
+To call the \`print_my_age\` method, we must supply a value for the \`age\` parameter:
 
-\`print_my_age(8)\`
+\`print_my_age(8)\` or \`print_my_age 8\`
 
-Here is what this looks like in the TypeScript REPL:
+Here is what this looks like in IRB:
 
 \`\`\`
-> function print_hello(): void {
-...   console.log("Hello");
-... }
-undefined
-> print_hello()
+irb(main):001:0> def print_hello
+irb(main):002:1>   puts "Hello"
+irb(main):003:1> end
+=> :print_hello
+irb(main):004:0> print_hello
 Hello
-undefined
-> function print_my_age(age: number): void {
-...   console.log("I am", age, "years old");
-... }
-undefined
-> print_my_age(8)
+=> nil
+irb(main):005:0> def print_my_age(age)
+irb(main):006:1>   puts "I am #{age} years old"
+irb(main):007:1> end
+=> :print_my_age
+irb(main):008:0> print_my_age(8)
 I am 8 years old
-undefined
+=> nil
 \`\`\`
 
-Functions can also return values with type annotations. Here is a function that returns a value:
+Methods can also return values. Here is a method that returns a value:
 
 \`\`\`
-> function add_five(value: number): number {
-...   return value + 5;
-... }
-undefined
-> let three_plus_five: number = add_five(3);
-undefined
-> three_plus_five
-8
+irb(main):001:0> def add_five(value)
+irb(main):002:1>   return value + 5
+irb(main):003:1> end
+=> :add_five
+irb(main):004:0> three_plus_five = add_five(3)
+=> 8
+irb(main):005:0> three_plus_five
+=> 8
 \`\`\``,
     codeSnippets: [],
     previousSection: 'functions',
@@ -343,16 +341,16 @@ undefined
     order: 10,
     content: `# Conditional or Branching Expressions
 
-The primary conditional or branching expression is the \`if\` / \`else if\` / \`else\` expression.
+The primary conditional or branching expression is the \`if\` / \`elsif\` / \`else\` expression.
 
 There are three variations:
 
 * \`if\`
-   * \`if (i_am_hungry) { console.log("I'm starving!"); }\`
+   * \`if i_am_hungry then puts "I'm starving!" end\`
 * \`if\` / \`else\`
-   * \`if (i_am_hungry) { console.log("I'm starving!"); } else { console.log("I am full."); }\`
-* \`if\` / \`else if\` / \`else\`
-   * \`if (age < 5) { console.log("You are younger than five years old."); } else if (age < 10) { console.log("You are five to nine years old."); } else { console.log("You are ten or older"); }\`
+   * \`if i_am_hungry then puts "I'm starving!" else puts "I am full." end\`
+* \`if\` / \`elsif\` / \`else\`
+   * \`if age < 5 then puts "You are younger than five years old." elsif age < 10 then puts "You are five to nine years old." else puts "You are ten or older" end\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],

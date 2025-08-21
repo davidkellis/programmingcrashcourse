@@ -2,22 +2,6 @@
   <div class="tutorial-section">
     <div class="section-header">
       <h1>{{ sectionTitle }}</h1>
-      <div class="section-navigation">
-        <button
-          v-if="previousSection"
-          @click="navigateToSection(previousSection)"
-          class="nav-button prev"
-        >
-          ← Previous
-        </button>
-        <button
-          v-if="nextSection"
-          @click="navigateToSection(nextSection)"
-          class="nav-button next"
-        >
-          Next →
-        </button>
-      </div>
     </div>
 
     <div v-if="isLoading" class="loading-message">
@@ -40,13 +24,13 @@
           :key="snippet.id"
           class="code-example"
         >
-          <div class="code-header">
-            <span class="code-context">{{ snippet.context }}</span>
+          <div class="code-toolbar">
             <button @click="runCodeExample(snippet.code)" class="run-button">
-              Run Example
+              Run
             </button>
+            <span class="code-context">{{ snippet.context }}</span>
           </div>
-          <pre><code>{{ snippet.code }}</code></pre>
+          <pre class="code-pre"><code>{{ snippet.code }}</code></pre>
           <p v-if="snippet.explanation" class="code-explanation">
             {{ snippet.explanation }}
           </p>
@@ -81,12 +65,13 @@ const codeBlocks = ref<Record<string, string>>({})
 const md = new MarkdownIt({
   html: true,
   linkify: true,
-  typographer: true
+  typographer: true,
+  breaks: true
 })
 
 // Custom renderer for code blocks to make them interactive
 const originalFence = md.renderer.rules.fence
-md.renderer.rules.fence = (tokens: any[], idx: number, options: any, env: any, self: any) => {
+md.renderer.rules.fence = (tokens: any[], idx: number) => {
   const token = tokens[idx]
   const language = token.info || ''
   const code = token.content
@@ -94,27 +79,22 @@ md.renderer.rules.fence = (tokens: any[], idx: number, options: any, env: any, s
   const codeId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   codeBlocks.value[codeId] = code
 
+  const label = language ? `${language} REPL` : 'Code'
+
   return `
     <div class="code-example">
-      <div class="code-header">
-        <span class="code-context">${language || 'code'} example</span>
-        <button data-code-id="${codeId}" class="run-button">
-          Run Example
-        </button>
+      <div class="code-toolbar">
+        <button data-code-id="${codeId}" class="run-button">Run</button>
+        <span class="code-context">${label}</span>
       </div>
-      <pre><code>${code}</code></pre>
+      <pre class="code-pre"><code>${code}</code></pre>
     </div>
   `
 }
 
 const sectionTitle = computed(() => section.value?.title || 'Tutorial Section')
 
-const previousSection = computed(() => section.value?.previousSection || null)
-const nextSection = computed(() => section.value?.nextSection || null)
 
-const navigateToSection = (sectionId: string) => {
-  router.push(`/section/${sectionId}`)
-}
 
 const loadSection = async () => {
   try {
@@ -191,11 +171,12 @@ const handleCodeBlockClick = (event: Event) => {
 
 <style scoped>
 .tutorial-section {
-  width: 100vw;
+  width: 100%;
   margin: 0;
   padding: 2rem;
   height: 100%;
   overflow-y: auto;
+  background: #fbfbfc;
 }
 
 .section-header {
@@ -214,54 +195,20 @@ const handleCodeBlockClick = (event: Event) => {
   margin: 0;
 }
 
-.section-navigation {
+
+
+
+
+.section-content { max-width: 760px; margin: 0 auto; }
+.content-wrapper-centered {
   display: flex;
-  gap: 1rem;
+  justify-content: center;
 }
 
-.nav-button {
-  padding: 0.5rem 1rem;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
+.loading-message { text-align: center; color: #6b7280; font-size: 1.125rem; padding: 2rem; }
 
-.nav-button:hover {
-  background: #2563eb;
-}
-
-.nav-button.prev {
-  background: #6b7280;
-}
-
-.nav-button.prev:hover {
-  background: #4b5563;
-}
-
-.section-content {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.loading-message {
-  text-align: center;
-  color: #6b7280;
-  font-size: 1.125rem;
-  padding: 2rem;
-}
-
-.error-message {
-  text-align: center;
-  color: #dc2626;
-  padding: 2rem;
-}
-
-.error-message h2 {
-  margin-bottom: 1rem;
-}
+.error-message { text-align: center; color: #dc2626; padding: 2rem; }
+.error-message h2 { margin-bottom: 1rem; }
 
 .retry-button {
   padding: 0.5rem 1rem;
@@ -274,120 +221,98 @@ const handleCodeBlockClick = (event: Event) => {
   transition: background-color 0.2s;
   margin-top: 1rem;
 }
+.retry-button:hover { background: #2563eb; }
 
-.retry-button:hover {
-  background: #2563eb;
-}
+/* Typography to mirror pamphlet look */
+.content-text { line-height: 1.8; color: #1f2937; font-size: 1.06rem; }
 
-.content-text {
-  line-height: 1.6;
-  color: #374151;
-}
+/* Headings inside v-html */
+.content-text :deep(h1) { font-size: 2rem; font-weight: 700; color: #111827; margin: 2rem 0 0.75rem; }
+.content-text :deep(h2) { font-size: 1.75rem; font-weight: 700; color: #111827; margin: 2rem 0 0.75rem; }
+.content-text :deep(h3) { font-size: 1.35rem; font-weight: 600; color: #111827; margin: 1.5rem 0 0.5rem; }
 
-.content-text h1,
-.content-text h2,
-.content-text h3 {
+/* Paragraphs and lists */
+.content-text :deep(p) { margin: 0.35rem 0 0.9rem; }
+.content-text :deep(ul) { list-style: disc; padding-left: 1.6rem; margin: 0.25rem 0 0.9rem; }
+.content-text :deep(ul ul) { list-style: circle; padding-left: 1.25rem; margin-top: 0.25rem; }
+.content-text :deep(li) { margin: 0.2rem 0; }
+.content-text :deep(li::marker) { color: #2563eb; }
+.content-text :deep(ul ul li::marker) { color: #60a5fa; }
+
+/* Inline code (not code blocks) */
+.content-text :deep(p code),
+.content-text :deep(li code) {
+  background: #fff5f5;
+  border: 1px solid #fde2e2;
   color: #1f2937;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.content-text h1 {
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.content-text code {
-  background: #f3f4f6;
-  padding: 0.125rem 0.25rem;
+  padding: 0.1rem 0.35rem;
   border-radius: 0.25rem;
-  font-size: 0.875em;
+  font-size: 0.95em;
 }
 
-.code-snippets {
-  margin-top: 3rem;
+/* Code cards (rendered fences via v-html and snippet list) */
+.content-text :deep(.code-example),
+.code-example {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.02);
+  margin: 1rem 0 1.5rem 0;
+  overflow: hidden;
 }
 
-.code-snippets h3 {
-  margin-bottom: 1.5rem;
-}
-
-.code-header {
+.content-text :deep(.code-toolbar),
+.code-toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
-  background: #f8f9fa;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+  background: #f8fafc;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.code-context {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+.content-text :deep(.code-context),
+.code-context { font-size: 0.875rem; color: #6b7280; font-weight: 600; }
+
+.content-text :deep(.code-pre),
+.code-pre {
+  background: #f3f4f6;
+  color: #111827;
+  padding: 1rem;
+  margin: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
+.content-text :deep(.code-explanation),
 .code-explanation {
   padding: 0.75rem 1rem;
   background: #f8f9fa;
   border-top: 1px solid #e5e7eb;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: #6b7280;
   margin: 0;
 }
 
-.content-text h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1rem;
-}
-
-.content-text h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 1.5rem 0 0.5rem 0;
-}
-
-.content-text p {
-  color: #374151;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.code-example {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin: 1.5rem 0;
-}
-
-.code-example pre {
-  background: #1f2937;
-  color: #e5e7eb;
-  padding: 1rem;
-  border-radius: 0.375rem;
-  overflow-x: auto;
-  margin: 0 0 1rem 0;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-
+.content-text :deep(.run-button),
 .run-button {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.9rem;
   background: #10b981;
   color: white;
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: 600;
   transition: background-color 0.2s;
 }
 
-.run-button:hover {
-  background: #059669;
-}
+.content-text :deep(.run-button:hover),
+.run-button:hover { background: #059669; }
+
+.code-snippets { margin-top: 2.5rem; }
+.code-snippets h3 { margin-bottom: 1rem; }
 </style>

@@ -64,6 +64,14 @@ class LocalContentService {
         replCommand: 'ts-node',
         syntaxHighlighting: 'typescript',
         dockerImage: 'node:18-slim'
+      },
+      {
+        id: 'ruby',
+        name: 'Ruby',
+        fileExtension: '.rb',
+        replCommand: 'ruby',
+        syntaxHighlighting: 'ruby',
+        dockerImage: 'ruby:3.2'
       }
     ]
   }
