@@ -261,6 +261,25 @@ print_status "Loaded image name: $LOADED_IMAGE_NAME"
 # Update the image name to use the actual loaded name
 FULL_IMAGE_NAME="$LOADED_IMAGE_NAME"
 
+# Step 6.8: Prepare host directories and permissions for Caddy persistence
+print_step "6.8. Preparing host directories for Caddy data/config/logs..."
+
+# Determine the UID/GID used inside the container (typically the caddy user)
+CADDY_UID=$(ssh -p "$REMOTE_PORT" "$REMOTE_USER@$REMOTE_HOST" "$REMOTE_RUNTIME run --rm $FULL_IMAGE_NAME sh -c 'id -u 2>/dev/null || echo 0'" | tr -d '\r')
+CADDY_GID=$(ssh -p "$REMOTE_PORT" "$REMOTE_USER@$REMOTE_HOST" "$REMOTE_RUNTIME run --rm $FULL_IMAGE_NAME sh -c 'id -g 2>/dev/null || echo 0'" | tr -d '\r')
+
+if [ -z "$CADDY_UID" ] || [ -z "$CADDY_GID" ]; then
+    print_warning "Could not determine container UID/GID; falling back to host user ownership"
+    CADDY_UID=""
+    CADDY_GID=""
+fi
+
+print_status "Container UID:GID resolved to: ${CADDY_UID:-unknown}:${CADDY_GID:-unknown}"
+
+# Create subdirectories and set ownership to match container user for write access
+ssh -p "$REMOTE_PORT" "$REMOTE_USER@$REMOTE_HOST" "sudo mkdir -p $REMOTE_PATH/logs $REMOTE_PATH/caddy_data $REMOTE_PATH/caddy_config && \
+    if [ -n \"$CADDY_UID\" ] && [ -n \"$CADDY_GID\" ]; then sudo chown -R $CADDY_UID:$CADDY_GID $REMOTE_PATH/logs $REMOTE_PATH/caddy_data $REMOTE_PATH/caddy_config; fi || true"
+
 # Step 7: Stop and remove existing container if it exists
 print_step "7. Stopping existing container if running..."
 ssh -p "$REMOTE_PORT" "$REMOTE_USER@$REMOTE_HOST" "$REMOTE_RUNTIME stop $CONTAINER_NAME 2>/dev/null || true"
