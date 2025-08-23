@@ -5,16 +5,28 @@ export const PYTHON_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `Welcome to Python programming! This tutorial will teach you the fundamentals of Python through interactive examples.
+    content: `Welcome!
 
-Python is a powerful, easy-to-learn programming language that emphasizes code readability and simplicity. Let's start exploring the basic building blocks of Python programming.
+This is a programing tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
-Let's begin with your first Python program:
+Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
+
+Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
+
+You'll also see editable code blocks like this:
 
 \`\`\`python
-print("Hello, World!")
-print("Welcome to Python programming!")
-\`\`\``,
+def say_hello(name):
+  print(f"Hello {name}")
+
+say_hello("Joe")
+\`\`\`
+
+Code blocks have a green Run button in the top-right. Click it to send the whole block to the REPL.
+
+You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
+
+Let’s begin.`,
     codeSnippets: [],
     nextSection: 'comments'
   },
@@ -29,6 +41,10 @@ print("Welcome to Python programming!")
 \`\`\`python
 # this line is a comment
 # everything to the right of a # symbol is a comment and is ignored by the Python interpreter
+
+# Let's see what happens when we run some actual code with comments
+message = "Hello from Python!"  # this comment explains what this line does
+print(message)  # this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',

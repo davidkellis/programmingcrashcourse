@@ -1,21 +1,20 @@
 <template>
-  <div class="language-selector">
-    <select
-      :value="selectedLanguage?.id || ''"
-      @change="handleChange"
-      :disabled="disabled"
-      class="language-select"
-    >
-      <option value="">Select Language</option>
-      <option
+  <div class="language-selector" role="group" aria-label="Language selector">
+    <div class="segmented">
+      <button
         v-for="language in languages"
         :key="language.id"
-        :value="language.id"
+        type="button"
+        class="segment"
+        :class="{ active: selectedLanguage && selectedLanguage.id === language.id }"
+        :disabled="disabled"
+        @click="handleSelect(language)"
       >
         {{ language.name }}
-      </option>
-    </select>
+      </button>
+    </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -30,48 +29,40 @@ interface Props {
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  'language-change': [language: Language]
+  'language-change': [language: Language | null]
 }>()
 
-const handleChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const languageId = target.value
-
-  if (languageId) {
-    const language = props.languages.find(lang => lang.id === languageId)
-    if (language) {
-      emit('language-change', language)
-    }
+const handleSelect = (language: Language) => {
+  // Toggle off if already selected
+  if (props.selectedLanguage && props.selectedLanguage.id === language.id) {
+    emit('language-change', null)
+    return
   }
+  emit('language-change', language)
 }
 </script>
 
 <style scoped>
-.language-selector {
-  display: flex;
-  align-items: center;
-}
+.language-selector { display: flex; align-items: center; }
 
-.language-select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background: white;
+.segmented { display: inline-flex; border: 1px solid #d1d5db; border-radius: 0.5rem; overflow: hidden; background: #fff; }
+.segment {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
   color: #374151;
-  font-size: 0.875rem;
+  background: #ffffff;
+  border: none;
+  border-right: 1px solid #e5e7eb;
   cursor: pointer;
-  min-width: 150px;
+  line-height: 1.2;
 }
-
-.language-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.language-select:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
+.segment:last-child { border-right: none; }
+.segment:hover:not(:disabled) { background: #f3f4f6; }
+.segment:disabled { color: #9ca3af; cursor: not-allowed; }
+.segment.active {
+  background: #e3f2fd;
+  color: #0b5ed7;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+  font-weight: 600;
 }
 </style>

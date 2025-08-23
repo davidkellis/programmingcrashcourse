@@ -5,16 +5,28 @@ export const JAVASCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `Welcome to JavaScript programming! This tutorial will teach you the fundamentals of JavaScript through interactive examples.
+    content: `Welcome! This is a programming tutorial for ages 10 and up.
 
-JavaScript is a versatile programming language that powers the web. It's used for creating interactive websites, web applications, and much more. Let's start exploring the basic building blocks of JavaScript programming.
+Our goal is simple: teach you to read and write code in the most popular programming languages.
 
-Let's begin with your first JavaScript program:
+These languages share the same core ideas (semantics and structure). The examples you see here apply across many widely used languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, and more. They are all imperative languages and they share the same foundations.
+
+How to use this tutorial:
+
+* You’ll see short inline code like \`nr: this\`. Some inline snippets have a green Run button, like \`1+2\`. Click Run to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom. If you don’t want a Run button on an inline snippet, prefix it with \`nr:\` inside the backticks.
+* You’ll also see editable code blocks like this:
 
 \`\`\`javascript
-console.log("Hello, World!");
-console.log("Welcome to JavaScript programming!");
-\`\`\``,
+function say_hello(name) {
+  console.log("Hello " + name);
+}
+
+say_hello("Joe");
+\`\`\`
+
+Code blocks have a green Run button in the top‑right. Click it to send the whole block to the REPL. You can also press \`nr: ctrl+enter\` to run (hold Control, press Enter).
+
+Let’s begin.`,
     codeSnippets: [],
     nextSection: 'comments'
   },
@@ -29,6 +41,10 @@ console.log("Welcome to JavaScript programming!");
 \`\`\`javascript
 // this line is a comment
 // everything to the right of a // symbol is a comment and is ignored by the JavaScript interpreter
+
+// Let's see what happens when we run some actual code with comments
+const message = "Hello from JavaScript!"; // this comment explains what this line does
+console.log(message); // this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',

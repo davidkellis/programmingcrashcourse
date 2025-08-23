@@ -5,16 +5,28 @@ export const RUBY_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `Welcome to Ruby programming! This tutorial will teach you the fundamentals of Ruby through interactive examples.
+    content: `Welcome! This is a programming tutorial for ages 10 and up.
 
-Ruby is a dynamic, open source programming language with a focus on simplicity and productivity. It has an elegant syntax that is natural to read and easy to write. Let's start exploring the basic building blocks of Ruby programming.
+Our goal is simple: teach you to read and write code in the most popular programming languages.
 
-Let's begin with your first Ruby program:
+These languages share the same core ideas (semantics and structure). The examples you see here apply across many widely used languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, and more. They are all imperative languages and they share the same foundations.
+
+How to use this tutorial:
+
+* You’ll see short inline code like \`nr: this\`. Some inline snippets have a green Run button, like \`1+2\`. Click Run to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom. If you don’t want a Run button on an inline snippet, prefix it with \`nr:\` inside the backticks.
+* You’ll also see editable code blocks like this:
 
 \`\`\`ruby
-puts "Hello, World!"
-puts "Welcome to Ruby programming!"
-\`\`\``,
+def say_hello(name)
+  puts "Hello #{name}"
+end
+
+say_hello("Joe")
+\`\`\`
+
+Code blocks have a green Run button in the top‑right. Click it to send the whole block to the REPL. You can also press \`nr: ctrl+enter\` to run (hold Control, press Enter).
+
+Let’s begin.`,
     codeSnippets: [],
     nextSection: 'comments'
   },
@@ -29,6 +41,10 @@ puts "Welcome to Ruby programming!"
 \`\`\`ruby
 # this line is a comment
 # everything to the right of a # symbol is a comment and is ignored by the Ruby interpreter
+
+# Let's see what happens when we run some actual code with comments
+message = "Hello from Ruby!" # this comment explains what this line does
+puts message # this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',

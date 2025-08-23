@@ -5,9 +5,12 @@
         <!-- Content Pane -->
         <div class="content-pane">
           <header class="tutorial-header">
-            <div class="header-content">
-              <h1 class="tutorial-title">Programming Crash Course</h1>
-              <div class="header-controls">
+            <div class="header-content three-col">
+              <div class="header-left">
+                <h1 class="tutorial-title"><a href="/">Programming Crash Course</a></h1>
+              </div>
+              <div class="header-center">
+                <div class="nav-group">
                 <button
                   class="nav-button prev"
                   @click="navigateToPrevious"
@@ -35,8 +38,10 @@
                 >
                   Next →
                 </button>
+                </div>
+              </div>
+              <div class="header-right">
                 <LanguageSelector :languages="SUPPORTED_LANGUAGES" :selected-language="uiState.selectedLanguage" @language-change="handleLanguageChange" :disabled="uiState.isLoading" />
-                <button class="repl-toggle" @click="toggleREPLVisibility" :aria-label="uiState.isREPLVisible ? 'Hide REPL' : 'Show REPL'">{{ uiState.isREPLVisible ? '🔽' : '🔼' }} REPL</button>
               </div>
             </div>
             <div v-if="uiState.error" class="error-banner">
@@ -81,7 +86,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterView } from 'vue-router'
-import { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, STORAGE_KEYS } from '@/constants'
+import { SUPPORTED_LANGUAGES, STORAGE_KEYS } from '@/constants'
 import { languageRuntime } from '@/services/languageRuntime'
 import { localContentService } from '@/services/localContentService'
 import type { Language, UIState, REPLState, TutorialSection } from '@/types'
@@ -150,9 +155,20 @@ const createREPLSession = async (language: Language) => {
   }
 }
 
-const handleLanguageChange = async (language: Language) => {
+const handleLanguageChange = async (languageOrNull: Language | null) => {
+  // If toggled off, hide REPL and clear session
+  if (!languageOrNull) {
+    uiState.value.selectedLanguage = null
+    uiState.value.isREPLVisible = false
+    replState.value.sessionId = null
+    localStorage.removeItem(STORAGE_KEYS.SELECTED_LANGUAGE)
+    return
+  }
+
+  const language = languageOrNull
   localStorage.setItem(STORAGE_KEYS.SELECTED_LANGUAGE, language.id)
   uiState.value.selectedLanguage = language
+  uiState.value.isREPLVisible = true
   replState.value.sessionId = null
   await loadSections()
   await createREPLSession(language)
@@ -206,10 +222,17 @@ const parseInputLines = (code: string): Array<{ prompt: string; text: string }> 
 onMounted(async () => {
   const savedLanguage = localStorage.getItem(STORAGE_KEYS.SELECTED_LANGUAGE)
   const languageCandidate = savedLanguage ? SUPPORTED_LANGUAGES.find(lang => lang.id === savedLanguage) : undefined
-  const language = (languageCandidate || DEFAULT_LANGUAGE) as Language
-  uiState.value.selectedLanguage = language
-  await loadSections()
-  await createREPLSession(language)
+  if (languageCandidate) {
+    uiState.value.selectedLanguage = languageCandidate as Language
+    uiState.value.isREPLVisible = true
+    await loadSections()
+    await createREPLSession(languageCandidate as Language)
+  } else {
+    // No language selected yet: hide REPL and wait for user to choose
+    uiState.value.selectedLanguage = null
+    uiState.value.isREPLVisible = false
+    await loadSections()
+  }
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -245,14 +268,18 @@ watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage &
 /* Header and misc styles */
 .tutorial-header { background: white; border-bottom: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 1; position: sticky; top: 0; }
 .header-content { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; width: 100%; box-sizing: border-box; }
+.three-col { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.header-left { justify-self: start; }
+.header-center { justify-self: center; }
+.header-right { justify-self: end; }
 .tutorial-title { margin: 0; font-size: 1.5rem; font-weight: 600; color: #2c3e50; }
-.header-controls { display: flex; align-items: center; gap: 1rem; }
+.nav-group { display: inline-flex; align-items: center; gap: 0.5rem; }
 
 .nav-button { background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 500; }
 .nav-button:hover:not(:disabled) { background: #218838; transform: translateY(-1px); }
 .nav-button:disabled { background: #6c757d; cursor: not-allowed; opacity: 0.6; }
-.nav-button.prev { margin-right: 0.5rem; }
-.nav-button.next { margin-left: 0.5rem; }
+.nav-button.prev { margin-right: 0.25rem; }
+.nav-button.next { margin-left: 0.25rem; }
 
 .toc-dropdown { position: relative; }
 .toc-toggle { background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: background-color 0.2s; }

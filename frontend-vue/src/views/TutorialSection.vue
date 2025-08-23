@@ -15,15 +15,6 @@
     <div v-else-if="section" class="section-content">
       <div class="content-text" v-html="renderMarkdown(section.content)" ref="contentRef"></div>
 
-      <!-- Replace placeholders with Ace code blocks -->
-      <div v-for="codeBlock in aceCodeBlocks" :key="codeBlock.id" class="ace-code-block-wrapper">
-        <AceCodeBlock
-          :code="codeBlock.code"
-          :language="codeBlock.language"
-          :onRunCode="runCodeExample"
-        />
-      </div>
-
       <div v-if="section.codeSnippets.length > 0" class="code-snippets">
         <h3>Code Examples</h3>
         <div v-for="snippet in section.codeSnippets" :key="snippet.id" class="code-example">
@@ -42,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick, createApp } from 'vue'
 import { localContentService } from '@/services/localContentService'
 import type { TutorialSection } from '@/types'
 import MarkdownIt from 'markdown-it'
@@ -61,7 +52,9 @@ const isLoading = ref(true)
 const error = ref<string | null>(null)
 const codeBlocks = ref<Record<string, string>>({})
 const contentRef = ref<HTMLElement>()
-const aceCodeBlocks = ref<Array<{ id: string; code: string; language: string }>>([])
+// Keep track of dynamically mounted Ace editors so we can clean them up
+type MountedAce = { unmount: () => void; el: HTMLElement }
+const mountedAceBlocks = ref<MountedAce[]>([])
 
 // Lazy Markdown-It initialization to avoid TDZ issues
 let mdInstance: MarkdownIt | null = null
@@ -160,11 +153,20 @@ const renderMarkdown = (content: string): string => {
   return getMarkdown().render(content)
 }
 
-// Process Ace code block placeholders after markdown rendering
+// Process Ace code block placeholders after markdown rendering by mounting
+// an AceCodeBlock inline at each placeholder location
+const clearMountedAceBlocks = () => {
+  mountedAceBlocks.value.forEach(({ unmount, el }) => {
+    try { unmount() } catch {}
+    try { el.remove() } catch {}
+  })
+  mountedAceBlocks.value = []
+}
+
 const processAceCodeBlocks = () => {
   if (!contentRef.value) return
+  clearMountedAceBlocks()
 
-  aceCodeBlocks.value = []
   const placeholders = contentRef.value.querySelectorAll('.ace-code-block-placeholder')
 
   Array.from(placeholders).forEach((placeholder) => {
@@ -174,14 +176,19 @@ const processAceCodeBlocks = () => {
 
     if (codeId && encodedCode) {
       const code = decodeURIComponent(encodedCode)
-      aceCodeBlocks.value.push({
-        id: codeId,
+
+      const mountEl = document.createElement('div')
+      // Replace the placeholder with our mount point
+      placeholder.parentNode?.replaceChild(mountEl, placeholder)
+
+      const app = createApp(AceCodeBlock, {
         code,
         language,
+        onRunCode: runCodeExample,
       })
+      app.mount(mountEl)
 
-      // Hide the placeholder
-      ;(placeholder as HTMLElement).style.display = 'none'
+      mountedAceBlocks.value.push({ unmount: () => app.unmount(), el: mountEl })
     }
   })
 }
@@ -206,6 +213,7 @@ watch(
 onUnmounted(() => {
   // Remove event listener
   document.removeEventListener('click', handleCodeBlockClick)
+  clearMountedAceBlocks()
 })
 
 // Watch for route changes to reload section content

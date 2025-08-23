@@ -45,9 +45,11 @@ type AceEditor = {
   on: (event: string, cb: () => void) => void
   session: { setMode: (mode: string) => void }
   commands: { addCommand: (cmd: { name: string; bindKey: Record<string, string>; exec: () => void }) => void }
+  setKeyboardHandler?: (handler: string) => void
 }
 
 let editor: AceEditor | null = null
+let keydownHandlerRef: ((e: KeyboardEvent) => void) | null = null
 
 // Language mode mapping
 const languageModeMap: Record<string, string> = {
@@ -71,6 +73,13 @@ const initEditor = async () => {
 
     // Create editor instance
     editor = ace.edit(editorRef.value as HTMLElement) as AceEditor
+
+    // set keyboard shortcuts (if available)
+    try {
+      if (editor && typeof editor.setKeyboardHandler === 'function') {
+        editor.setKeyboardHandler("ace/keyboard/vscode")
+      }
+    } catch {}
 
     // Set theme and mode
     editor!.setTheme('ace/theme/chrome')
@@ -102,9 +111,24 @@ const initEditor = async () => {
     // Add Ctrl+Enter key binding
     editor!.commands.addCommand({
       name: 'runCode',
-      bindKey: { win: 'Ctrl-Enter', mac: 'Cmd-Enter' },
+      // Bind both Enter and Return aliases in case a keymap uses one or the other
+      bindKey: { win: 'Ctrl-Enter|Ctrl-Return', mac: 'Cmd-Enter|Command-Enter|Cmd-Return|Command-Return' },
       exec: () => runCode()
     })
+
+    // Hard override: capture Ctrl/Cmd+Enter at the DOM level to avoid
+    // keymap conflicts (e.g., VSCode handler using Ctrl+Enter)
+    keydownHandlerRef = (e: KeyboardEvent) => {
+      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+      const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey
+      const isEnter = e.key === 'Enter'
+      if (ctrlOrCmd && isEnter) {
+        e.preventDefault()
+        e.stopPropagation()
+        runCode()
+      }
+    }
+    ;(editor as unknown as { container: HTMLElement }).container.addEventListener('keydown', keydownHandlerRef, { capture: true })
 
     // Focus event listener
     editor!.on('focus', () => {
@@ -146,7 +170,8 @@ const loadAceEditor = (): Promise<AceGlobal> => {
         'mode-typescript',
         'mode-ruby',
         'theme-chrome',
-        'ext-language_tools'
+        'ext-language_tools',
+        'keybinding-vscode'
       ]
 
       const loadResource = (name: string) => new Promise<void>((resolveRes) => {
@@ -199,6 +224,12 @@ onUnmounted(() => {
   if (editor) {
     editor.destroy()
   }
+  try {
+    const container = (editor as unknown as { container?: HTMLElement })?.container
+    if (container && keydownHandlerRef) {
+      container.removeEventListener('keydown', keydownHandlerRef, { capture: true } as unknown as boolean)
+    }
+  } catch {}
 })
 </script>
 
