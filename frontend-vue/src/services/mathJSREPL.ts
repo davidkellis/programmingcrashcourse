@@ -287,7 +287,8 @@ class MathJSREPLService {
 
         // Bind the runtime variable store into the eval scope so we can reference
         // original objects (like Set/Map) without JSON-serializing them
-        const __SCOPE__ = runtime.variables
+        // Use a local alias and reference it inside the template by name.
+        // const SCOPE = runtime.variables
 
         // Create a persistent execution context with variable tracking and optional result capture
         const executionContext = `
@@ -295,7 +296,7 @@ class MathJSREPLService {
             // Restore existing variables from the runtime
             ${Object.keys(runtime.variables)
               .filter((key) => !['console', 'Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Function', 'RegExp', 'Error', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'math', '__result__'].includes(key))
-              .map((key) => `let ${key} = __SCOPE__['${key}'];`)
+              .map((key) => `let ${key} = runtime.variables['${key}'];`)
               .join('\n')}
 
             // Execute the user code (with optional __result__ capture)
