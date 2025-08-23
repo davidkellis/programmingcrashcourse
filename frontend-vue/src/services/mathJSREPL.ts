@@ -285,13 +285,17 @@ class MathJSREPLService {
             : code
         }
 
+        // Bind the runtime variable store into the eval scope so we can reference
+        // original objects (like Set/Map) without JSON-serializing them
+        const __SCOPE__ = runtime.variables
+
         // Create a persistent execution context with variable tracking and optional result capture
         const executionContext = `
           (function() {
             // Restore existing variables from the runtime
-            ${Object.entries(runtime.variables)
-              .filter(([key]) => !['console', 'Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Function', 'RegExp', 'Error', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'math', '__result__'].includes(key))
-              .map(([key, value]) => `let ${key} = ${JSON.stringify(value)};`)
+            ${Object.keys(runtime.variables)
+              .filter((key) => !['console', 'Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Function', 'RegExp', 'Error', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'math', '__result__'].includes(key))
+              .map((key) => `let ${key} = __SCOPE__['${key}'];`)
               .join('\n')}
 
             // Execute the user code (with optional __result__ capture)
@@ -338,6 +342,10 @@ class MathJSREPLService {
               try {
                 if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v)
                 if (v === null || v === undefined) return String(v)
+                if (typeof Set !== 'undefined' && v instanceof Set) {
+                  const arr = Array.from(v as Set<unknown>)
+                  return `Set(${(v as Set<unknown>).size}) { ${arr.map((x) => String(x)).join(', ')} }`
+                }
                 const json = JSON.stringify(v)
                 return json ?? String(v)
               } catch {

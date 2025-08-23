@@ -45,9 +45,9 @@ const handleSelect = (language: Language) => {
 <style scoped>
 .language-selector { display: flex; align-items: center; }
 
-.segmented { display: inline-flex; border: 1px solid #d1d5db; border-radius: 0.5rem; overflow: hidden; background: #fff; }
+.segmented { display: inline-flex; border: 1px solid #d1d5db; border-radius: 0.5rem; overflow: hidden; background: #fff; height: 36px; }
 .segment {
-  padding: 0.4rem 0.75rem;
+  padding: 0 0.75rem;
   font-size: 0.85rem;
   color: #374151;
   background: #ffffff;
@@ -55,6 +55,8 @@ const handleSelect = (language: Language) => {
   border-right: 1px solid #e5e7eb;
   cursor: pointer;
   line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
 }
 .segment:last-child { border-right: none; }
 .segment:hover:not(:disabled) { background: #f3f4f6; }

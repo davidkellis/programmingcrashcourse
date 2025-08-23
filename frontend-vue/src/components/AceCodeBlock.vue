@@ -94,7 +94,7 @@ const initEditor = async () => {
 
     // Configure editor options
     editor!.setOptions({
-      fontSize: '14px',
+      fontSize: '16px',
       showPrintMargin: false,
       showGutter: true,
       highlightActiveLine: true,
@@ -285,7 +285,7 @@ onUnmounted(() => {
 /* Ace Editor custom styles */
 :deep(.ace_editor) {
   font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   line-height: 1.6 !important;
 }
 

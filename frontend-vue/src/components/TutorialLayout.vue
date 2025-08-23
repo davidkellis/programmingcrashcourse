@@ -275,15 +275,15 @@ watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage &
 .tutorial-title { margin: 0; font-size: 1.5rem; font-weight: 600; color: #2c3e50; }
 .nav-group { display: inline-flex; align-items: center; gap: 0.5rem; }
 
-.nav-button { background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 500; }
+.nav-button { background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 600; min-height: 36px; line-height: 1; display: inline-flex; align-items: center; }
 .nav-button:hover:not(:disabled) { background: #218838; transform: translateY(-1px); }
 .nav-button:disabled { background: #6c757d; cursor: not-allowed; opacity: 0.6; }
 .nav-button.prev { margin-right: 0.25rem; }
 .nav-button.next { margin-left: 0.25rem; }
 
 .toc-dropdown { position: relative; }
-.toc-toggle { background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: background-color 0.2s; }
-.toc-toggle:hover { background: #5a6268; }
+.toc-toggle { background: #e9ecef; color: #2c3e50; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: background-color 0.2s, transform 0.2s; font-weight: 600; min-height: 36px; line-height: 1; display: inline-flex; align-items: center; border:#218838 1px solid; }
+.toc-toggle:hover { background: #dfe3e6; transform: translateY(-1px); }
 .toc-menu { position: absolute; top: 100%; left: 0; background: white; border: 1px solid #e9ecef; border-radius: 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 1000; min-width: 250px; max-height: 400px; overflow-y: auto; }
 .toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; cursor: pointer; transition: background-color 0.2s; border-bottom: 1px solid #f8f9fa; }
 .toc-item:hover { background: #f8f9fa; }

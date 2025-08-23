@@ -331,7 +331,7 @@ const handleCodeBlockClick = (event: Event) => {
 .content-text {
   line-height: 1.8;
   color: #1f2937;
-  font-size: 1.06rem;
+  font-size: 1.2rem;
 }
 
 /* Headings inside v-html */
@@ -386,7 +386,7 @@ const handleCodeBlockClick = (event: Event) => {
   color: #1f2937;
   padding: 0.1rem 0.35rem;
   border-radius: 0.25rem;
-  font-size: 0.95em;
+  font-size: 1.1rem;
 }
 
 /* Code cards (rendered fences via v-html and snippet list) */
@@ -412,7 +412,7 @@ const handleCodeBlockClick = (event: Event) => {
 
 .content-text :deep(.code-context),
 .code-context {
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: #6b7280;
   font-weight: 600;
 }
@@ -426,7 +426,7 @@ const handleCodeBlockClick = (event: Event) => {
   border-radius: 0 0 0.5rem 0.5rem;
   overflow-x: auto;
   font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
@@ -435,7 +435,7 @@ const handleCodeBlockClick = (event: Event) => {
   padding: 0.75rem 1rem;
   background: #f8f9fa;
   border-top: 1px solid #e5e7eb;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #6b7280;
   margin: 0;
 }
@@ -448,7 +448,7 @@ const handleCodeBlockClick = (event: Event) => {
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   transition: background-color 0.2s;
 }
@@ -488,7 +488,7 @@ const handleCodeBlockClick = (event: Event) => {
   border: none !important;
   border-radius: 0.375rem !important;
   padding: 0.2rem 0.6rem !important;
-  font-size: 0.875rem !important;
+  font-size: 0.95rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   opacity: 1 !important;

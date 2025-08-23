@@ -5,16 +5,15 @@ export const JAVASCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `Welcome! This is a programming tutorial for ages 10 and up.
+    content: `Welcome!
 
-Our goal is simple: teach you to read and write code in the most popular programming languages.
+This is a programing tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
-These languages share the same core ideas (semantics and structure). The examples you see here apply across many widely used languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, and more. They are all imperative languages and they share the same foundations.
+Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
 
-How to use this tutorial:
+Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
 
-* You’ll see short inline code like \`nr: this\`. Some inline snippets have a green Run button, like \`1+2\`. Click Run to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom. If you don’t want a Run button on an inline snippet, prefix it with \`nr:\` inside the backticks.
-* You’ll also see editable code blocks like this:
+You'll also see editable code blocks like this:
 
 \`\`\`javascript
 function say_hello(name) {
@@ -24,7 +23,9 @@ function say_hello(name) {
 say_hello("Joe");
 \`\`\`
 
-Code blocks have a green Run button in the top‑right. Click it to send the whole block to the REPL. You can also press \`nr: ctrl+enter\` to run (hold Control, press Enter).
+Code blocks have a green Run button in the top-right. Click it to send the whole block to the REPL.
+
+You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
 Let’s begin.`,
     codeSnippets: [],
@@ -34,8 +35,8 @@ Let’s begin.`,
     id: 'comments',
     title: 'Comments',
     order: 2,
-    content: `* lines that start with // are comments
-* comments are just explanations about something
+    content: `* lines that start with \`nr: //\` are comments
+* comments are used to explain what the code does
 * comments are ignored by the JavaScript interpreter
 
 \`\`\`javascript
@@ -98,7 +99,7 @@ false
 [3.141592653589793, "pi", "pie"]
 [1000, "cookies", true]
 [0, "cookies", false]
-{1: "one", 2: "two", 3: "three"}
+{"1": "one", "2": "two", "3": "three"}
 {"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
 \`\`\``,
     codeSnippets: [],
@@ -113,35 +114,62 @@ false
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
-This is a set of three numbers:
+### This is a set of three numbers:
 
-* \`1\`
-* \`2\`
-* \`3\`
+* \`nr: [ 1, 2, 3 ]\`
 
-This is a set of two names:
+You can visualize a set as a circle containing its unique elements. For example, the following SVG shows a set with the numbers 1, 2, and 3:
 
-* \`"Jack"\`
-* \`"Jill"\`
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+    <text x="90" y="80" fill="#FFFFFF" font-size="18">1</text>
+    <text x="110" y="100" fill="#FFFFFF" font-size="18">2</text>
+    <text x="90" y="120" fill="#FFFFFF" font-size="18">3</text>
+  </svg>
+</div>
 
-This is a set of different kinds of things:
 
-* \`1\`
-* \`3.141592653589793\`
-* \`"Steve"\`
-* \`true\`
+### This is a set of two names:
 
-This is **not** a set (because some values are repeated):
+* \`nr: [ "Jack", "Jill" ]\`
 
-* \`1\`
-* \`1\`
-* \`3.141592653589793\`
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
+    <text x="80" y="100" fill="#FFFFFF" font-size="18">Jack</text>
+    <text x="90" y="120" fill="#FFFFFF" font-size="18">Jill</text>
+  </svg>
+</div>
 
-Sets in JavaScript are created using the Set constructor:
 
-* \`new Set([1,2,3])\`
-* \`new Set(["Jack", "Jill"])\`
-* \`new Set([1, 3.141592653589793, "Steve", true])\``,
+### This is a set of different kinds of things:
+
+* \`nr: [ 1, 3.141592653589793, "Steve", True ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+   <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+   <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
+   <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
+   <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
+   <text x="90" y="130" fill="#FFFFFF" font-size="16">Steve</text>
+   <text x="90" y="150" fill="#FFFFFF" font-size="16">True</text>
+   </svg>
+</div>
+
+### This is **NOT** a set (because \`nr: 1\` is repeated):
+
+* \`nr: [ 1, 1, 3.141592653589793 ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
+    <text x="85" y="70" fill="#FFFFFF" font-size="16">1</text>
+    <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
+    <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
+  </svg>
+</div>
+`,
     codeSnippets: [],
     previousSection: 'values',
     nextSection: 'types'
@@ -150,28 +178,112 @@ Sets in JavaScript are created using the Set constructor:
     id: 'types',
     title: 'Types',
     order: 5,
-    content: `A type is a named set of values; it's a set that we give a name to.
+    content: `A type is a set of values that we give a name to.
 
-We can name a set of values however we want. For example:
+We can name a type anything we want. For example:
 
-* We could call the set \`[1,2,3]\` **TinyNumber**
-* We could call the set \`[4,5,6,7,8,9]\` **SmallNumber**
-* We could call the set \`[10,11,12,13,14,15,16,17,18,19]\` **MediumNumber**
+* We could call the set \`nr: [1,2,3]\` **TinyNumber**
+   * The type **TinyNumber** is the set of values \`nr: [1,2,3]\`
 
-Or we could give them different names:
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+  <path id="tinyNumberPath_js" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#tinyNumberPath_js" startOffset="50%" text-anchor="middle">TinyNumber</textPath>
+  </text>
+  <text x="90" y="90" fill="#FFFFFF" font-size="18">1</text>
+  <text x="110" y="110" fill="#FFFFFF" font-size="18">2</text>
+  <text x="90" y="130" fill="#FFFFFF" font-size="18">3</text>
+</svg>
 
-* We could call the set \`[1,2,3]\` **AwesomeNumber**
-* We could call the set \`[4,5,6,7,8,9]\` **CoolNumber**
-* We could call the set \`[10,11,12,13,14,15,16,17,18,19]\` **SuperNumber**
+* We could give the name **DogName** to the set \`nr: ["Max", "Ace", "Tiny"]\`
+   * The type **DogName** is the set of values \`nr: ["Max", "Ace", "Tiny"]\`
 
-JavaScript has some built-in types that are commonly used:
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
+  <path id="dogNamePath_js" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#dogNamePath_js" startOffset="50%" text-anchor="middle">DogName</textPath>
+  </text>
+  <text x="80" y="90" fill="#FFFFFF" font-size="18">"Max"</text>
+  <text x="85" y="110" fill="#FFFFFF" font-size="18">"Ace"</text>
+  <text x="85" y="130" fill="#FFFFFF" font-size="18">"Tiny"</text>
+</svg>
 
-* **number** - numbers
-* **string** - strings
-* **boolean** - boolean
-* **object** - objects (including arrays)
-* **undefined** - undefined values
-* **function** - functions`,
+
+* We could name the set \`nr: [99, 100, 101]\` **AgeOfAnOldPerson**
+   * The type **AgeOfAnOldPerson** is the set of values \`nr: [99, 100, 101]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
+  <path id="ageOfAnOldPersonPath_js" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#ageOfAnOldPersonPath_js" startOffset="50%" text-anchor="middle">AgeOfAnOldPerson</textPath>
+  </text>
+  <text x="85" y="90" fill="#FFFFFF" font-size="18">99</text>
+  <text x="95" y="110" fill="#FFFFFF" font-size="18">100</text>
+  <text x="90" y="130" fill="#FFFFFF" font-size="18">101</text>
+</svg>
+
+* We could say **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
+   * The type **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
+  <path id="smallOddNumberPath_js" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#smallOddNumberPath_js" startOffset="50%" text-anchor="middle">SmallOddNumber</textPath>
+  </text>
+  <text x="85" y="80" fill="#FFFFFF" font-size="18">1</text>
+  <text x="95" y="100" fill="#FFFFFF" font-size="18">3</text>
+  <text x="90" y="120" fill="#FFFFFF" font-size="18">5</text>
+  <text x="85" y="140" fill="#FFFFFF" font-size="18">7</text>
+  <text x="90" y="160" fill="#FFFFFF" font-size="18">9</text>
+</svg>
+
+* Some types are sets with an infinite number of values. For example, the type **WholeNumber** is the set of all whole numbers.
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+  <path id="intPath_js" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#intPath_js" startOffset="50%" text-anchor="middle">WholeNumber</textPath>
+  </text>
+  <text x="25" y="100" fill="#FFFFFF" font-size="18">…, -2, -1, 0, 1, 2, …</text>
+</svg>
+
+## Typed Values
+
+If a value is in the set named by a particular type name, then we say the value is "of that type", or we say that the value "has that type".
+
+* Since \`nr: 1\` is in the **TinyNumber** set:
+   * we say, \`nr: 1\` is of type TinyNumber
+   * or we say, \`nr: 1\` has the type TinyNumber
+* Since \`nr: 1\` is in the **SmallOddNumber** set
+   * we say, \`nr: 1\` is of type SmallOddNumber
+   * or we say, \`nr: 1\` has the type SmallOddNumber
+* Since \`nr: 1\` is in the **WholeNumber** set
+   * we say, \`nr: 1\` is of type WholeNumber
+   * or we say, \`nr: 1\` has the type WholeNumber
+* Since \`nr: 99\` is in the **AgeOfAnOldPerson** set
+   * we say, \`nr: 99\` is of type AgeOfAnOldPerson
+   * or we say, \`nr: 99\` has the type AgeOfAnOldPerson
+* Since \`nr: "Max"\` is in the **DogName** set
+   * we say, \`nr: "Max"\` is of type DogName
+   * or we say \`nr: "Max"\` has the type DogName
+
+In JavaScript, there is a type called \`nr: number\` that is the set of all numbers:
+
+* \`nr: [..., -10.1, -2.0, -1.6, 0.0, 0.5, 1.0, 2.8, 3.1, 1000.0, ...]\`
+
+JavaScript has a bunch of built in types:
+
+* **bool** (as **boolean**)
+* **number**
+* **string**
+* **object**
+* **undefined**
+* **function**`,
     codeSnippets: [],
     previousSection: 'sets',
     nextSection: 'variables'

@@ -34,8 +34,8 @@ Let’s begin.`,
     id: 'comments',
     title: 'Comments',
     order: 2,
-    content: `* lines that start with # are comments
-* comments are just explanations about something
+    content: `* lines that start with \`nr: #\` are comments
+* comments are used to explain what the code does
 * comments are ignored by the Python interpreter
 
 \`\`\`python
@@ -113,35 +113,62 @@ False
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
-This is a set of three numbers:
+### This is a set of three numbers:
 
-* \`1\`
-* \`2\`
-* \`3\`
+* \`nr: [ 1, 2, 3 ]\`
 
-This is a set of two names:
+You can visualize a set as a circle containing its unique elements. For example, the following SVG shows a set with the numbers 1, 2, and 3:
 
-* \`"Jack"\`
-* \`"Jill"\`
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+    <text x="90" y="80" fill="#FFFFFF" font-size="18">1</text>
+    <text x="110" y="100" fill="#FFFFFF" font-size="18">2</text>
+    <text x="90" y="120" fill="#FFFFFF" font-size="18">3</text>
+  </svg>
+</div>
 
-This is a set of different kinds of things:
 
-* \`1\`
-* \`3.141592653589793\`
-* \`"Steve"\`
-* \`True\`
+### This is a set of two names:
 
-This is **not** a set (because some values are repeated):
+* \`nr: [ "Jack", "Jill" ]\`
 
-* \`1\`
-* \`1\`
-* \`3.141592653589793\`
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
+    <text x="80" y="100" fill="#FFFFFF" font-size="18">"Jack"</text>
+    <text x="90" y="120" fill="#FFFFFF" font-size="18">"Jill"</text>
+  </svg>
+</div>
 
-Sets in Python are notated with curly braces:
 
-* \`{1,2,3}\`
-* \`{"Jack", "Jill"}\`
-* \`{1, 3.141592653589793, "Steve", True}\``,
+### This is a set of different kinds of things:
+
+* \`nr: [ 1, 3.141592653589793, "Steve", True ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+   <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+   <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
+   <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
+   <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
+   <text x="90" y="130" fill="#FFFFFF" font-size="16">"Steve"</text>
+   <text x="90" y="150" fill="#FFFFFF" font-size="16">True</text>
+   </svg>
+</div>
+
+### This is **NOT** a set (because \`nr: 1\` is repeated):
+
+* \`nr: [ 1, 1, 3.141592653589793 ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
+    <text x="85" y="70" fill="#FFFFFF" font-size="16">1</text>
+    <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
+    <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
+  </svg>
+</div>
+`,
     codeSnippets: [],
     previousSection: 'values',
     nextSection: 'types'
@@ -150,63 +177,107 @@ Sets in Python are notated with curly braces:
     id: 'types',
     title: 'Types',
     order: 5,
-    content: `A type is a named set of values; it's a set that we give a name to.
+    content: `A type is a set of values that we give a name to.
 
-We can name a set of values however we want. For example:
+We can name a type anything we want. For example:
 
-* We could call the set \`[1,2,3]\` **TinyNumber**
-   * The type **TinyNumber** is the set of values \`[1,2,3]\`
-* We could give the name **DogName** to the set \`["Max", "Ace", "Tiny"]\`
-   * The type **DogName** is the set of values \`["Max", "Ace", "Tiny"]\`
-* We could name the set \`[99, 100, 101]\` **AgeOfAnOldPerson**
-   * The type **AgeOfAnOldPerson** is the set of values \`[99, 100, 101]\`
-* We could say **SmallOddNumber** is the set \`[1, 3, 5, 7, 9]\`
-   * The type **SmallOddNumber** is the set \`[1, 3, 5, 7, 9]\`
+* We could call the set \`nr: [1,2,3]\` **TinyNumber**
+   * The type **TinyNumber** is the set of values \`nr: [1,2,3]\`
 
-If a value is in the set belonging to a type name, then we say the value is of that type, or we say that the value has that type.
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+  <path id="tinyNumberPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#tinyNumberPath" startOffset="50%" text-anchor="middle">TinyNumber</textPath>
+  </text>
+  <text x="90" y="90" fill="#FFFFFF" font-size="18">1</text>
+  <text x="110" y="110" fill="#FFFFFF" font-size="18">2</text>
+  <text x="90" y="130" fill="#FFFFFF" font-size="18">3</text>
+</svg>
 
-* Since \`1\` is in the **TinyNumber** set:
-   * we say, 1 is of type TinyNumber
-   * we say, 1 has the type TinyNumber
-* Since \`1\` is in the **SmallOddNumber** set
-   * we say, 1 is of type SmallOddNumber
-   * we say, 1 has the type SmallOddNumber
-* Since \`99\` is in the **AgeOfAnOldPerson** set
-   * we say, 99 is of type AgeOfAnOldPerson
-   * we say, 99 has the type AgeOfAnOldPerson
-* Since \`"Max"\` is in the **DogName** set
-   * we say, \`"Max"\` is of type DogName
-   * we say \`"Max"\` has the type DogName
+* We could give the name **DogName** to the set \`nr: ["Max", "Ace", "Tiny"]\`
+   * The type **DogName** is the set of values \`nr: ["Max", "Ace", "Tiny"]\`
 
-In Python, there is a type called \`int\` that is the set of all numbers **without** a decimal point:
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
+  <path id="dogNamePath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#dogNamePath" startOffset="50%" text-anchor="middle">DogName</textPath>
+  </text>
+  <text x="80" y="90" fill="#FFFFFF" font-size="18">"Max"</text>
+  <text x="85" y="110" fill="#FFFFFF" font-size="18">"Ace"</text>
+  <text x="85" y="130" fill="#FFFFFF" font-size="18">"Tiny"</text>
+</svg>
 
-* ...
-* \`-3\`
-* \`-2\`
-* \`-1\`
-* \`0\`
-* \`1\`
-* \`2\`
-* \`3\`
-* ...
 
-There is a type called \`float\` that is the set of all numbers **with** a decimal point:
+* We could name the set \`nr: [99, 100, 101]\` **AgeOfAnOldPerson**
+   * The type **AgeOfAnOldPerson** is the set of values \`nr: [99, 100, 101]\`
 
-* ... (numbers less than -3.0)
-* \`-3.0\`
-* ... (numbers between -3.0 and -1.0)
-* \`-1.0\`
-* ... (numbers between -1.0 and 0.0)
-* \`0.0\`
-* ... (numbers between 0.0 and 1.0)
-* \`1.0\`
-* ... (numbers between 1.0 and 1.1)
-* \`1.1\`
-* ... (numbers between 1.1 and 1.2)
-* \`1.2\`
-* ... (numbers between 1.2 and 1000.0)
-* \`1000.0\`
-* ... (numbers greater than 1000.0)
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
+  <path id="ageOfAnOldPersonPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#ageOfAnOldPersonPath" startOffset="50%" text-anchor="middle">AgeOfAnOldPerson</textPath>
+  </text>
+  <text x="85" y="90" fill="#FFFFFF" font-size="18">99</text>
+  <text x="95" y="110" fill="#FFFFFF" font-size="18">100</text>
+  <text x="90" y="130" fill="#FFFFFF" font-size="18">101</text>
+</svg>
+
+* We could say **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
+   * The type **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
+  <path id="smallOddNumberPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#smallOddNumberPath" startOffset="50%" text-anchor="middle">SmallOddNumber</textPath>
+  </text>
+  <text x="85" y="80" fill="#FFFFFF" font-size="18">1</text>
+  <text x="95" y="100" fill="#FFFFFF" font-size="18">3</text>
+  <text x="90" y="120" fill="#FFFFFF" font-size="18">5</text>
+  <text x="85" y="140" fill="#FFFFFF" font-size="18">7</text>
+  <text x="90" y="160" fill="#FFFFFF" font-size="18">9</text>
+</svg>
+
+* Some types are sets with an infinite number of values. For example, the type **WholeNumber** is the set of all whole numbers.
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+  <path id="intPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#intPath" startOffset="50%" text-anchor="middle">WholeNumber</textPath>
+  </text>
+  <text x="25" y="100" fill="#FFFFFF" font-size="18">…, -2, -1, 0, 1, 2, …</text>
+</svg>
+
+## Typed Values
+
+If a value is in the set named by a particular type name, then we say the value is "of that type", or we say that the value "has that type".
+
+* Since \`nr: 1\` is in the **TinyNumber** set:
+   * we say, \`nr: 1\` is of type TinyNumber
+   * or we say, \`nr: 1\` has the type TinyNumber
+* Since \`nr: 1\` is in the **SmallOddNumber** set
+   * we say, \`nr: 1\` is of type SmallOddNumber
+   * or we say, \`nr: 1\` has the type SmallOddNumber
+* Since \`nr: 1\` is in the **WholeNumber** set
+   * we say, \`nr: 1\` is of type WholeNumber
+   * or we say, \`nr: 1\` has the type WholeNumber
+* Since \`nr: 99\` is in the **AgeOfAnOldPerson** set
+   * we say, \`nr: 99\` is of type AgeOfAnOldPerson
+   * or we say, \`nr: 99\` has the type AgeOfAnOldPerson
+* Since \`nr: "Max"\` is in the **DogName** set
+   * we say, \`nr: "Max"\` is of type DogName
+   * or we say \`nr: "Max"\` has the type DogName
+
+In Python, there is a type called \`nr: int\` that is the set of all whole numbers:
+
+* \`nr: [..., -3, -2, -1, 0, 1, 2, 3, ...]\`
+
+There is a type called \`nr: float\` that is the set of all numbers:
+
+* \`nr: [..., -10.1, -2.0, -1.6, 0.0, 0.5, 1.0, 2.8, 3.1, 1000.0, ...]\`
 
 Python has a bunch of built in types:
 

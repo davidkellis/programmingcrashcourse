@@ -38,6 +38,7 @@ class LanguageRuntimeService {
   private rubyWasmVM: { eval: (code: string) => unknown } | null = null;
   private rubyWasmLoaded = false;
   private rubyWasmCapture: string[] | null = null;
+  private tsCompilerLoaded = false;
 
   /**
    * Initialize the language runtime service
@@ -165,6 +166,27 @@ class LanguageRuntimeService {
   }
 
   /**
+   * Load the TypeScript compiler in the browser (window.ts)
+   * Uses the official TypeScript bundle as suggested in
+   * https://stackoverflow.com/a/59874612
+   */
+  private async loadTypeScriptCompiler(): Promise<void> {
+    if (this.tsCompilerLoaded) return
+    await new Promise<void>((resolve, reject) => {
+      if ((window as unknown as { ts?: unknown }).ts) {
+        this.tsCompilerLoaded = true
+        resolve()
+        return
+      }
+      const script = document.createElement('script')
+      script.src = 'https://unpkg.com/typescript@latest/lib/typescript.js'
+      script.onload = () => { this.tsCompilerLoaded = true; resolve() }
+      script.onerror = () => reject(new Error('Failed to load TypeScript compiler'))
+      document.head.appendChild(script)
+    })
+  }
+
+  /**
    * Create a new runtime session for a language
    */
   async createSession(language: Language): Promise<string> {
@@ -243,7 +265,8 @@ import datetime
         }
         break
       case 'typescript':
-        // TypeScript also runs as JavaScript in the browser
+        // TypeScript also runs as JavaScript in the browser; ensure compiler is available
+        await this.loadTypeScriptCompiler()
         runtime.variables = {
           console: console,
           Math: Math,
@@ -342,19 +365,68 @@ import datetime
 
         case 'typescript':
           try {
-            // Execute TypeScript by stripping type annotations (basic) and evaluating as JS
+            await this.loadTypeScriptCompiler()
+            const tsGlobal = (window as unknown as { ts?: { transpileModule: (code: string, opts: unknown) => { outputText: string; diagnostics?: Array<{ messageText: unknown }> }; ScriptTarget: Record<string, number>; ModuleKind: Record<string, number>; JsxEmit: Record<string, number>; flattenDiagnosticMessageText?: (msg: unknown, newline: string) => string } }).ts
+            if (!tsGlobal) throw new Error('TypeScript compiler not available')
+
+            // Capture last-expression result by appending an assignment before transpile
+            const trimmed = code.trim()
+            const lines = trimmed.split('\n').filter(l => l.trim() !== '')
+            const lastLine = lines[lines.length - 1] || ''
+            const isStmt = /^(let|const|var|function|class|interface|type|enum|if|for|while|switch|try|catch|finally|return|import|export|async\s+function)/.test(lastLine.trim())
+            const withResult = isStmt
+              ? code
+              : `${lines.slice(0, -1).join('\n')}${lines.length > 1 ? '\n' : ''}__result__ = (${lastLine});`
+            const codeForTranspile = `declare var __result__: any;\n${withResult}`
+
+            // Transpile TS to JS using official compiler
+            const transpileResult = tsGlobal.transpileModule(codeForTranspile, {
+              compilerOptions: {
+                target: tsGlobal.ScriptTarget.ES2020,
+                module: tsGlobal.ModuleKind.None,
+                jsx: tsGlobal.JsxEmit.Preserve,
+              },
+              reportDiagnostics: true,
+            })
+
+            if (transpileResult.diagnostics && transpileResult.diagnostics.length > 0) {
+              const msgs = transpileResult.diagnostics.map((d: { messageText: unknown }) => tsGlobal.flattenDiagnosticMessageText ? tsGlobal.flattenDiagnosticMessageText(d.messageText, '\n') : String(d.messageText))
+              error = msgs.join('\n')
+              // Still try to run if we have output
+            }
+
+            const jsCode: string = transpileResult.outputText || ''
+
+            // Capture console output and format Sets/Maps nicely
             const capturedOutput: string[] = []
+            const formatArg = (arg: unknown): string => {
+              try {
+                if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') return String(arg)
+                if (arg === null || arg === undefined) return String(arg)
+                if (typeof Set !== 'undefined' && arg instanceof Set) {
+                  const arr = Array.from(arg as Set<unknown>)
+                  return `Set(${(arg as Set<unknown>).size}) { ${arr.map((x) => String(x)).join(', ')} }`
+                }
+                if (typeof Map !== 'undefined' && arg instanceof Map) {
+                  const arr = Array.from(arg as Map<unknown, unknown>)
+                  return `Map(${(arg as Map<unknown, unknown>).size}) { ${arr.map(([k, v]) => `${String(k)} => ${String(v)}`).join(', ')} }`
+                }
+                const json = JSON.stringify(arg)
+                return json ?? String(arg)
+              } catch {
+                return String(arg)
+              }
+            }
             const customConsole = {
               ...console,
               log: (...args: unknown[]) => {
-                const outputStr = args.map((arg) => String(arg)).join(' ')
+                const outputStr = args.map((arg) => formatArg(arg)).join(' ')
                 capturedOutput.push(outputStr)
-                // Also call the original console.log
                 console.log(...args)
               },
             }
 
-            // Initialize the global scope if it doesn't exist
+            // Persistent scope across TS executions
             type GlobalScope = {
               console: Console
               Math: Math
@@ -366,79 +438,46 @@ import datetime
             if (!(runtimeVars as Record<string, unknown>)._globalScope) {
               ;(runtimeVars as Record<string, unknown>)._globalScope = { _vars: {} } as Partial<GlobalScope>
             }
-
-            // Create a persistent global object for this session
             const globalScope = (runtimeVars as Record<string, unknown>)._globalScope as GlobalScope
-
-            // Add built-in objects to the global scope
             globalScope.console = customConsole
             globalScope.Math = Math
             globalScope.Date = Date
             globalScope.JSON = JSON
-
-            // Create a global variables object for this session if it doesn't exist
             if (!globalScope._vars) globalScope._vars = {}
 
-            // Parse the code to detect variable declarations
+            // Variable declarations from original TS code
             const varDeclarations = this.extractVariableDeclarations(code)
 
-            console.log('Variable declarations found:', varDeclarations)
-            console.log('Current variables:', Object.keys(globalScope._vars))
-
-            // Very naive TS-to-JS: remove type annotations and interfaces (best-effort)
-            const transpiledCode = code
-              // remove : type annotations
-              .replace(/: \s*[A-Za-z_][A-Za-z0-9_<>\[\]|,&? ]*/g, '')
-              // remove interface and type blocks
-              .replace(/interface\s+[A-Za-z_][A-Za-z0-9_]*\s*\{[\s\S]*?\}/g, '')
-              .replace(/type\s+[A-Za-z_][A-Za-z0-9_]*\s*=\s*[\s\S]*?;/g, '')
-
-            // Create a simple execution script that uses a global object for variables
             const executionScript = `
-              (function() {
-                // Restore existing variables to the global scope
-                ${Object.entries(globalScope._vars)
-                  .map(([key, value]) => `var ${key} = ${JSON.stringify(value)};`)
-                  .join('\n')}
-
-                // Execute the user code
-                ${transpiledCode}
-
-                // Capture any new variables that were declared
+              (function(__SCOPE__) {
+                ${Object.keys(globalScope._vars).map((key) => `var ${key} = __SCOPE__['${key}'];`).join('\n')}
+                var __result__ = undefined;
+                ${jsCode}
                 const newVars = {};
-                ${varDeclarations
-                  .map(
-                    (varName) => `
-                  if (typeof ${varName} !== 'undefined') {
-                    newVars['${varName}'] = ${varName};
-                  }
-                `,
-                  )
-                  .join('\n')}
-
+                ${varDeclarations.map((varName) => `if (typeof ${varName} !== 'undefined') { newVars['${varName}'] = ${varName}; }`).join('\n')}
+                if (typeof __result__ !== 'undefined') {
+                  try { console.log(__result__) } catch {}
+                  newVars['__result__'] = __result__;
+                }
                 return newVars;
-              })()
+              })(__SCOPE__)
             `
 
-            // Execute the script with the custom console
-            const func = new Function('console', 'Math', 'Date', 'JSON', executionScript)
+            const func = new Function('console', 'Math', 'Date', 'JSON', '__SCOPE__', executionScript)
+            const result = func(customConsole, Math, Date, JSON, globalScope._vars)
 
-            const result = func(customConsole, Math, Date, JSON)
-
-            // Update the global scope with any new variables
             if (result && typeof result === 'object') {
               Object.assign(globalScope._vars, result as Record<string, unknown>)
-              console.log('Updated variables:', Object.keys(globalScope._vars))
             }
 
-            // Combine captured console output with return value
-            if (capturedOutput.length > 0) {
-              output = capturedOutput.join('\n')
-            } else {
-              output = ''
+            output = capturedOutput.length > 0 ? capturedOutput.join('\n') : ''
+            if (result && typeof result === 'object' && Object.prototype.hasOwnProperty.call(result, '__result__')) {
+              const val = (result as Record<string, unknown>).__result__
+              if (val !== undefined) {
+                const formatted = formatArg(val)
+                output = output ? `${output}\n${formatted}` : formatted
+              }
             }
-
-            // Update the variables in the result
             variables = { ...globalScope }
           } catch (tsError: unknown) {
             error = tsError instanceof Error ? tsError.message : 'TypeScript execution error'
