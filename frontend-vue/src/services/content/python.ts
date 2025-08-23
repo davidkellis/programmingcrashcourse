@@ -5,9 +5,7 @@ export const PYTHON_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `# Python Programming Introduction
-
-Welcome to Python programming! This tutorial will teach you the fundamentals of Python through interactive examples.
+    content: `Welcome to Python programming! This tutorial will teach you the fundamentals of Python through interactive examples.
 
 Python is a powerful, easy-to-learn programming language that emphasizes code readability and simplicity. Let's start exploring the basic building blocks of Python programming.
 
@@ -24,14 +22,14 @@ print("Welcome to Python programming!")
     id: 'comments',
     title: 'Comments',
     order: 2,
-    content: `# Comments
-
-* lines that start with # are comments
+    content: `* lines that start with # are comments
 * comments are just explanations about something
 * comments are ignored by the Python interpreter
 
+\`\`\`python
 # this line is a comment
-# everything to the right of a # symbol is a comment and is ignored by the Python interpreter`,
+# everything to the right of a # symbol is a comment and is ignored by the Python interpreter
+\`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values'
@@ -40,9 +38,7 @@ print("Welcome to Python programming!")
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `# Values
-
-A value is either:
+    content: `A value is either:
 
 * a number, for example:
    * \`1\`
@@ -97,9 +93,7 @@ False
     id: 'sets',
     title: 'Sets',
     order: 4,
-    content: `# Sets
-
-A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
@@ -140,9 +134,7 @@ Sets in Python are notated with curly braces:
     id: 'types',
     title: 'Types',
     order: 5,
-    content: `# Types
-
-A type is a named set of values; it's a set that we give a name to.
+    content: `A type is a named set of values; it's a set that we give a name to.
 
 We can name a set of values however we want. For example:
 
@@ -202,12 +194,12 @@ There is a type called \`float\` that is the set of all numbers **with** a decim
 
 Python has a bunch of built in types:
 
-* \`bool\` - boolean
-* \`int\` - integers (numbers without a decimal point)
-* \`float\` - floating point numbers (numbers with a decimal point)
-* \`str\` - strings
-* \`set\` - sets
-* \`dict\` - dictionary (also called a map)`,
+* **bool** - boolean
+* **int** - integers (numbers without a decimal point)
+* **float** - floating point numbers (numbers with a decimal point)
+* **str** - strings
+* **set** - sets
+* **dict** - dictionary (also called a map)`,
     codeSnippets: [],
     previousSection: 'sets',
     nextSection: 'variables'
@@ -216,9 +208,7 @@ Python has a bunch of built in types:
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content: `# Variables and Assignment
-
-A variable is a name that points at a particular value.
+    content: `A variable is a name that points at a particular value.
 
 There are two simple ways to think about a variable:
 
@@ -280,9 +270,7 @@ In this code snippet, we are running the Python interpreter in its interactive m
     id: 'expressions',
     title: 'Expressions',
     order: 7,
-    content: `# Expressions
-
-So far, we have seen several different kinds of expression:
+    content: `So far, we have seen several different kinds of expression:
 
 * value literal expressions
    * \`123\` - integer literal expressions
@@ -320,9 +308,7 @@ When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hell
     id: 'functions',
     title: 'Functions',
     order: 8,
-    content: `# Functions
-
-A function is like a recipe. A recipe has a name and a list of instructions to follow.
+    content: `A function is like a recipe. A recipe has a name and a list of instructions to follow.
 
 For example, here is a recipe for making a peanut butter sandwich:
 
@@ -360,7 +346,7 @@ There are 2 simple rules that you must follow when naming a function:
       * _20_people
       * book_x5
 
-In Python, we create a function by using the special keyword \`def\`, followed by the name of the function, followed by parenthesis at the end of the function name, followed by a colon (a colon is this character: \`:\` ), like this:
+In Python, we create a function by using the special keyword \`nr: def\`, followed by the name of the function, followed by parenthesis at the end of the function name, followed by a colon (a colon is this character: \`nr: :\` ), like this:
 
 def make_peanut_butter_sandwich():
   pass
@@ -403,9 +389,7 @@ def print_hello():
     id: 'function-invocation',
     title: 'Function Invocation',
     order: 9,
-    content: `# Function Invocation or Function Calling
-
-You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
+    content: `You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
 
 A function may be called, or invoked, by typing the name of the function, followed by parenthesis. If the function was defined to accept parameters, then you must supply values for those parameters.
 
@@ -498,9 +482,7 @@ We can see that in the following interactive interpreter session:
     id: 'conditionals',
     title: 'Conditional Expressions',
     order: 10,
-    content: `# Conditional or Branching Expressions
-
-The primary conditional or branching expression is the \`if\` / \`elif\` / \`else\` expression.
+    content: `The primary conditional or branching expression is the \`if\` / \`elif\` / \`else\` expression.
 
 There are three variations:
 

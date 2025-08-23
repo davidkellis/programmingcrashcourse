@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import TutorialLayout from '@/components/TutorialLayout.vue'
-import TutorialHome from '@/views/TutorialHome.vue'
 import TutorialSection from '@/views/TutorialSection.vue'
 
 const router = createRouter({

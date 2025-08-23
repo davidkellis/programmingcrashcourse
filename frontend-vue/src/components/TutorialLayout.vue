@@ -6,7 +6,7 @@
         <div class="content-pane">
           <header class="tutorial-header">
             <div class="header-content">
-              <h1 class="tutorial-title">Interactive Programming Tutorial</h1>
+              <h1 class="tutorial-title">Programming Crash Course</h1>
               <div class="header-controls">
                 <button
                   class="nav-button prev"
@@ -221,7 +221,12 @@ watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage &
 .tutorial-layout { display: flex; flex-direction: column; height: 100vh; width: 100%; background-color: #f8f9fa; margin: 0; padding: 0; overflow: hidden; box-sizing: border-box; }
 
 .tutorial-main { flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; }
-.grid-container { display: grid; width: 100%; height: 100%; }
+.grid-container {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: 2fr 1fr; /* Give content 2/3 width, REPL 1/3 width */
+}
 
 /* Place content and REPL in specific grid cells */
 .dock-right .content-pane { grid-column: 1; grid-row: 1; overflow: auto; min-height: 0; }

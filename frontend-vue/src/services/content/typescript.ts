@@ -5,9 +5,7 @@ export const TYPESCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `# TypeScript Programming Introduction
-
-Welcome to TypeScript programming! This tutorial will teach you the fundamentals of TypeScript through interactive examples.
+    content: `Welcome to TypeScript programming! This tutorial will teach you the fundamentals of TypeScript through interactive examples.
 
 TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale. It adds static type definitions to JavaScript, making your code more reliable and easier to maintain. Let's start exploring the basic building blocks of TypeScript programming.
 
@@ -24,14 +22,18 @@ console.log("Welcome to TypeScript programming!");
     id: 'comments',
     title: 'Comments',
     order: 2,
-    content: `# Comments
-
-* lines that start with // are comments
+    content: `* lines that start with // are comments
 * comments are just explanations about something
 * comments are ignored by the TypeScript compiler
 
+\`\`\`typescript
 // this line is a comment
-// everything to the right of a // symbol is a comment and is ignored by the TypeScript compiler`,
+// everything to the right of a // symbol is a comment and is ignored by the TypeScript compiler
+
+// Let's see what happens when we run some actual code with comments
+let message: string = "Hello from TypeScript!"; // this comment explains what this line does
+console.log(message); // this comment explains we're printing the message
+\`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values'
@@ -40,9 +42,7 @@ console.log("Welcome to TypeScript programming!");
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `# Values
-
-A value is either:
+    content: `A value is either:
 
 * a number, for example:
    * \`1\`
@@ -97,9 +97,7 @@ false
     id: 'sets',
     title: 'Sets',
     order: 4,
-    content: `# Sets
-
-A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
@@ -140,9 +138,7 @@ Sets in TypeScript are created using the Set constructor with type annotations:
     id: 'types',
     title: 'Types',
     order: 5,
-    content: `# Types
-
-A type is a named set of values; it's a set that we give a name to.
+    content: `A type is a named set of values; it's a set that we give a name to.
 
 We can name a set of values however we want. For example:
 
@@ -158,16 +154,16 @@ Or we could give them different names:
 
 TypeScript has some built-in types that are commonly used:
 
-* \`number\` - numbers
-* \`string\` - strings
-* \`boolean\` - boolean values
-* \`object\` - objects
-* \`undefined\` - undefined values
-* \`null\` - null values
-* \`any\` - any type (use sparingly)
-* \`void\` - no return value (for functions)
-* \`Array<T>\` - arrays of type T
-* \`Set<T>\` - sets of type T`,
+* **number** - numbers
+* **string** - strings
+* **boolean** - boolean values
+* **object** - objects
+* **undefined** - undefined values
+* **null** - null values
+* **any** - any type (use sparingly)
+* **void** - no return value (for functions)
+* **Array<T>** - arrays of type T
+* **Set<T>** - sets of type T`,
     codeSnippets: [],
     previousSection: 'sets',
     nextSection: 'variables'
@@ -176,9 +172,7 @@ TypeScript has some built-in types that are commonly used:
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content: `# Variables and Assignment
-
-A variable is a name that points at a particular value.
+    content: `A variable is a name that points at a particular value.
 
 There are two simple ways to think about a variable:
 
@@ -209,9 +203,7 @@ In this code snippet, we are running the TypeScript interpreter in its interacti
     id: 'expressions',
     title: 'Expressions',
     order: 7,
-    content: `# Expressions
-
-So far, we have seen several different kinds of expression:
+    content: `So far, we have seen several different kinds of expression:
 
 * value literal expressions
    * \`123\` - number literal expressions
@@ -238,9 +230,7 @@ When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hell
     id: 'functions',
     title: 'Functions',
     order: 8,
-    content: `# Functions
-
-A function is like a recipe. A recipe has a name and a list of instructions to follow.
+    content: `A function is like a recipe. A recipe has a name and a list of instructions to follow.
 
 For example, here is a recipe for making a peanut butter sandwich:
 
@@ -288,9 +278,7 @@ function print_hello(): void {
     id: 'function-invocation',
     title: 'Function Invocation',
     order: 9,
-    content: `# Function Invocation or Function Calling
-
-You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
+    content: `You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
 
 A function may be called, or invoked, by typing the name of the function, followed by parenthesis. If the function was defined to accept parameters, then you must supply values for those parameters.
 
@@ -341,9 +329,7 @@ undefined
     id: 'conditionals',
     title: 'Conditional Expressions',
     order: 10,
-    content: `# Conditional or Branching Expressions
-
-The primary conditional or branching expression is the \`if\` / \`else if\` / \`else\` expression.
+    content: `The primary conditional or branching expression is the \`if\` / \`else if\` / \`else\` expression.
 
 There are three variations:
 

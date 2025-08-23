@@ -413,7 +413,9 @@ class MathJSREPLService {
     for (const pattern of patterns) {
       let match
       while ((match = pattern.exec(code)) !== null) {
-        declarations.push(match[1])
+        if (match[1]) {
+          declarations.push(match[1])
+        }
       }
     }
 

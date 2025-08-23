@@ -1,0 +1,29 @@
+# Caddy configuration for Vue.js SPA
+
+{
+    # Global email for Let's Encrypt
+    email david@conquerthelawn.com
+}
+
+# For production with domain
+crashcourse.conquerthelawn.com {
+    root * /usr/share/caddy
+    try_files {path} /index.html
+    file_server
+    encode gzip
+
+    header {
+        # Security headers
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "no-referrer-when-downgrade"
+        Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; child-src 'self' blob:;"
+    }
+
+    # Add health check endpoint
+    @health {
+        path /health
+    }
+    respond @health 200
+}

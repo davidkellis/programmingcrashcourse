@@ -54,6 +54,24 @@ This will start the Vue.js frontend application on http://localhost:5173
 - **TypeScript** - Type-safe JavaScript
 - **Ruby** - Beginner-friendly syntax
 
+## Inline code Run buttons
+
+Inline code snippets automatically get a small Run button to the right that sends the snippet to the REPL. To suppress the Run button for a particular inline snippet (e.g., when the snippet is not valid to execute), prefix the content inside the backticks with one of the following directives:
+
+- `norun:`
+- `no-run:`
+- `nr:`
+
+Examples:
+
+```markdown
+`norun: def`
+`no-run: :`
+`nr: [1, 2,)`
+```
+
+These prefixes are stripped from the displayed text and only affect whether the Run button is attached.
+
 ## Development Commands
 
 ```bash

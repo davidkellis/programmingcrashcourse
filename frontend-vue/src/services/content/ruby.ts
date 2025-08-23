@@ -5,9 +5,7 @@ export const RUBY_TUTORIAL_SECTIONS: TutorialSection[] = [
     id: 'introduction',
     title: 'Introduction',
     order: 1,
-    content: `# Ruby Programming Introduction
-
-Welcome to Ruby programming! This tutorial will teach you the fundamentals of Ruby through interactive examples.
+    content: `Welcome to Ruby programming! This tutorial will teach you the fundamentals of Ruby through interactive examples.
 
 Ruby is a dynamic, open source programming language with a focus on simplicity and productivity. It has an elegant syntax that is natural to read and easy to write. Let's start exploring the basic building blocks of Ruby programming.
 
@@ -24,14 +22,14 @@ puts "Welcome to Ruby programming!"
     id: 'comments',
     title: 'Comments',
     order: 2,
-    content: `# Comments
-
-* lines that start with # are comments
+    content: `* lines that start with # are comments
 * comments are just explanations about something
 * comments are ignored by the Ruby interpreter
 
+\`\`\`ruby
 # this line is a comment
-# everything to the right of a # symbol is a comment and is ignored by the Ruby interpreter`,
+# everything to the right of a # symbol is a comment and is ignored by the Ruby interpreter
+\`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values'
@@ -40,9 +38,7 @@ puts "Welcome to Ruby programming!"
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `# Values
-
-A value is either:
+    content: `A value is either:
 
 * a number, for example:
    * \`1\`
@@ -97,9 +93,7 @@ false
     id: 'sets',
     title: 'Sets',
     order: 4,
-    content: `# Sets
-
-A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
@@ -140,9 +134,7 @@ Sets in Ruby are created using the Set class (you need to require 'set' first):
     id: 'types',
     title: 'Types',
     order: 5,
-    content: `# Types
-
-A type is a named set of values; it's a set that we give a name to.
+    content: `A type is a named set of values; it's a set that we give a name to.
 
 We can name a set of values however we want. For example:
 
@@ -158,14 +150,14 @@ Or we could give them different names:
 
 Ruby has some built-in types (classes) that are commonly used:
 
-* \`Integer\` - whole numbers
-* \`Float\` - floating point numbers (numbers with a decimal point)
-* \`String\` - strings
-* \`TrueClass\` / \`FalseClass\` - boolean values
-* \`Array\` - arrays
-* \`Hash\` - hashes (key-value pairs)
-* \`Set\` - sets (requires 'set' library)
-* \`NilClass\` - nil (Ruby's null value)`,
+* **Integer** - whole numbers
+* **Float** - floating point numbers (numbers with a decimal point)
+* **String** - strings
+* **TrueClass** / **FalseClass** - boolean values
+* **Array** - arrays
+* **Hash** - hashes (key-value pairs)
+* **Set** - sets (requires 'set' library)
+* **NilClass** - nil (Ruby's null value)`,
     codeSnippets: [],
     previousSection: 'sets',
     nextSection: 'variables'
@@ -174,9 +166,7 @@ Ruby has some built-in types (classes) that are commonly used:
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content: `# Variables and Assignment
-
-A variable is a name that points at a particular value.
+    content: `A variable is a name that points at a particular value.
 
 There are two simple ways to think about a variable:
 
@@ -192,10 +182,8 @@ In this example, \`my_age\` is the variable name, and \`25\` is the value.
 Here is what this looks like in the Ruby REPL (IRB):
 
 \`\`\`
-irb(main):001:0> my_age = 25
-=> 25
-irb(main):002:0> my_age
-=> 25
+my_age = 25
+my_age
 \`\`\`
 
 In this code snippet, we are running the Ruby interpreter in its interactive mode (called IRB for Interactive Ruby), and assigning the value \`25\` to the variable named \`my_age\`, and then we read the value stored in the \`my_age\` variable by entering the name of the variable by itself and pressing enter; IRB shows us that the value \`25\` is currently stored in the variable named \`my_age\`.`,
@@ -207,9 +195,7 @@ In this code snippet, we are running the Ruby interpreter in its interactive mod
     id: 'expressions',
     title: 'Expressions',
     order: 7,
-    content: `# Expressions
-
-So far, we have seen several different kinds of expression:
+    content: `So far, we have seen several different kinds of expression:
 
 * value literal expressions
    * \`123\` - integer literal expressions
@@ -236,9 +222,7 @@ When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hell
     id: 'functions',
     title: 'Functions',
     order: 8,
-    content: `# Functions
-
-A function is like a recipe. A recipe has a name and a list of instructions to follow.
+    content: `A function is like a recipe. A recipe has a name and a list of instructions to follow.
 
 For example, here is a recipe for making a peanut butter sandwich:
 
@@ -286,9 +270,7 @@ end
     id: 'function-invocation',
     title: 'Function Invocation',
     order: 9,
-    content: `# Function Invocation or Function Calling
-
-You can use a method by calling it, or invoking it. Calling a method is the same thing as invoking it.
+    content: `You can use a method by calling it, or invoking it. Calling a method is the same thing as invoking it.
 
 A method may be called, or invoked, by typing the name of the method, optionally followed by parenthesis. If the method was defined to accept parameters, then you must supply values for those parameters.
 
@@ -339,9 +321,7 @@ irb(main):005:0> three_plus_five
     id: 'conditionals',
     title: 'Conditional Expressions',
     order: 10,
-    content: `# Conditional or Branching Expressions
-
-The primary conditional or branching expression is the \`if\` / \`elsif\` / \`else\` expression.
+    content: `The primary conditional or branching expression is the \`if\` / \`elsif\` / \`else\` expression.
 
 There are three variations:
 

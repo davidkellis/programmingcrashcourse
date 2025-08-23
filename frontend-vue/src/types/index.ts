@@ -35,7 +35,7 @@ export interface TutorialSection {
 export interface ExecutionResult {
   output: string;
   error?: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   executionTime: number;
   timestamp: Date;
 }
@@ -51,8 +51,8 @@ export interface ExecutionRecord {
 }
 
 export interface SessionState {
-  variables: Record<string, any>;
-  functions: Record<string, any>;
+  variables: Record<string, unknown>;
+  functions: Record<string, unknown>;
   imports: string[];
   executionHistory: ExecutionRecord[];
   language: string;
@@ -111,7 +111,7 @@ export interface REPLState {
   isExecuting: boolean;
   history: ExecutionRecord[];
   currentInput: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
 }
 
 // Component prop types
@@ -132,7 +132,7 @@ export interface CodeSnippetProps {
 export interface REPLProps {
   sessionId: string | null;
   language: Language | null;
-  onExecute: (code: string) => Promise<any>;
+  onExecute: (code: string) => Promise<unknown>;
   history: ExecutionRecord[];
   isExecuting?: boolean;
 }

@@ -10,9 +10,9 @@
 
 <br>
 
-```
+```python
 # this line is a comment
-# everything to the right of a # symbol is a comment and is ignored by the Python interpeter
+# everything to the right of a # symbol is a comment and is ignored by the Python interpreter
 ```
 
 <br>
@@ -258,7 +258,7 @@ In this code snippet, we are running the python interpreter in its interactive m
 
 <br>
 
-# Expressions  
+# Expressions
 
 So far, we have seen several different kinds of expression:
 
@@ -337,7 +337,7 @@ A function is like a recipe. It has a name and it has a list of instructions to 
 For example, here’s a recipe:
 
 > Peanut Butter Sandwich:
-> 
+>
 > 1. Take two pieces of bread
 > 2. Toast them
 > 3. Pull them out of the toaster

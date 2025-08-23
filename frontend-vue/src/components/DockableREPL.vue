@@ -110,7 +110,7 @@ interface Props {
   sessionId: string | null
   language: Language | null
   history: ExecutionRecord[]
-  variables: Record<string, any>
+  variables: Record<string, unknown>
   isExecuting: boolean
   asPane?: boolean
 }
@@ -133,6 +133,7 @@ const inputTextarea = ref<HTMLTextAreaElement>()
 // REPL state
 const currentPrompt = ref('>>> ')
 const isMultiLine = ref(false)
+const executedFromRepl = ref(false)
 
 // MathJS version for display
 const mathJSVersion = ref('11.11.0')
@@ -214,6 +215,7 @@ const executeCode = async () => {
   currentInput.value = ''
   currentPrompt.value = '>>> '
   isMultiLine.value = false
+  executedFromRepl.value = true
 
   emit('execute', code)
 
@@ -255,11 +257,23 @@ const autoResize = () => {
 
 watch(() => props.isExecuting, (isExecuting, wasExecuting) => {
   if (wasExecuting && !isExecuting) {
-    requestAnimationFrame(() => { if (inputTextarea.value) { inputTextarea.value.focus(); autoResize() } })
+    if (executedFromRepl.value) {
+      requestAnimationFrame(() => { if (inputTextarea.value) { inputTextarea.value.focus(); autoResize() } })
+    }
+    executedFromRepl.value = false
   }
 })
 
 watch(() => currentInput.value, () => { nextTick(() => autoResize()) })
+
+// Auto-scroll history when new records are appended externally
+watch(() => props.history.length, () => {
+  nextTick(() => {
+    if (historyContainer.value) {
+      historyContainer.value.scrollTop = historyContainer.value.scrollHeight
+    }
+  })
+})
 
 onMounted(() => {
   setDefaultSizeFromViewport()

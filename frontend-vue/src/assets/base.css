@@ -58,6 +58,12 @@
   font-weight: normal;
 }
 
+/* Restore semantic bold text for strong/b elements after the global reset above */
+b,
+strong {
+  font-weight: 700;
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);
