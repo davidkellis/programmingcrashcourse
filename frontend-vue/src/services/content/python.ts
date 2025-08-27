@@ -28,7 +28,7 @@ You can edit the code in the code blocks by clicking on the code and typing. Whe
 
 Let’s begin.`,
     codeSnippets: [],
-    nextSection: 'comments'
+    nextSection: 'comments',
   },
   {
     id: 'comments',
@@ -48,7 +48,7 @@ print(message)  # this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
-    nextSection: 'values'
+    nextSection: 'values',
   },
   {
     id: 'values',
@@ -103,7 +103,7 @@ False
 \`\`\``,
     codeSnippets: [],
     previousSection: 'comments',
-    nextSection: 'sets'
+    nextSection: 'sets',
   },
   {
     id: 'sets',
@@ -171,7 +171,7 @@ You can visualize a set as a circle containing its unique elements. For example,
 `,
     codeSnippets: [],
     previousSection: 'values',
-    nextSection: 'types'
+    nextSection: 'types',
   },
   {
     id: 'types',
@@ -281,77 +281,97 @@ There is a type called \`nr: float\` that is the set of all numbers:
 
 Python has a bunch of built in types:
 
-* **bool** - boolean
-* **int** - integers (numbers without a decimal point)
-* **float** - floating point numbers (numbers with a decimal point)
-* **str** - strings
-* **set** - sets
-* **dict** - dictionary (also called a map)`,
+* \`nr: bool\` - boolean
+* \`nr: int\` - integers (numbers without a decimal point)
+* \`nr: float\` - floating point numbers (numbers with a decimal point)
+* \`nr: str\` - strings
+* \`nr: set\` - sets
+* \`nr: list\` - lists
+* \`nr: dict\` - dictionary (also called a map)
+* and many more
+`,
     codeSnippets: [],
     previousSection: 'sets',
-    nextSection: 'variables'
+    nextSection: 'variables',
   },
   {
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content: `A variable is a name that points at a particular value.
+    content: `A variable is a name that points at a particular value. For example:
 
-There are two simple ways to think about a variable:
+  <div>
+      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
+        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
+        <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
+        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+      </svg>
+  </div>
 
-1. You can think of a variable as a name that we use to point at a value
-   * For example:
-      * what_i_ate_for_breakfast → \`"cereal"\`
-      * my_current_age → \`10.5\`
-2. You can also think of a variable as a box with name on it and it holds a value inside
-   * For example:
+  <div>
+      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
+        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
+        <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
+        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+      </svg>
+  </div>
 
 We name a variable with letters, numbers, and the underscore character, for example:
 
-* \`firstName\`
-* \`last_name\`
-* \`myAge\`
-* \`what_i_ate_for_breakfast\`
-* \`name1\`
-* \`name2\`
+* \`nr: firstName\`
+* \`nr: last_name\`
+* \`nr: myAge\`
+* \`nr: what_i_ate_for_breakfast\`
 
 We can't use spaces in variable names.
 
-We use the equal sign, \`=\` , to make a variable point at a value, or put a value into the box, like this:
+A variable can only point at one value at a time; however, we can change the value that a variable points at.
 
-my_age_last_year = 25
+When we make a variable point at a value, we say that we are assigning a value to a variable; this process is called assignment.
 
-This makes the \`my_age_last_year\` variable point to the value \`25\`.
+## Assignment
 
-This puts the value \`25\` into the box named \`my_age_last_year\`, like this:
+We use the equal sign, \`nr: =\` , to make a variable point at a value, like this: \`my_age_last_year = 25\`
 
-The equal sign, \`=\` , is called the assignment operator.
+This makes the \`nr: my_age_last_year\` variable point to the value \`nr: 25\`.
 
-When we use the assignment operator, \`=\` , to make a variable point at a value, we call that an assignment expression.
+The equal sign, \`nr: =\` , is called the assignment operator.
 
-In an assignment expression, we use the \`=\` operator to assign the value on the right hand side of the \`=\` operator to the variable on the left hand side of the \`=\` operator.
+When we use the assignment operator, \`nr: =\` , to make a variable point at a value, we call that an assignment expression.
 
 These are all assignment expressions:
 
-* \`my_age = 25\`
+* \`my_age = 10\`
 * \`my_first_word = "cookie"\`
 * \`number_of_cookies_i_want_to_eat = 100\`
 
-When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at, or we are opening the box and reading the value inside.
+When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
 
-To show an example, we can run the following code in the Python interpreter:
+For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
 
-❯ python
-Python 3.12.5 (main, Aug 14 2024, 05:08:31) [Clang 18.1.8 ] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> my_age = 25
->>> my_age
-25
+\`\`\`python
+my_age = 10
+my_age_next_year = my_age + 1
+my_age_next_year
+\`\`\`
 
-In this code snippet, we are running the Python interpreter in its interactive mode (called the read-evaluate-print-loop, or REPL for short), and assigning the value \`25\` to the variable named \`my_age\`, and then we read the value stored in the \`my_age\` variable by entering the name of the variable by itself and pressing enter; the REPL shows us that the value \`25\` is currently stored in the variable named \`my_age\`.`,
+Finally, we can change the value that a variable points at by assigning a new value to the variable:
+
+\`\`\`python
+my_age = 10
+print(f"my_age -> {my_age}")   # this prints 10
+my_age = 11
+print(f"my_age -> {my_age}")   # this prints 11
+\`\`\`
+
+`,
     codeSnippets: [],
     previousSection: 'types',
-    nextSection: 'expressions'
+    nextSection: 'expressions',
   },
   {
     id: 'expressions',
@@ -366,30 +386,53 @@ In this code snippet, we are running the Python interpreter in its interactive m
    * \`"Max"\` - string literal expressions
    * \`[1, 2, 3, 1, 2, 3]\` - list literal expressions
    * \`{1: "one", 2: "two"}\` - dictionary literal expressions
-* variable expressions
-   * \`my_age\` - variable expressions
-   * \`what_i_ate_for_breakfast\` - variable expressions
 * assignment expressions
-   * \`my_age = 25\` - assignment expressions
-   * \`what_i_ate_for_breakfast = "cereal"\` - assignment expressions
-* operator expressions
-   * \`1 + 2\` - operator expressions
-   * \`3 * 4\` - operator expressions
-   * \`10 / 2\` - operator expressions
-   * \`5 - 3\` - operator expressions
+   * \`my_age = 25\`
+   * \`what_i_ate_for_breakfast = "cereal"\`
+* variable evaluation expressions
+   * \`my_age\`
+   * \`what_i_ate_for_breakfast\`
+* math expressions
+   * \`1 + 2\`
+   * \`3 * 4\`
+   * \`10 / 2\`
+   * \`5 - 3\`
 
 An expression is anything that can be evaluated to produce a value.
 
-When we evaluate an expression, we compute the value that the expression represents.
+For example, each of these expressions produces a value:
+* \`1 + 2\` -> \`nr: 3\`
+* \`3 * 4\` -> \`nr: 12\`
+* \`10 / 2\` -> \`nr: 5\`
+* \`5 - 3\` -> \`nr: 2\`
 
-For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`.
+When we evaluate an expression, we compute the value that the expression represents, and then we use that computed value instead of the complex expression that produced it.
 
-When we evaluate the expression \`my_age\`, we compute whatever value is currently stored in the variable named \`my_age\`.
+For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`, because math expressions evaluate to the number that the math produces.
 
-When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hello"\`.`,
+When we evaluate the expression \`my_age\`, we look up whatever value is currently stored in the variable named \`my_age\`, because variable evaluation expressions evaluate to the value that the variable currently points at.
+
+When we evaluate the expression \`5\`, we know that evaluates to the number \`5\`, because literal expressions evaluate to themselves.
+
+Different programming languages support different kinds of expressions, and each kind of expression has a different way of being evaluated.
+
+Learning a programming language is all about learning and remembering how each different kind of expression is interpreted and evaluated.
+
+The common expression types across every popular programming language are:
+
+* value literal expressions
+* assignment expressions
+* variable evaluation expressions
+* function definition expressions
+* function invocation expressions
+* conditional expressions
+* loop expressions
+
+These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in python, then you know what it looks like in most every language.
+`,
     codeSnippets: [],
     previousSection: 'variables',
-    nextSection: 'functions'
+    nextSection: 'functions',
   },
   {
     id: 'functions',
@@ -470,7 +513,7 @@ def print_hello():
   print("Hello")`,
     codeSnippets: [],
     previousSection: 'expressions',
-    nextSection: 'function-invocation'
+    nextSection: 'function-invocation',
   },
   {
     id: 'function-invocation',
@@ -563,7 +606,7 @@ We can see that in the following interactive interpreter session:
 8`,
     codeSnippets: [],
     previousSection: 'functions',
-    nextSection: 'conditionals'
+    nextSection: 'conditionals',
   },
   {
     id: 'conditionals',
@@ -593,6 +636,26 @@ There are three variations:
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],
-    previousSection: 'function-invocation'
-  }
+    previousSection: 'function-invocation',
+    nextSection: 'next-steps',
+  },
+  {
+    id: 'next-steps',
+    title: 'Next Steps',
+    order: 11,
+    content: `You're off to a great start. Here are some suggested next steps:
+
+  ### Practice
+  - Try writing small programs that use variables, functions, and conditionals.
+  - Recreate the examples in this tutorial and modify them.
+
+  ### Learn more (Resources)
+  - Big-O notation explained clearly: [Big O by Sam Rose](https://samwho.dev/big-o/)
+
+  ### Where to go next
+  - Explore loops, collections, and file I/O.
+  - Learn how to structure projects and write tests.`,
+    codeSnippets: [],
+    previousSection: 'conditionals',
+  },
 ]

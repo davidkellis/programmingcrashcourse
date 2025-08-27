@@ -7,7 +7,12 @@
           <header class="tutorial-header">
             <div class="header-content three-col">
               <div class="header-left">
-                <h1 class="tutorial-title"><a href="/">Programming Crash Course</a></h1>
+                <h1 class="tutorial-title">
+                  <a href="/" class="brand">
+                    <img src="/favicon.png" alt="" class="brand-icon" aria-hidden="true" />
+                    Programming Crash Course
+                  </a>
+                </h1>
               </div>
               <div class="header-center">
                 <div class="nav-group">
@@ -273,6 +278,8 @@ watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage &
 .header-center { justify-self: center; }
 .header-right { justify-self: end; }
 .tutorial-title { margin: 0; font-size: 1.5rem; font-weight: 600; color: #2c3e50; }
+.brand { display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none; }
+.brand-icon { width: 24px; height: 24px; border-radius: 4px; display: inline-block; }
 .nav-group { display: inline-flex; align-items: center; gap: 0.5rem; }
 
 .nav-button { background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 600; min-height: 36px; line-height: 1; display: inline-flex; align-items: center; }

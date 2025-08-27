@@ -29,7 +29,7 @@ You can edit the code in the code blocks by clicking on the code and typing. Whe
 
 Let’s begin.`,
     codeSnippets: [],
-    nextSection: 'comments'
+    nextSection: 'comments',
   },
   {
     id: 'comments',
@@ -49,7 +49,7 @@ puts message # this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
-    nextSection: 'values'
+    nextSection: 'values',
   },
   {
     id: 'values',
@@ -104,7 +104,7 @@ false
 \`\`\``,
     codeSnippets: [],
     previousSection: 'comments',
-    nextSection: 'sets'
+    nextSection: 'sets',
   },
   {
     id: 'sets',
@@ -172,7 +172,7 @@ You can visualize a set as a circle containing its unique elements. For example,
 `,
     codeSnippets: [],
     previousSection: 'values',
-    nextSection: 'types'
+    nextSection: 'types',
   },
   {
     id: 'types',
@@ -276,46 +276,97 @@ In Ruby, whole numbers are instances of \`nr: Integer\` and numbers with decimal
 
 Ruby has a bunch of built in classes:
 
-* **TrueClass** / **FalseClass**
-* **Integer**
-* **Float**
-* **String**
-* **Array**
-* **Hash**
-* **Set** (requires 'set')
-* **NilClass**`,
+* \`nr: TrueClass\` / \`nr: FalseClass\`
+* \`nr: Integer\`
+* \`nr: Float\`
+* \`nr: String\`
+* \`nr: Array\`
+* \`nr: Hash\`
+* \`nr: Set\`
+* and many more
+`,
     codeSnippets: [],
     previousSection: 'sets',
-    nextSection: 'variables'
+    nextSection: 'variables',
   },
   {
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content: `A variable is a name that points at a particular value.
+    content: `A variable is a name that points at a particular value. For example:
 
-There are two simple ways to think about a variable:
+  <div>
+      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
+        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
+        <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
+        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+      </svg>
+  </div>
 
-1. A variable is a labeled box, and we can put values in the box
-2. A variable is a name tag, and we can stick the name tag on different values
+  <div>
+      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
+        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
+        <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
+        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+      </svg>
+  </div>
 
-For example, we can create a variable named \`my_age\` and assign the value \`25\` to it:
+We name a variable with letters, numbers, and the underscore character, for example:
 
-\`my_age = 25\`
+* \`nr: firstName\`
+* \`nr: last_name\`
+* \`nr: myAge\`
+* \`nr: what_i_ate_for_breakfast\`
 
-In this example, \`my_age\` is the variable name, and \`25\` is the value.
+We can't use spaces in variable names.
 
-Here is what this looks like in the Ruby REPL (IRB):
+A variable can only point at one value at a time; however, we can change the value that a variable points at.
 
+When we make a variable point at a value, we say that we are assigning a value to a variable; this process is called assignment.
+
+## Assignment
+
+We use the equal sign, \`nr: =\` , to make a variable point at a value, like this: \`my_age_last_year = 25\`
+
+This makes the \`nr: my_age_last_year\` variable point to the value \`nr: 25\`.
+
+The equal sign, \`nr: =\` , is called the assignment operator.
+
+When we use the assignment operator, \`nr: =\` , to make a variable point at a value, we call that an assignment expression.
+
+These are all assignment expressions:
+
+* \`my_age = 10\`
+* \`my_first_word = "cookie"\`
+* \`number_of_cookies_i_want_to_eat = 100\`
+
+When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
+
+For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
+
+\`\`\`ruby
+my_age = 10
+my_age_next_year = my_age + 1
+my_age_next_year
 \`\`\`
-my_age = 25
-my_age
+
+Finally, we can change the value that a variable points at by assigning a new value to the variable:
+
+\`\`\`ruby
+my_age = 10
+puts "my_age -> #{my_age}"   # this prints 10
+my_age = 11
+puts "my_age -> #{my_age}"   # this prints 11
 \`\`\`
 
-In this code snippet, we are running the Ruby interpreter in its interactive mode (called IRB for Interactive Ruby), and assigning the value \`25\` to the variable named \`my_age\`, and then we read the value stored in the \`my_age\` variable by entering the name of the variable by itself and pressing enter; IRB shows us that the value \`25\` is currently stored in the variable named \`my_age\`.`,
+`,
     codeSnippets: [],
     previousSection: 'types',
-    nextSection: 'expressions'
+    nextSection: 'expressions',
   },
   {
     id: 'expressions',
@@ -342,7 +393,7 @@ When we evaluate the expression \`my_age\`, we compute whatever value is current
 When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hello"\`.`,
     codeSnippets: [],
     previousSection: 'variables',
-    nextSection: 'functions'
+    nextSection: 'functions',
   },
   {
     id: 'functions',
@@ -390,7 +441,7 @@ end
 \`\`\``,
     codeSnippets: [],
     previousSection: 'expressions',
-    nextSection: 'function-invocation'
+    nextSection: 'function-invocation',
   },
   {
     id: 'function-invocation',
@@ -441,7 +492,7 @@ irb(main):005:0> three_plus_five
 \`\`\``,
     codeSnippets: [],
     previousSection: 'functions',
-    nextSection: 'conditionals'
+    nextSection: 'conditionals',
   },
   {
     id: 'conditionals',
@@ -460,6 +511,24 @@ There are three variations:
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],
-    previousSection: 'function-invocation'
-  }
+    previousSection: 'function-invocation',
+    nextSection: 'next-steps',
+  },
+  {
+    id: 'next-steps',
+    title: 'Next Steps',
+    order: 11,
+    content: `You're off to a great start. Here are some suggested next steps:
+
+  ### Practice
+  - Write tiny scripts that use variables, methods, and conditionals.
+
+  ### Learn more (Resources)
+  - Big-O notation explained clearly: [Big O by Sam Rose](https://samwho.dev/big-o/)
+
+  ### Where to go next
+  - Learn blocks, enumerables, and simple file scripts.`,
+    codeSnippets: [],
+    previousSection: 'conditionals',
+  },
 ]

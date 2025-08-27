@@ -376,7 +376,7 @@ import datetime
             const isStmt = /^(let|const|var|function|class|interface|type|enum|if|for|while|switch|try|catch|finally|return|import|export|async\s+function)/.test(lastLine.trim())
             const withResult = isStmt
               ? code
-              : `${lines.slice(0, -1).join('\n')}${lines.length > 1 ? '\n' : ''}__result__ = (${lastLine});`
+              : `${lines.slice(0, -1).join('\n')}${lines.length > 1 ? '\n' : ''}__result__ = (${lastLine}\n);`
             const codeForTranspile = `declare var __result__: any;\n${withResult}`
 
             // Transpile TS to JS using official compiler

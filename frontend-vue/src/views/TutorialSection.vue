@@ -488,7 +488,7 @@ const handleCodeBlockClick = (event: Event) => {
   border: none !important;
   border-radius: 0.375rem !important;
   padding: 0.2rem 0.6rem !important;
-  font-size: 0.95rem !important;
+  font-size: 1.15rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   opacity: 1 !important;
@@ -526,7 +526,7 @@ const handleCodeBlockClick = (event: Event) => {
   color: #1f2937;
   padding: 0.2rem 0.6rem;
   border-radius: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 1.1rem;
   display: inline-flex;
   align-items: center;
   line-height: 1.35;
