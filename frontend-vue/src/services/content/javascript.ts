@@ -376,22 +376,55 @@ console.log(` + "`my_age -> ${my_age}`" + `)   // this prints 11
     content: `So far, we have seen several different kinds of expression:
 
 * value literal expressions
-   * \`123\` - number literal expressions
-   * \`"Hello"\` - string literal expressions
-   * \`true\` - boolean literal expressions
-   * \`[1, 2, 3]\` - array literal expressions
-* variable expressions
-   * \`my_age\` - variable expressions
+  * \`123\` - number literal expressions
+  * \`3.14159\` - number literal expressions
+  * \`true\` - boolean literal expressions
+  * \`"Max"\` - string literal expressions
+  * \`[1, 2, 3, 1, 2, 3]\` - array literal expressions
+  * \`{1: "one", 2: "two"}\` - object literal expressions (as maps)
 * assignment expressions
-   * \`my_age = 25\` - assignment expressions
+  * \`my_age = 25\`
+  * \`what_i_ate_for_breakfast = "cereal"\`
+* variable evaluation expressions
+  * \`my_age\`
+  * \`what_i_ate_for_breakfast\`
+* math expressions
+  * \`1 + 2\`
+  * \`3 * 4\`
+  * \`10 / 2\`
+  * \`5 - 3\`
 
-An expression is a piece of code that can be evaluated (or computed) to produce a value.
+An expression is anything that can be evaluated to produce a value.
 
-For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`.
+For example, each of these expressions produces a value:
+* \`1 + 2\` -> \`nr: 3\`
+* \`3 * 4\` -> \`nr: 12\`
+* \`10 / 2\` -> \`nr: 5\`
+* \`5 - 3\` -> \`nr: 2\`
 
-When we evaluate the expression \`my_age\`, we compute whatever value is currently stored in the variable named \`my_age\`.
+When we evaluate an expression, we compute the value that the expression represents, and then we use that computed value instead of the complex expression that produced it.
 
-When we evaluate the expression \`"Hello"\`, we compute the string value \`"Hello"\`.`,
+For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`, because math expressions evaluate to the number that the math produces.
+
+When we evaluate the expression \`my_age\`, we look up whatever value is currently stored in the variable named \`my_age\`, because variable evaluation expressions evaluate to the value that the variable currently points at.
+
+When we evaluate the expression \`5\`, we know that evaluates to the number \`5\`, because literal expressions evaluate to themselves.
+
+Different programming languages support different kinds of expressions, and each kind of expression has a different way of being evaluated.
+
+Learning a programming language is all about learning and remembering how each different kind of expression is interpreted and evaluated.
+
+The common expression types across every popular programming language are:
+
+* value literal expressions
+* assignment expressions
+* variable evaluation expressions
+* function definition expressions
+* function invocation expressions
+* conditional expressions
+* loop expressions
+
+These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in Python, then you know what it looks like in most every language.`,
     codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
