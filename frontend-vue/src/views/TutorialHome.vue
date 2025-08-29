@@ -22,12 +22,12 @@
         </div>
         <div v-else class="sections-grid">
           <div
-            v-for="(section, index) in sections"
+            v-for="section in orderedSections"
             :key="section.id"
             class="section-card"
             @click="navigateToSection(section.id)"
           >
-            <div class="section-number">{{ index + 1 }}</div>
+            <div class="section-number">{{ section.order }}</div>
             <div class="section-content">
               <h3 class="section-title">{{ section.title }}</h3>
               <p class="section-preview">
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { localContentService } from '@/services/localContentService'
 import type { TutorialSection } from '@/types'
@@ -95,6 +95,10 @@ const loadSections = async () => {
     isLoading.value = false
   }
 }
+
+const orderedSections = computed(() => {
+  return [...sections.value].sort((a, b) => a.order - b.order)
+})
 
 const getSectionPreview = (content: string): string => {
   // Remove markdown formatting and get first 150 characters

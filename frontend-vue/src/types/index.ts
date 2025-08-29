@@ -22,11 +22,25 @@ export interface CodeSnippet {
   lineEnd?: number;
 }
 
+// Group of code snippets that can be run sequentially
+export interface CodeSnippetGroup {
+  id: string;
+  title: string;
+  description?: string;
+  // If true, keep group collapsed initially
+  collapsedByDefault?: boolean;
+  // If true, keep running snippets even if one fails (default: false)
+  continueOnError?: boolean;
+  snippets: CodeSnippet[];
+}
+
 export interface TutorialSection {
   id: string;
   title: string;
   content: string;
   codeSnippets: CodeSnippet[];
+  // Optional mixed items: individual snippets and/or groups. If present, UI should prefer this over codeSnippets.
+  codeItems?: Array<CodeSnippet | CodeSnippetGroup>;
   nextSection?: string;
   previousSection?: string;
   order: number;

@@ -29,7 +29,7 @@
                     📚 {{ currentSectionTitle || 'Sections' }}
                   </button>
                   <div v-if="isTOCVisible" class="toc-menu" @click.stop>
-                    <div v-for="section in sections" :key="section.id" class="toc-item" @click="navigateToSection(section.id)" :class="{ active: section.id === currentSectionId }">
+                    <div v-for="section in orderedSections" :key="section.id" class="toc-item" @click="navigateToSection(section.id)" :class="{ active: section.id === currentSectionId }">
                       <span class="toc-number">{{ section.order }}</span>
                       <span class="toc-title">{{ section.title }}</span>
                     </div>
@@ -58,7 +58,12 @@
           <div class="content-wrapper">
             <div class="inner-centered">
               <RouterView v-slot="{ Component }">
-                <component :is="Component" :current-language="uiState.selectedLanguage?.id" @run-code="handleRunCode" />
+                <component
+                  :is="Component"
+                  :current-language="uiState.selectedLanguage?.id"
+                  @run-code="handleRunCode"
+                  @run-code-sequence="handleRunCodeSequence"
+                />
               </RouterView>
             </div>
           </div>
@@ -110,13 +115,19 @@ const gridStyle = computed(() => {
     return { gridTemplateColumns: '1fr', gridTemplateRows: '100%' }
   }
   if (replLayout.value.position === 'right') {
-    return { gridTemplateColumns: `1fr ${replLayout.value.size.width}px`, gridTemplateRows: '100%' }
+    const replW = Math.max(0, replLayout.value.size.width || 0)
+    // Ensure the content track never collapses, even on narrow viewports
+    // Content gets at least 320px, REPL can shrink down to 0 if needed
+    return { gridTemplateColumns: `minmax(320px, 1fr) minmax(0, ${replW}px)`, gridTemplateRows: '100%' }
   }
   // Bottom dock: two rows
   return { gridTemplateColumns: '1fr', gridTemplateRows: `1fr ${replLayout.value.size.height}px` }
 })
 
 const sections = ref<TutorialSection[]>([])
+const orderedSections = computed(() => {
+  return [...sections.value].sort((a, b) => a.order - b.order)
+})
 const isTOCVisible = ref(false)
 
 // Current section tracking
@@ -222,6 +233,20 @@ const loadSections = async () => {
 }
 
 const handleRunCode = async (code: string) => { try { await handleCodeExecution(code) } catch (error) { console.error('Failed to run code example:', error) } }
+
+type RunCodeSequencePayload = { codes: string[]; continueOnError?: boolean; groupId?: string; title?: string }
+const handleRunCodeSequence = async (payload: RunCodeSequencePayload) => {
+  const { codes, continueOnError = false } = payload || { codes: [] }
+  if (!codes || codes.length === 0) return
+  for (const code of codes) {
+    try {
+      await handleCodeExecution(code)
+    } catch (err) {
+      console.error('Failed during group execution:', err)
+      if (!continueOnError) break
+    }
+  }
+}
 const parseInputLines = (code: string): Array<{ prompt: string; text: string }> => code.split('\n').map((line, index) => ({ prompt: index === 0 ? '>>> ' : '... ', text: line }))
 
 onMounted(async () => {
@@ -253,14 +278,15 @@ watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage &
   display: grid;
   width: 100%;
   height: 100%;
-  grid-template-columns: 2fr 1fr; /* Give content 2/3 width, REPL 1/3 width */
+  /* Safer default so content doesn't collapse before inline style applies */
+  grid-template-columns: minmax(320px, 1fr) minmax(0, 1fr);
 }
 
 /* Place content and REPL in specific grid cells */
-.dock-right .content-pane { grid-column: 1; grid-row: 1; overflow: auto; min-height: 0; }
+.dock-right .content-pane { grid-column: 1; grid-row: 1; overflow: auto; min-height: 0; min-width: 0; position: relative; }
 .dock-right .repl-pane { grid-column: 2; grid-row: 1; }
 
-.dock-bottom .content-pane { grid-column: 1; grid-row: 1; overflow: auto; min-height: 0; }
+.dock-bottom .content-pane { grid-column: 1; grid-row: 1; overflow: auto; min-height: 0; min-width: 0; position: relative; }
 .dock-bottom .repl-pane { grid-column: 1; grid-row: 2; }
 
 /* Content centering and sizing */
@@ -268,7 +294,7 @@ watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage &
 .inner-centered { width: 100%; }
 
 /* REPL pane fills its grid cell */
-.repl-pane { display: flex; height: 100%; width: 100%; }
+.repl-pane { display: flex; height: 100%; width: 100%; min-width: 0; }
 
 /* Header and misc styles */
 .tutorial-header { background: white; border-bottom: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 1; position: sticky; top: 0; }

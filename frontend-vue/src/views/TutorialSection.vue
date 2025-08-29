@@ -1,7 +1,25 @@
 <template>
   <div class="tutorial-section">
+    <!-- Floating ToC rail -->
+    <div class="toc-rail">
+      <div class="toc-panel" v-show="tocHover" :class="{ open: tocHover }" :style="{ top: `${tocTop}px` }" role="navigation" aria-label="On this page" @mouseenter="tocHover = true" @mouseleave="tocHover = false">
+        <div class="toc-header">On this page</div>
+        <div v-if="headings.length === 0" class="toc-empty">No subsections</div>
+        <ul v-else class="toc-list">
+          <li v-for="h in headings" :key="h.id" :class="['toc-item', `level-${h.level}` , { active: h.id === activeHeadingId }]">
+            <button type="button" class="toc-link" @click.stop.prevent="scrollToHeading(h.id)">{{ h.text }}</button>
+          </li>
+        </ul>
+      </div>
+      <!-- Always-visible Notion-like handle to reveal the ToC -->
+      <button class="toc-handle" v-show="!tocHover" :style="{ top: `${tocTop}px` }" title="On this page" aria-label="Open table of contents" @mouseenter="tocHover = true" @click="tocHover = true">
+        <span class="line line-1"></span>
+        <span class="line line-2"></span>
+        <span class="line line-3"></span>
+      </button>
+    </div>
     <div class="section-header">
-      <h1>{{ sectionTitle }}</h1>
+      <h1 :id="slugify(sectionTitle)">{{ sectionTitle }}</h1>
     </div>
 
     <div v-if="isLoading" class="loading-message">Loading section...</div>
@@ -13,9 +31,45 @@
     </div>
 
     <div v-else-if="section" class="section-content">
-      <div class="content-text" v-html="renderMarkdown(section.content)" ref="contentRef"></div>
+      <div class="content-text" v-html="renderedHtml" ref="contentRef"></div>
 
-      <div v-if="section.codeSnippets.length > 0" class="code-snippets">
+      <!-- Prefer codeItems (mixed snippets and groups); fallback to legacy codeSnippets -->
+      <div v-if="section.codeItems && section.codeItems.length > 0" class="code-snippets">
+        <h3>Code Examples</h3>
+        <div v-for="item in normalizedItems" :key="item.id" class="code-example" :class="{ 'is-group': item.type === 'group' }">
+          <!-- Group rendering -->
+          <template v-if="item.type === 'group'">
+            <div class="code-toolbar group-toolbar">
+              <button @click="runSnippetGroup(item.group)" class="run-button">Run Group</button>
+              <span class="code-context"><strong>{{ item.group.title }}</strong></span>
+              <button class="group-toggle" @click="toggleGroup(item.group.id)">{{ isExpanded(item.group.id) ? 'Collapse' : 'Expand' }}</button>
+            </div>
+            <p v-if="item.group.description" class="code-explanation">{{ item.group.description }}</p>
+            <div v-show="isExpanded(item.group.id)" class="group-snippets">
+              <div v-for="(snippet, idx) in item.group.snippets" :key="snippet.id" class="code-example nested">
+                <div class="code-toolbar">
+                  <button @click="runCodeExample(snippet.code)" class="run-button">Run</button>
+                  <span class="code-context">{{ idx + 1 }}. {{ snippet.context }}</span>
+                </div>
+                <pre class="code-pre"><code>{{ snippet.code }}</code></pre>
+                <p v-if="snippet.explanation" class="code-explanation">{{ snippet.explanation }}</p>
+              </div>
+            </div>
+          </template>
+
+          <!-- Single snippet rendering (legacy item inside codeItems) -->
+          <template v-else>
+            <div class="code-toolbar">
+              <button @click="runCodeExample(item.snippet.code)" class="run-button">Run</button>
+              <span class="code-context">{{ item.snippet.context }}</span>
+            </div>
+            <pre class="code-pre"><code>{{ item.snippet.code }}</code></pre>
+            <p v-if="item.snippet.explanation" class="code-explanation">{{ item.snippet.explanation }}</p>
+          </template>
+        </div>
+      </div>
+
+      <div v-else-if="section.codeSnippets.length > 0" class="code-snippets">
         <h3>Code Examples</h3>
         <div v-for="snippet in section.codeSnippets" :key="snippet.id" class="code-example">
           <div class="code-toolbar">
@@ -35,7 +89,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick, createApp } from 'vue'
 import { localContentService } from '@/services/localContentService'
-import type { TutorialSection } from '@/types'
+import type { TutorialSection, CodeSnippet, CodeSnippetGroup } from '@/types'
 import MarkdownIt from 'markdown-it'
 import AceCodeBlock from '@/components/AceCodeBlock.vue'
 
@@ -52,9 +106,46 @@ const isLoading = ref(true)
 const error = ref<string | null>(null)
 const codeBlocks = ref<Record<string, string>>({})
 const contentRef = ref<HTMLElement>()
+// Cache of rendered markdown HTML; only updated when section.content changes
+const renderedHtml = ref<string>('')
 // Keep track of dynamically mounted Ace editors so we can clean them up
 type MountedAce = { unmount: () => void; el: HTMLElement }
 const mountedAceBlocks = ref<MountedAce[]>([])
+
+// ToC state
+type HeadingItem = { id: string; text: string; level: number; top: number }
+const headings = ref<HeadingItem[]>([])
+const activeHeadingId = ref<string>('')
+const tocHover = ref(false)
+let scrollListener: ((e: Event) => void) | null = null
+let resizeListener: ((e: Event) => void) | null = null
+let scrollContainer: HTMLElement | null = null
+let prevScrollEl: HTMLElement | null = null
+const tocTop = ref<number>(0)
+
+const updateTocTop = () => {
+  // Place handle/panel just below the sticky header
+  tocTop.value = getHeaderOffset() + 12
+}
+
+const getScrollContainer = (): HTMLElement | null => {
+  const start = contentRef.value as HTMLElement | null
+  const isScrollable = (el: HTMLElement) => {
+    const cs = window.getComputedStyle(el)
+    const oy = cs.overflowY
+    return (oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1
+  }
+  let el: HTMLElement | null = start
+  while (el) {
+    if (isScrollable(el)) return el
+    el = el.parentElement as HTMLElement | null
+  }
+  // Try known pane
+  const pane = document.querySelector('.content-pane') as HTMLElement | null
+  if (pane && isScrollable(pane)) return pane
+  // Fallback
+  return (document.scrollingElement as HTMLElement | null) || document.documentElement
+}
 
 // Lazy Markdown-It initialization to avoid TDZ issues
 let mdInstance: MarkdownIt | null = null
@@ -98,7 +189,7 @@ const getMarkdown = (): MarkdownIt => {
 
     const safeCode = escapeHtml(code)
     // return `<span class="inline-code-wrapper"><code>${safeCode}</code><button class="inline-run-button" data-code-id="${codeId}" title="Run">➤</button></span>`
-    return `<span class=\"inline-code-wrapper\"><code>${safeCode}</code><button class=\"inline-run-button\" data-code-id=\"${codeId}\" title=\"Run\">➤</button></span>`
+    return `<span class="inline-code-wrapper"><code>${safeCode}</code><button class="inline-run-button" data-code-id="${codeId}" title="Run">➤</button></span>`
   }
 
   md.renderer.rules.fence = (tokens: Array<{ info: string; content: string }>, idx: number) => {
@@ -109,6 +200,12 @@ const getMarkdown = (): MarkdownIt => {
 
     const codeId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     codeBlocks.value[codeId] = code
+
+    if (import.meta.env.DEV) {
+      try {
+        console.log('[Fence] Created placeholder', { codeId, language, codePreview: code.slice(0, 60) })
+      } catch {}
+    }
 
     return `<div class="ace-code-block-placeholder" data-code-id="${codeId}" data-language="${language}" data-code="${encodeURIComponent(code)}"></div>`
   }
@@ -142,6 +239,7 @@ const loadSection = async () => {
 
 const emit = defineEmits<{
   'run-code': [code: string]
+  'run-code-sequence': [payload: { codes: string[]; continueOnError?: boolean; groupId?: string; title?: string }]
 }>()
 
 const runCodeExample = (code: string) => {
@@ -149,8 +247,96 @@ const runCodeExample = (code: string) => {
   emit('run-code', code)
 }
 
+// Group helpers and state
+type NormalizedItem =
+  | { type: 'group'; id: string; group: CodeSnippetGroup }
+  | { type: 'snippet'; id: string; snippet: CodeSnippet }
+
+const isGroup = (item: CodeSnippet | CodeSnippetGroup): item is CodeSnippetGroup => {
+  return 'snippets' in item
+}
+
+const normalizedItems = computed<NormalizedItem[]>(() => {
+  const items = section.value?.codeItems
+  if (items && items.length > 0) {
+    return items.map((it) => (isGroup(it) ? { type: 'group', id: it.id, group: it } : { type: 'snippet', id: (it as CodeSnippet).id, snippet: it as CodeSnippet }))
+  }
+  // Fallback: convert legacy codeSnippets list
+  const legacy = section.value?.codeSnippets || []
+  return legacy.map((s) => ({ type: 'snippet', id: s.id, snippet: s }))
+})
+
+const groupExpanded = ref<Record<string, boolean>>({})
+const initializeGroupExpanded = () => {
+  groupExpanded.value = {}
+  const items = section.value?.codeItems || []
+  items.forEach((it) => {
+    if (isGroup(it)) {
+      groupExpanded.value[it.id] = !(it.collapsedByDefault ?? false)
+    }
+  })
+
+  // After Ace mounts adjust layout, recompute heading positions so ToC ranges align
+  setTimeout(() => { recomputeHeadingPositions(); updateActiveHeading() }, 150)
+  setTimeout(() => { recomputeHeadingPositions(); updateActiveHeading() }, 400)
+}
+
+const isExpanded = (groupId: string) => {
+  return !!groupExpanded.value[groupId]
+}
+const toggleGroup = (groupId: string) => {
+  groupExpanded.value[groupId] = !groupExpanded.value[groupId]
+}
+
+const runSnippetGroup = (group: CodeSnippetGroup) => {
+  const codes = group.snippets.map((s) => s.code)
+  emit('run-code-sequence', {
+    codes,
+    continueOnError: group.continueOnError ?? false,
+    groupId: group.id,
+    title: group.title,
+  })
+}
+
 const renderMarkdown = (content: string): string => {
-  return getMarkdown().render(content)
+  if (import.meta.env.DEV) {
+    try {
+      console.log('[Markdown] Rendering content:', content.slice(0, 200))
+      console.log('[Markdown] Content contains fenced blocks:', content.includes('```'))
+    } catch {}
+  }
+  const html = getMarkdown().render(content)
+  if (import.meta.env.DEV) {
+    try {
+      console.log('[Markdown] Rendered HTML preview:', html.slice(0, 500))
+    } catch {}
+  }
+  // Post-process HTML to add IDs to headings
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const headingElements = doc.querySelectorAll('h1, h2, h3, h4, h5, h6')
+  const seen = new Map<string, number>()
+  if (import.meta.env.DEV) {
+    try {
+      const phCount = doc.body.querySelectorAll('.ace-code-block-placeholder').length
+      console.log('[Markdown] Placeholders in rendered HTML:', phCount)
+    } catch {}
+  }
+  
+  headingElements.forEach((heading) => {
+    const text = heading.textContent?.trim() || ''
+    if (!text) return
+    
+    const base = slugify(text)
+    if (!base) return
+    
+    const count = seen.get(base) || 0
+    seen.set(base, count + 1)
+    const id = count === 0 ? base : `${base}-${count + 1}`
+    heading.setAttribute('id', id)
+  })
+  
+  return doc.body.innerHTML
 }
 
 // Process Ace code block placeholders after markdown rendering by mounting
@@ -163,34 +349,300 @@ const clearMountedAceBlocks = () => {
   mountedAceBlocks.value = []
 }
 
+// Debug: log element and ancestors' dimensions and computed layout
+const logAncestorLayout = (el: HTMLElement, label = '') => {
+  if (!import.meta.env.DEV) return
+  try {
+    const lines: string[] = []
+    let node: HTMLElement | null = el
+    let depth = 0
+    while (node && depth < 10) {
+      const cs = window.getComputedStyle(node)
+      const tag = node.tagName.toLowerCase()
+      const cls = (node.className || '').toString()
+      const id = node.id ? `#${node.id}` : ''
+      const w = node.offsetWidth
+      const h = node.offsetHeight
+      lines.push(`${depth}: <${tag}${id} class="${cls}"> ${w}x${h} display:${cs.display} position:${cs.position} visibility:${cs.visibility} overflow:${cs.overflow}/${cs.overflowX}/${cs.overflowY}`)
+      node = node.parentElement as HTMLElement | null
+      depth++
+    }
+    console.log('[AceMount] Ancestor layout', label, lines)
+  } catch (e) {
+    console.warn('[AceMount] Failed to log ancestor layout', e)
+  }
+}
+
+const recomputeHeadingPositions = () => {
+  // Refresh heading top offsets relative to the current scroll container
+  scrollContainer = scrollContainer || getScrollContainer()
+  const sc = scrollContainer as HTMLElement | null
+  if (!sc) return
+  const containerRect = sc.getBoundingClientRect()
+  headings.value = headings.value.map((h) => {
+    const el = document.getElementById(h.id)
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      const top = rect.top - containerRect.top + sc.scrollTop
+      return { ...h, top }
+    }
+    return h
+  })
+}
+
 const processAceCodeBlocks = () => {
-  if (!contentRef.value) return
-  clearMountedAceBlocks()
+  if (!contentRef.value) {
+    if (import.meta.env.DEV) {
+      try { console.log('[AceMount] No contentRef available') } catch {}
+    }
+    return
+  }
 
   const placeholders = contentRef.value.querySelectorAll('.ace-code-block-placeholder')
+  if (import.meta.env.DEV) {
+    try { 
+      console.log('[AceMount] Found placeholders:', placeholders.length)
+      console.log('[AceMount] Existing mounted blocks:', mountedAceBlocks.value.length)
+    } catch {}
+  }
+
+  // Only clear and remount if we actually have placeholders to process
+  if (placeholders.length === 0) {
+    if (import.meta.env.DEV) {
+      try { console.log('[AceMount] No placeholders found, skipping remount') } catch {}
+    }
+    return
+  }
+
+  clearMountedAceBlocks()
 
   Array.from(placeholders).forEach((placeholder) => {
     const codeId = placeholder.getAttribute('data-code-id')
     const language = placeholder.getAttribute('data-language') || 'text'
     const encodedCode = placeholder.getAttribute('data-code')
 
-    if (codeId && encodedCode) {
-      const code = decodeURIComponent(encodedCode)
+    let code: string | null = null
+    if (codeId) {
+      // Prefer retrieving original code from the in-memory map
+      // (HTML attributes may be sanitized or truncated by the browser)
+      code = codeBlocks.value[codeId] ?? null
+      if (!code && encodedCode) {
+        try { code = decodeURIComponent(encodedCode) } catch { code = encodedCode }
+      }
+    }
 
+    if (codeId && code != null) {
       const mountEl = document.createElement('div')
-      // Replace the placeholder with our mount point
-      placeholder.parentNode?.replaceChild(mountEl, placeholder)
+      mountEl.style.cssText = 'width: 100% !important; height: 200px !important; min-height: 200px !important; display: block !important; position: relative !important; margin: 1rem 0 !important; visibility: visible !important; box-sizing: border-box !important;'
+      mountEl.className = 'ace-mount-container'
+      
+      try {
+        placeholder.parentNode?.replaceChild(mountEl, placeholder)
+      } catch (e) {
+        console.error('[AceMount] Failed to replace placeholder', e)
+        return
+      }
 
-      const app = createApp(AceCodeBlock, {
-        code,
-        language,
-        onRunCode: runCodeExample,
-      })
-      app.mount(mountEl)
+      // Log immediate layout context before mounting Vue component
+      logAncestorLayout(mountEl as HTMLElement, `before-mount ${codeId}`)
+      try {
+        const r = (mountEl as HTMLElement).getBoundingClientRect()
+        console.log('[AceMount] mountEl rect before-mount:', { x: r.x, y: r.y, w: r.width, h: r.height })
+      } catch {}
 
-      mountedAceBlocks.value.push({ unmount: () => app.unmount(), el: mountEl })
+      try {
+        const app = createApp(AceCodeBlock, {
+          code,
+          language,
+          onRunCode: runCodeExample,
+        })
+        
+        // Wait for DOM to be ready before mounting
+        setTimeout(() => {
+          app.mount(mountEl)
+          mountedAceBlocks.value.push({ unmount: () => app.unmount(), el: mountEl })
+          if (import.meta.env.DEV) {
+            try { console.log('[AceMount] Mounted AceCodeBlock for', codeId) } catch {}
+            // Re-log after mount to see if size has resolved
+            logAncestorLayout(mountEl as HTMLElement, `after-mount ${codeId}`)
+            setTimeout(() => logAncestorLayout(mountEl as HTMLElement, `after-mount+100ms ${codeId}`), 100)
+            setTimeout(() => logAncestorLayout(mountEl as HTMLElement, `after-mount+300ms ${codeId}`), 300)
+          }
+        }, 10)
+      } catch (e) {
+        console.error('[AceMount] Failed to mount AceCodeBlock', e)
+      }
     }
   })
+}
+
+// Build ToC from rendered markdown: assign ids to headings and collect positions
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+const buildHeadings = () => {
+  if (!contentRef.value) return
+  const el = contentRef.value
+  scrollContainer = getScrollContainer()
+  if (!scrollContainer) return
+  const sc = scrollContainer as HTMLElement
+  const containerRect = sc.getBoundingClientRect()
+  
+  // Find headings in markdown content
+  const contentHeadings = Array.from(el.querySelectorAll('h1, h2, h3, h4')) as HTMLElement[]
+  
+  // Find the section header (outside markdown content)
+  const sectionHeader = document.querySelector('.section-header h1') as HTMLElement | null
+  
+  const allHeadings = sectionHeader ? [sectionHeader, ...contentHeadings] : contentHeadings
+  const list: HeadingItem[] = []
+  
+  allHeadings.forEach((h) => {
+    const raw = (h.textContent || '').trim()
+    if (!raw || !h.id) return
+    const level = Number(h.tagName.substring(1)) || 3
+    const hRect = h.getBoundingClientRect()
+    const top = hRect.top - containerRect.top + sc.scrollTop
+    list.push({ id: h.id, text: raw, level, top })
+    console.log('[ToC] Found heading with ID:', { id: h.id, text: raw, element: h })
+  })
+  headings.value = list
+  console.log('[ToC] Built headings:', headings.value.map(h => h.id))
+  // Ensure listeners are bound to the correct scroll container once content exists
+  attachScrollHandlers()
+  updateActiveHeading()
+}
+
+const getHeaderOffset = () => {
+  const sticky = document.querySelector('.tutorial-header') as HTMLElement | null
+  return sticky ? sticky.offsetHeight + 8 : 0
+}
+
+const updateActiveHeading = () => {
+  const first = headings.value[0]
+  if (!first) { activeHeadingId.value = ''; return }
+  scrollContainer = scrollContainer || getScrollContainer()
+  if (!scrollContainer) { activeHeadingId.value = first.id; return }
+  const sc = scrollContainer as HTMLElement
+  const scrollY = sc.scrollTop // Use exact scroll position for accurate section detection
+  // Use the same anchor gap used by scrollToHeading() so clicking a ToC item lands
+  // squarely inside the intended section. This keeps section boundaries non-overlapping.
+  const anchorGap = getHeaderOffset() + 20
+  const epsilon = 0.5
+  let current: HeadingItem = first
+  
+  if (import.meta.env.DEV) {
+    console.log('[ToC] updateActiveHeading - scrollY:', scrollY, 'headings:', headings.value.map(h => ({ id: h.id, text: h.text, top: h.top })))
+  }
+  
+  // Find the closest heading by checking which section boundary we're in
+  let bestMatch: HeadingItem = first
+  let bestDistance = Infinity
+  
+  for (let i = 0; i < headings.value.length; i++) {
+    const h = headings.value[i]
+    const nextH = headings.value[i + 1]
+    
+    // Calculate section boundaries based on the same anchor gap used by scrolling
+    // Non-overlapping: a section ends exactly where the next section begins.
+    const sectionStart = h.top - anchorGap
+    const sectionEnd = nextH ? nextH.top - anchorGap : Infinity
+    
+    if (import.meta.env.DEV) {
+      console.log(`[ToC] Section "${h.text}": ${sectionStart} to ${sectionEnd} (scrollY: ${scrollY})`)
+    }
+    
+    // Check if we're within this section's boundaries
+    if (scrollY + 0 >= sectionStart - epsilon && scrollY < sectionEnd - epsilon) {
+      bestMatch = h
+      if (import.meta.env.DEV) {
+        console.log(`[ToC] In section: "${h.text}"`)
+      }
+      break
+    }
+    
+    // Also track the closest heading as fallback
+    const distance = Math.abs(scrollY - h.top)
+    if (distance < bestDistance) {
+      bestDistance = distance
+      current = h
+    }
+  }
+  
+  // Use section-based match if found, otherwise use closest heading
+  const selected = bestMatch || current
+  
+  // Only update if it's actually changed to avoid unnecessary re-renders
+  if (activeHeadingId.value !== selected.id) {
+    activeHeadingId.value = selected.id
+    console.log('[ToC] Active heading changed to:', selected.id, 'at scroll position:', scrollY)
+  }
+}
+
+const attachScrollHandlers = () => {
+  const newEl = getScrollContainer()
+  if (!newEl) return
+  if (prevScrollEl && scrollListener) prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
+  scrollContainer = newEl
+  if (resizeListener) window.removeEventListener('resize', resizeListener)
+  scrollListener = () => updateActiveHeading()
+  resizeListener = () => {
+    updateTocTop()
+    recomputeHeadingPositions()
+    updateActiveHeading()
+  }
+  const sc = scrollContainer as HTMLElement
+  sc.addEventListener('scroll', scrollListener as EventListener, { passive: true } as AddEventListenerOptions)
+  window.addEventListener('resize', resizeListener)
+  prevScrollEl = sc
+}
+
+const scrollToHeading = (id: string) => {
+  console.log('[ToC] scrollToHeading called with id:', id)
+  const el = document.getElementById(id)
+  if (!el) {
+    console.log('[ToC] Element not found:', id)
+    return
+  }
+  scrollContainer = getScrollContainer()
+  if (!scrollContainer) {
+    console.log('[ToC] No scroll container found')
+    return
+  }
+  const sc = scrollContainer as HTMLElement
+  console.log('[ToC] Scroll container:', sc, sc.tagName, sc.className)
+  const offset = getHeaderOffset()
+  
+  // Use the same position calculation as buildHeadings for consistency
+  const containerRect = sc.getBoundingClientRect()
+  const elRect = el.getBoundingClientRect()
+  const headingTop = elRect.top - containerRect.top + sc.scrollTop
+  
+  // Target position: heading position minus header offset minus small buffer
+  let target = headingTop - offset - 20 // 20px buffer to ensure heading is visible
+  
+  // Clamp to valid range
+  target = Math.max(0, Math.min(target, sc.scrollHeight - sc.clientHeight))
+  console.log('[ToC] Scroll details:', { id, offset, headingTop, target, current: sc.scrollTop, scrollHeight: sc.scrollHeight })
+  
+  const before = sc.scrollTop
+  sc.scrollTop = target
+  // Recompute heading positions right after programmatic scroll to account for
+  // any lazy layout shifts so our section detection uses fresh coordinates.
+  recomputeHeadingPositions()
+  console.log('[ToC] After setting scrollTop:', target, 'was:', before)
+  
+  // Hide the panel so the handle reappears
+  tocHover.value = false
+  
+  // Ensure highlight is correct after scroll completes
+  window.setTimeout(() => updateActiveHeading(), 100)
 }
 
 onMounted(() => {
@@ -198,22 +650,59 @@ onMounted(() => {
 
   // Add event listener for code block buttons
   document.addEventListener('click', handleCodeBlockClick)
+  updateTocTop()
+  attachScrollHandlers()
 })
 
 // Watch for content changes to process Ace code blocks
+let processTimeout: ReturnType<typeof setTimeout> | null = null
 watch(
   () => section.value?.content,
-  () => {
-    nextTick(() => {
-      processAceCodeBlocks()
-    })
+  (newContent, oldContent) => {
+    // Only process if content actually changed
+    if (newContent === oldContent) return
+    
+    // Clear any pending timeout
+    if (processTimeout) {
+      clearTimeout(processTimeout)
+    }
+    
+    // Debounce the processing to avoid multiple rapid calls
+    processTimeout = setTimeout(() => {
+      // Unmount any existing Ace editors before replacing HTML to avoid leaks
+      clearMountedAceBlocks()
+      // Reset code map; new render will repopulate via placeholders
+      codeBlocks.value = {}
+      // Render markdown once and cache the HTML so it won't change on scroll
+      renderedHtml.value = renderMarkdown(newContent || '')
+      // Wait for DOM to reflect new HTML, then build headings and mount Ace
+      nextTick(() => {
+        buildHeadings()
+        setTimeout(() => {
+          if (import.meta.env.DEV) {
+            try { console.log('[Pipeline] Mounting Ace editors after headings rendered') } catch {}
+          }
+          processAceCodeBlocks()
+        }, 120)
+      })
+    }, 50) // 50ms debounce
   },
+)
+
+// Initialize group collapse state when items change
+watch(
+  () => section.value?.codeItems,
+  () => initializeGroupExpanded(),
+  { immediate: true },
 )
 
 onUnmounted(() => {
   // Remove event listener
   document.removeEventListener('click', handleCodeBlockClick)
   clearMountedAceBlocks()
+  if (prevScrollEl && scrollListener) prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
+  if (resizeListener) window.removeEventListener('resize', resizeListener)
+  if (processTimeout) clearTimeout(processTimeout)
 })
 
 // Watch for route changes to reload section content
@@ -264,10 +753,114 @@ const handleCodeBlockClick = (event: Event) => {
   width: 100%;
   margin: 0;
   padding: 2rem;
-  height: 100%;
-  overflow-y: auto;
+  /* Let the parent .content-pane be the scroll container */
+  height: auto;
+  overflow: visible;
   background: #fbfbfc;
 }
+
+/* Floating ToC rail */
+.toc-rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 44px; /* includes handle width */
+  z-index: 20;
+}
+
+.toc-panel {
+  position: absolute;
+  left: 8px; /* appear closer to the handle/left edge */
+  top: 80px; /* below sticky header */
+  transform: translateX(-100%);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.95;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px; /* full rounding as it's no longer butted to handle */
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  min-width: 240px;
+  max-width: 320px;
+  max-height: calc(100vh - 100px);
+  overflow: auto;
+  padding: 0.5rem 0.75rem;
+}
+
+.toc-panel.open {
+  transform: translateX(0);
+}
+
+.toc-header {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.toc-empty { color: #6b7280; font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+
+.toc-list { list-style: none; margin: 0; padding: 0.25rem 0; }
+.toc-item { margin: 0; padding: 0; }
+.toc-item .toc-link {
+  appearance: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 0.95rem;
+}
+.toc-item .toc-link:hover { background: #f3f4f6; }
+.toc-item.active .toc-link { background: #e3f2fd; color: #007bff; font-weight: 600; }
+
+.toc-item.level-2 .toc-link { padding-left: 0.5rem; }
+.toc-item.level-3 .toc-link { padding-left: 1.25rem; font-size: 0.92rem; }
+.toc-item.level-4 .toc-link { padding-left: 2rem; font-size: 0.9rem; }
+
+@media (max-width: 1024px) {
+  .toc-rail { display: none; }
+}
+
+/* ToC handle: visible hint for discoverability */
+.toc-handle {
+  position: absolute;
+  left: 8px;
+  top: 90px; /* overridden by inline style bound to tocTop */
+  width: 36px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.toc-handle:hover {
+  transform: translateX(2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+  border-color: #d1d5db;
+}
+.toc-panel.open ~ .toc-handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toc-handle .line {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+}
+.toc-handle .line-1 { width: 18px; background: #111827; opacity: 0.9; }
+.toc-handle .line-2 { width: 14px; background: #cbd5e1; }
+.toc-handle .line-3 { width: 10px; background: #e5e7eb; }
 
 .section-header {
   display: flex;
@@ -290,6 +883,10 @@ const handleCodeBlockClick = (event: Event) => {
 .section-content {
   max-width: 920px;
   margin: 0 auto;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  position: relative;
 }
 .content-wrapper-centered {
   display: flex;
@@ -332,6 +929,10 @@ const handleCodeBlockClick = (event: Event) => {
   line-height: 1.8;
   color: #1f2937;
   font-size: 1.2rem;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 1px;
 }
 
 /* Headings inside v-html */
@@ -469,8 +1070,29 @@ const handleCodeBlockClick = (event: Event) => {
   margin: 1rem 0;
 }
 
+.content-text :deep(.ace-code-block-placeholder),
 .ace-code-block-placeholder {
   display: none;
+}
+
+/* Ensure mounted Ace editors are visible and sized */
+.content-text :deep(.ace-code-block) {
+  display: block !important;
+  visibility: visible !important;
+  width: 100% !important;
+  height: 200px !important;
+  min-height: 200px !important;
+}
+
+/* Force dimensions on dynamically mounted containers */
+.content-text :deep(.ace-mount-container) {
+  display: block !important;
+  width: 100% !important;
+  height: 200px !important;
+  min-height: 200px !important;
+  position: relative !important;
+  visibility: visible !important;
+  box-sizing: border-box !important;
 }
 
 /* Inline code run buttons */

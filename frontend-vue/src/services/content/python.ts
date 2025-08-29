@@ -28,6 +28,46 @@ You can edit the code in the code blocks by clicking on the code and typing. Whe
 
 Let’s begin.`,
     codeSnippets: [],
+    codeItems: [
+      {
+        id: 'intro_group_hello_vars',
+        title: 'Warm-up: Hello and Variables',
+        description: 'Run these in order to see how the REPL keeps state between snippets.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          {
+            id: 'intro_g1_s1',
+            code: "print('Hello from a grouped snippet!')",
+            language: 'python',
+            isExecutable: true,
+            context: 'Print a greeting',
+          },
+          {
+            id: 'intro_g1_s2',
+            code: 'x = 41',
+            language: 'python',
+            isExecutable: true,
+            context: 'Create a variable',
+          },
+          {
+            id: 'intro_g1_s3',
+            code: 'x + 1',
+            language: 'python',
+            isExecutable: true,
+            context: 'Use the variable defined earlier',
+          },
+        ],
+      },
+      {
+        id: 'intro_single_snippet',
+        code: "sum([1, 2, 3])",
+        language: 'python',
+        isExecutable: true,
+        context: 'A single snippet alongside a group',
+        explanation: 'Groups and single items can be mixed; the UI will render both.',
+      },
+    ],
     nextSection: 'comments',
   },
   {
@@ -48,250 +88,174 @@ print(message)  # this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
-    nextSection: 'values',
+    nextSection: 'operators',
   },
   {
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `A value is either:
+    content: `Values are the basic pieces of data that programs read, store, and manipulate. In Python, the most commonly used value types are numbers, strings, booleans, lists, dictionaries (maps), and objects (instances of classes).
 
-* a number, for example:
-   * \`1\`
-   * \`1.4\`
-   * \`3.141592653589793\`
-   * \`1000\`
-   * \`1000000\`
-   * \`1_000_000 # numbers may not have commas in them, but may use underscores instead\`
-* a quoted string, for example:
-   * \`"my name is David"\`
-   * \`"I ate a sleeve of cookies"\`
-   * \`"I had to exercise"\`
-* a boolean true or false value, for example:
-   * \`True\`
-   * \`False\`
-* a list of values, for example:
-   * \`[1, 3, 5, 7, 9]\`
-   * \`[3.141592653589793, "pi", "pie"]\`
-   * \`[1000, "cookies", True]\`
-   * \`[0, "cookies", False]\`
-* a dictionary is a collection of associated key/value pairs, for example:
-   * \`{1: "one", 2: "two", 3: "three"}\`
-   * \`{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}\`
-* an instance of a class (more on this later)
+### Numbers (int and float)
 
-Let's see how these values evaluate in the Python REPL:
+- What they are used for: counting things, doing arithmetic, measuring quantities like time, distance, or cost.
+- Kinds of numbers:
+  - \`nr: int\` are whole numbers: \`nr: ..., -2, -1, 0, 1, 2, ...\`
+  - \`nr: float\` are numbers with a fractional part: \`nr: 3.14\`, \`nr: -0.5\`, \`nr: 1.0\`
+- Notes: You can use underscores for readability in big numbers.
 
 \`\`\`python
-1
-1.4
-3.141592653589793
-1000
-1000000
+42
 1_000_000
-"my name is David"
-"I ate a sleeve of cookies"
-"I had to exercise"
+3.141592653589793
+-7
+\`\`\`
+
+### Strings (str)
+
+- What they are used for: representing text like names, messages, file paths, and any human‑readable data.
+- Features: written with quotes, can include spaces and punctuation, support Unicode.
+
+\`\`\`python
+"Hello, world!"
+'Python is fun'
+"😀 emojis are text, too"
+\`\`\`
+
+### Booleans (bool)
+
+- What they are used for: representing truth values for decisions, conditions, and flags.
+- Values: \`nr: True\` and \`nr: False\`.
+
+\`\`\`python
 True
 False
+\`\`\`
+
+### Lists (list)
+
+- What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
+- Features: can hold values of any type, can be empty, can be nested.
+
+\`\`\`python
 [1, 3, 5, 7, 9]
-[3.141592653589793, "pi", "pie"]
+["apples", "bananas", "cherries"]
 [1000, "cookies", True]
-[0, "cookies", False]
+[]  # an empty list
+\`\`\`
+
+### Dictionaries (dict)
+
+- What they are used for: mapping keys to values; great for lookups, configurations, and records.
+- Features: keys must be unique; common keys are strings or numbers.
+
+\`\`\`python
 {1: "one", 2: "two", 3: "three"}
 {"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
-\`\`\``,
+\`\`\`
+
+### Objects (instances of classes)
+
+- What they are used for: representing real‑world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
+- Example: creating an instance of a simple class.
+
+\`\`\`python
+class Dog:
+  def __init__(self, name):
+    self.name = name
+
+my_dog = Dog("Max")
+my_dog
+\`\`\`
+
+You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.
+`,
     codeSnippets: [],
-    previousSection: 'comments',
-    nextSection: 'sets',
+    previousSection: 'operators',
+    nextSection: 'operators',
   },
   {
-    id: 'sets',
-    title: 'Sets',
+    id: 'operators',
+    title: 'Operators',
     order: 4,
-    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `Operators combine or transform values to produce new values. You will use them constantly with numbers, strings, lists, and booleans.
 
-In other words, a set is a group of values where every value is different; there cannot be two of anything.
+### Arithmetic operators (numbers)
 
-### This is a set of three numbers:
+- Addition: \`nr: +\`
+- Subtraction: \`nr: -\`
+- Multiplication: \`nr: *\`
+- Division (float): \`nr: /\`
+- Floor division: \`nr: //\`
+- Remainder (modulo): \`nr: %\`
+- Exponent: \`nr: **\`
 
-* \`nr: [ 1, 2, 3 ]\`
+\`\`\`python
+1 + 2
+7 - 3
+4 * 5
+9 / 2
+9 // 2
+9 % 2
+2 ** 3
+\`\`\`
 
-You can visualize a set as a circle containing its unique elements. For example, the following SVG shows a set with the numbers 1, 2, and 3:
+### Comparison operators (booleans)
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
-    <text x="90" y="80" fill="#FFFFFF" font-size="18">1</text>
-    <text x="110" y="100" fill="#FFFFFF" font-size="18">2</text>
-    <text x="90" y="120" fill="#FFFFFF" font-size="18">3</text>
-  </svg>
-</div>
+- Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+- Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+- Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
 
+\`\`\`python
+3 == 3
+3 != 4
+2 < 5
+5 <= 5
+7 > 1
+7 >= 10
+\`\`\`
 
-### This is a set of two names:
+### Boolean operators
 
-* \`nr: [ "Jack", "Jill" ]\`
+- And: \`nr: and\`  |  Or: \`nr: or\`  |  Not: \`nr: not\`
+- Short‑circuit: \`A and B\` skips \`B\` if \`A\` is False; \`A or B\` skips \`B\` if \`A\` is True.
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
-    <text x="80" y="100" fill="#FFFFFF" font-size="18">"Jack"</text>
-    <text x="90" y="120" fill="#FFFFFF" font-size="18">"Jill"</text>
-  </svg>
-</div>
+\`\`\`python
+True and False
+True or False
+not (2 < 3)
+\`\`\`
 
+### Sequence operators (strings and lists)
 
-### This is a set of different kinds of things:
+- Concatenation: \`nr: +\`
+- Repetition: \`nr: *\`
+- Membership: \`nr: in\`, \`nr: not in\`
+- Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start:stop:step]\`
 
-* \`nr: [ 1, 3.141592653589793, "Steve", True ]\`
+\`\`\`python
+"Hi, " + "there"
+"ha" * 3
+"py" in "python"
+[1, 2] + [3]
+[0] * 4
+[1,2,3,4][1:3]
+\`\`\`
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-   <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-   <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
-   <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
-   <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
-   <text x="90" y="130" fill="#FFFFFF" font-size="16">"Steve"</text>
-   <text x="90" y="150" fill="#FFFFFF" font-size="16">True</text>
-   </svg>
-</div>
+### Precedence and grouping
 
-### This is **NOT** a set (because \`nr: 1\` is repeated):
+- Parentheses \`nr: ( )\` change evaluation order.
+- Precedence (high → low): \`nr: **\`, \`nr: * / // %\`, \`nr: + -\`, comparisons, \`nr: not\`, \`nr: and\`, \`nr: or\`.
 
-* \`nr: [ 1, 1, 3.141592653589793 ]\`
+\`\`\`python
+1 + 2 * 3
+(1 + 2) * 3
+\`\`\`
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
-    <text x="85" y="70" fill="#FFFFFF" font-size="16">1</text>
-    <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
-    <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
-  </svg>
-</div>
+You now know the basic operators; next you will use them with variables and assignments.
 `,
     codeSnippets: [],
     previousSection: 'values',
-    nextSection: 'types',
-  },
-  {
-    id: 'types',
-    title: 'Types',
-    order: 5,
-    content: `A type is a set of values that we give a name to.
-
-We can name a type anything we want. For example:
-
-* We could call the set \`nr: [1,2,3]\` **TinyNumber**
-   * The type **TinyNumber** is the set of values \`nr: [1,2,3]\`
-
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
-  <path id="tinyNumberPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
-  <text fill="#000">
-    <textPath href="#tinyNumberPath" startOffset="50%" text-anchor="middle">TinyNumber</textPath>
-  </text>
-  <text x="90" y="90" fill="#FFFFFF" font-size="18">1</text>
-  <text x="110" y="110" fill="#FFFFFF" font-size="18">2</text>
-  <text x="90" y="130" fill="#FFFFFF" font-size="18">3</text>
-</svg>
-
-* We could give the name **DogName** to the set \`nr: ["Max", "Ace", "Tiny"]\`
-   * The type **DogName** is the set of values \`nr: ["Max", "Ace", "Tiny"]\`
-
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
-  <path id="dogNamePath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
-  <text fill="#000">
-    <textPath href="#dogNamePath" startOffset="50%" text-anchor="middle">DogName</textPath>
-  </text>
-  <text x="80" y="90" fill="#FFFFFF" font-size="18">"Max"</text>
-  <text x="85" y="110" fill="#FFFFFF" font-size="18">"Ace"</text>
-  <text x="85" y="130" fill="#FFFFFF" font-size="18">"Tiny"</text>
-</svg>
-
-
-* We could name the set \`nr: [99, 100, 101]\` **AgeOfAnOldPerson**
-   * The type **AgeOfAnOldPerson** is the set of values \`nr: [99, 100, 101]\`
-
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
-  <path id="ageOfAnOldPersonPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
-  <text fill="#000">
-    <textPath href="#ageOfAnOldPersonPath" startOffset="50%" text-anchor="middle">AgeOfAnOldPerson</textPath>
-  </text>
-  <text x="85" y="90" fill="#FFFFFF" font-size="18">99</text>
-  <text x="95" y="110" fill="#FFFFFF" font-size="18">100</text>
-  <text x="90" y="130" fill="#FFFFFF" font-size="18">101</text>
-</svg>
-
-* We could say **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
-   * The type **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
-
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
-  <path id="smallOddNumberPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
-  <text fill="#000">
-    <textPath href="#smallOddNumberPath" startOffset="50%" text-anchor="middle">SmallOddNumber</textPath>
-  </text>
-  <text x="85" y="80" fill="#FFFFFF" font-size="18">1</text>
-  <text x="95" y="100" fill="#FFFFFF" font-size="18">3</text>
-  <text x="90" y="120" fill="#FFFFFF" font-size="18">5</text>
-  <text x="85" y="140" fill="#FFFFFF" font-size="18">7</text>
-  <text x="90" y="160" fill="#FFFFFF" font-size="18">9</text>
-</svg>
-
-* Some types are sets with an infinite number of values. For example, the type **WholeNumber** is the set of all whole numbers.
-
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
-  <path id="intPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
-  <text fill="#000">
-    <textPath href="#intPath" startOffset="50%" text-anchor="middle">WholeNumber</textPath>
-  </text>
-  <text x="25" y="100" fill="#FFFFFF" font-size="18">…, -2, -1, 0, 1, 2, …</text>
-</svg>
-
-## Typed Values
-
-If a value is in the set named by a particular type name, then we say the value is "of that type", or we say that the value "has that type".
-
-* Since \`nr: 1\` is in the **TinyNumber** set:
-   * we say, \`nr: 1\` is of type TinyNumber
-   * or we say, \`nr: 1\` has the type TinyNumber
-* Since \`nr: 1\` is in the **SmallOddNumber** set
-   * we say, \`nr: 1\` is of type SmallOddNumber
-   * or we say, \`nr: 1\` has the type SmallOddNumber
-* Since \`nr: 1\` is in the **WholeNumber** set
-   * we say, \`nr: 1\` is of type WholeNumber
-   * or we say, \`nr: 1\` has the type WholeNumber
-* Since \`nr: 99\` is in the **AgeOfAnOldPerson** set
-   * we say, \`nr: 99\` is of type AgeOfAnOldPerson
-   * or we say, \`nr: 99\` has the type AgeOfAnOldPerson
-* Since \`nr: "Max"\` is in the **DogName** set
-   * we say, \`nr: "Max"\` is of type DogName
-   * or we say \`nr: "Max"\` has the type DogName
-
-In Python, there is a type called \`nr: int\` that is the set of all whole numbers:
-
-* \`nr: [..., -3, -2, -1, 0, 1, 2, 3, ...]\`
-
-There is a type called \`nr: float\` that is the set of all numbers:
-
-* \`nr: [..., -10.1, -2.0, -1.6, 0.0, 0.5, 1.0, 2.8, 3.1, 1000.0, ...]\`
-
-Python has a bunch of built in types:
-
-* \`nr: bool\` - boolean
-* \`nr: int\` - integers (numbers without a decimal point)
-* \`nr: float\` - floating point numbers (numbers with a decimal point)
-* \`nr: str\` - strings
-* \`nr: set\` - sets
-* \`nr: list\` - lists
-* \`nr: dict\` - dictionary (also called a map)
-* and many more
-`,
-    codeSnippets: [],
-    previousSection: 'sets',
     nextSection: 'variables',
   },
   {
@@ -370,7 +334,7 @@ print(f"my_age -> {my_age}")   # this prints 11
 
 `,
     codeSnippets: [],
-    previousSection: 'types',
+    previousSection: 'operators',
     nextSection: 'expressions',
   },
   {
@@ -429,6 +393,105 @@ The common expression types across every popular programming language are:
 * loop expressions
 
 These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in python, then you know what it looks like in most every language.
+
+### Comparison expressions
+
+Comparison expressions evaluate to a boolean (\`nr: True\` or \`nr: False\`).
+
+Try these:
+
+\`\`\`python
+1 == 1
+1 != 2
+3 < 5
+5 <= 5
+7 > 2
+2 >= 9
+# chained comparisons (Python feature):
+1 < 3 < 5
+5 < 3 < 7
+\`\`\`
+
+### Boolean logic expressions
+
+Use \`nr: and\`, \`nr: or\`, and \`nr: not\` to combine or negate boolean values.
+
+\`\`\`python
+True and True
+True and False
+True or False
+False or False
+not True
+not (1 < 2)
+\`\`\`
+
+Short-circuiting: in \`nr: A and B\`, if \`nr: A\` is False, Python does not evaluate \`nr: B\`. In \`nr: A or B\`, if \`nr: A\` is True, Python does not evaluate \`nr: B\`.
+
+### Grouping and operator precedence
+
+Parentheses \`nr: ( )\` change evaluation order. Arithmetic has the usual precedence (\`nr: * / // %\` before \`nr: + -\`), then comparisons, then \`nr: not\`, then \`nr: and\`, then \`nr: or\`.
+
+\`\`\`python
+1 + 2 * 3
+(1 + 2) * 3
+10 - 4 - 1
+10 - (4 - 1)
+(2 < 3) and (3 < 5)
+\`\`\`
+
+### String expressions
+
+\`nr: +\` concatenates strings; \`nr: *\` repeats them.
+
+\`\`\`python
+"Hello, " + "world!"
+"ha" * 3
+name = "Sam"
+"Hello, " + name
+f"Hello, {name}!"  # f-strings interpolate values
+\`\`\`
+
+### List expressions
+
+Lists also support concatenation and repetition.
+
+\`\`\`python
+[1, 2] + [3, 4]
+[0] * 5
+len([1, 2, 3])
+\`\`\`
+
+### Indexing and slicing
+
+Use square brackets to get elements or slices from strings and lists.
+
+\`\`\`python
+letters = ["a", "b", "c", "d", "e"]
+letters[0]
+letters[-1]
+letters[1:4]
+letters[:3]
+letters[::2]
+
+text = "python"
+text[0]
+text[-1]
+text[1:4]
+text[::-1]
+\`\`\`
+
+### Membership
+
+Use \`nr: in\` and \`nr: not in\` to test membership.
+
+\`\`\`python
+3 in [1, 2, 3]
+"py" in "python"
+9 not in [1, 2, 3]
+"x" not in "python"
+\`\`\`
+
+These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.
 `,
     codeSnippets: [],
     previousSection: 'variables',
@@ -637,25 +700,195 @@ There are three variations:
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],
     previousSection: 'function-invocation',
-    nextSection: 'next-steps',
+    nextSection: 'sets',
   },
   {
-    id: 'next-steps',
-    title: 'Next Steps',
+    id: 'sets',
+    title: 'Sets',
     order: 11,
-    content: `You're off to a great start. Here are some suggested next steps:
+    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
-  ### Practice
-  - Try writing small programs that use variables, functions, and conditionals.
-  - Recreate the examples in this tutorial and modify them.
+In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
-  ### Learn more (Resources)
-  - Big-O notation explained clearly: [Big O by Sam Rose](https://samwho.dev/big-o/)
+### This is a set of three numbers:
 
-  ### Where to go next
-  - Explore loops, collections, and file I/O.
-  - Learn how to structure projects and write tests.`,
+* \`nr: [ 1, 2, 3 ]\`
+
+You can visualize a set as a circle containing its unique elements. For example, the following SVG shows a set with the numbers 1, 2, and 3:
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+    <text x="90" y="80" fill="#FFFFFF" font-size="18">1</text>
+    <text x="110" y="100" fill="#FFFFFF" font-size="18">2</text>
+    <text x="90" y="120" fill="#FFFFFF" font-size="18">3</text>
+  </svg>
+</div>
+
+
+### This is a set of two names:
+
+* \`nr: [ "Jack", "Jill" ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
+    <text x="80" y="100" fill="#FFFFFF" font-size="18">"Jack"</text>
+    <text x="90" y="120" fill="#FFFFFF" font-size="18">"Jill"</text>
+  </svg>
+</div>
+
+
+### This is a set of different kinds of things:
+
+* \`nr: [ 1, 3.141592653589793, "Steve", True ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+   <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+   <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
+   <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
+   <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
+   <text x="90" y="130" fill="#FFFFFF" font-size="16">"Steve"</text>
+   <text x="90" y="150" fill="#FFFFFF" font-size="16">True</text>
+   </svg>
+</div>
+
+### This is **NOT** a set (because \`nr: 1\` is repeated):
+
+* \`nr: [ 1, 1, 3.141592653589793 ]\`
+
+<div style="display: flex; justify-content: center; margin: 1em 0;">
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
+    <text x="85" y="70" fill="#FFFFFF" font-size="16">1</text>
+    <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
+    <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
+  </svg>
+</div>
+`,
     codeSnippets: [],
     previousSection: 'conditionals',
+    nextSection: 'types',
+  },
+  {
+    id: 'types',
+    title: 'Types',
+    order: 12,
+    content: `A type is a set of values that we give a name to.
+
+We can name a type anything we want. For example:
+
+* We could call the set \`nr: [1,2,3]\` **TinyNumber**
+   * The type **TinyNumber** is the set of values \`nr: [1,2,3]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+  <path id="tinyNumberPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#tinyNumberPath" startOffset="50%" text-anchor="middle">TinyNumber</textPath>
+  </text>
+  <text x="90" y="90" fill="#FFFFFF" font-size="18">1</text>
+  <text x="110" y="110" fill="#FFFFFF" font-size="18">2</text>
+  <text x="90" y="130" fill="#FFFFFF" font-size="18">3</text>
+</svg>
+
+* We could give the name **DogName** to the set \`nr: ["Max", "Ace", "Tiny"]\`
+   * The type **DogName** is the set of values \`nr: ["Max", "Ace", "Tiny"]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
+  <path id="dogNamePath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#dogNamePath" startOffset="50%" text-anchor="middle">DogName</textPath>
+  </text>
+  <text x="80" y="90" fill="#FFFFFF" font-size="18">"Max"</text>
+  <text x="85" y="110" fill="#FFFFFF" font-size="18">"Ace"</text>
+  <text x="85" y="130" fill="#FFFFFF" font-size="18">"Tiny"</text>
+</svg>
+
+
+* We could name the set \`nr: [99, 100, 101]\` **AgeOfAnOldPerson**
+   * The type **AgeOfAnOldPerson** is the set of values \`nr: [99, 100, 101]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
+  <path id="ageOfAnOldPersonPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#ageOfAnOldPersonPath" startOffset="50%" text-anchor="middle">AgeOfAnOldPerson</textPath>
+  </text>
+  <text x="85" y="90" fill="#FFFFFF" font-size="18">99</text>
+  <text x="95" y="110" fill="#FFFFFF" font-size="18">100</text>
+  <text x="90" y="130" fill="#FFFFFF" font-size="18">101</text>
+</svg>
+
+* We could say **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
+   * The type **SmallOddNumber** is the set \`nr: [1, 3, 5, 7, 9]\`
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
+  <path id="smallOddNumberPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#smallOddNumberPath" startOffset="50%" text-anchor="middle">SmallOddNumber</textPath>
+  </text>
+  <text x="85" y="80" fill="#FFFFFF" font-size="18">1</text>
+  <text x="95" y="100" fill="#FFFFFF" font-size="18">3</text>
+  <text x="90" y="120" fill="#FFFFFF" font-size="18">5</text>
+  <text x="85" y="140" fill="#FFFFFF" font-size="18">7</text>
+  <text x="90" y="160" fill="#FFFFFF" font-size="18">9</text>
+</svg>
+
+* Some types are sets with an infinite number of values. For example, the type **WholeNumber** is the set of all whole numbers.
+
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
+  <path id="intPath" d="M 20 100 A 80 80 0 1 1 180 100" fill="none"/>
+  <text fill="#000">
+    <textPath href="#intPath" startOffset="50%" text-anchor="middle">WholeNumber</textPath>
+  </text>
+  <text x="25" y="100" fill="#FFFFFF" font-size="18">…, -2, -1, 0, 1, 2, …</text>
+</svg>
+
+## Typed Values
+
+If a value is in the set named by a particular type name, then we say the value is "of that type", or we say that the value "has that type".
+
+* Since \`nr: 1\` is in the **TinyNumber** set:
+   * we say, \`nr: 1\` is of type TinyNumber
+   * or we say, \`nr: 1\` has the type TinyNumber
+* Since \`nr: 1\` is in the **SmallOddNumber** set
+   * we say, \`nr: 1\` is of type SmallOddNumber
+   * or we say, \`nr: 1\` has the type SmallOddNumber
+* Since \`nr: 1\` is in the **WholeNumber** set
+   * we say, \`nr: 1\` is of type WholeNumber
+   * or we say, \`nr: 1\` has the type WholeNumber
+* Since \`nr: 99\` is in the **AgeOfAnOldPerson** set
+   * we say, \`nr: 99\` is of type AgeOfAnOldPerson
+   * or we say, \`nr: 99\` has the type AgeOfAnOldPerson
+* Since \`nr: "Max"\` is in the **DogName** set
+   * we say, \`nr: "Max"\` is of type DogName
+   * or we say \`nr: "Max"\` has the type DogName
+
+In Python, there is a type called \`nr: int\` that is the set of all whole numbers:
+
+* \`nr: [..., -3, -2, -1, 0, 1, 2, 3, ...]\`
+
+There is a type called \`nr: float\` that is the set of all numbers:
+
+* \`nr: [..., -10.1, -2.0, -1.6, 0.0, 0.5, 1.0, 2.8, 3.1, 1000.0, ...]\`
+
+Python has a bunch of built in types:
+
+* \`nr: bool\` - boolean
+* \`nr: int\` - integers (numbers without a decimal point)
+* \`nr: float\` - floating point numbers (numbers with a decimal point)
+* \`nr: str\` - strings
+* \`nr: set\` - sets
+* \`nr: list\` - lists
+* \`nr: dict\` - dictionary (also called a map)
+* and many more
+`,
+    codeSnippets: [],
+    previousSection: 'sets',
+    nextSection: 'next-steps',
   },
 ]

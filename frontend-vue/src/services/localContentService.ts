@@ -33,7 +33,20 @@ class LocalContentService {
    */
   async getCodeSnippets(sectionId: string, language: string): Promise<CodeSnippet[]> {
     const section = await this.getSection(sectionId, language)
-    return section?.codeSnippets || []
+    if (!section) return []
+    if (section.codeItems && section.codeItems.length > 0) {
+      // Flatten groups into a single list of snippets
+      const flattened: CodeSnippet[] = []
+      for (const item of section.codeItems) {
+        if ('snippets' in item) {
+          flattened.push(...item.snippets)
+        } else {
+          flattened.push(item)
+        }
+      }
+      return flattened
+    }
+    return section.codeSnippets || []
   }
 
   /**
