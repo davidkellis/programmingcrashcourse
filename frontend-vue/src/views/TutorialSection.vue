@@ -32,56 +32,6 @@
 
     <div v-else-if="section" class="section-content">
       <div class="content-text" v-html="renderedHtml" ref="contentRef"></div>
-
-      <!-- Prefer codeItems (mixed snippets and groups); fallback to legacy codeSnippets -->
-      <div v-if="section.codeItems && section.codeItems.length > 0" class="code-snippets">
-        <h3>Code Examples</h3>
-        <div v-for="item in normalizedItems" :key="item.id" class="code-example" :class="{ 'is-group': item.type === 'group' }">
-          <!-- Group rendering -->
-          <template v-if="item.type === 'group'">
-            <div class="code-toolbar group-toolbar">
-              <button @click="runSnippetGroup(item.group)" class="run-button">Run Group</button>
-              <span class="code-context"><strong>{{ item.group.title }}</strong></span>
-              <button class="group-toggle" @click="toggleGroup(item.group.id)">{{ isExpanded(item.group.id) ? 'Collapse' : 'Expand' }}</button>
-            </div>
-            <p v-if="item.group.description" class="code-explanation">{{ item.group.description }}</p>
-            <div v-show="isExpanded(item.group.id)" class="group-snippets">
-              <div v-for="(snippet, idx) in item.group.snippets" :key="snippet.id" class="code-example nested">
-                <div class="code-toolbar">
-                  <button @click="runCodeExample(snippet.code)" class="run-button">Run</button>
-                  <span class="code-context">{{ idx + 1 }}. {{ snippet.context }}</span>
-                </div>
-                <pre class="code-pre"><code>{{ snippet.code }}</code></pre>
-                <p v-if="snippet.explanation" class="code-explanation">{{ snippet.explanation }}</p>
-              </div>
-            </div>
-          </template>
-
-          <!-- Single snippet rendering (legacy item inside codeItems) -->
-          <template v-else>
-            <div class="code-toolbar">
-              <button @click="runCodeExample(item.snippet.code)" class="run-button">Run</button>
-              <span class="code-context">{{ item.snippet.context }}</span>
-            </div>
-            <pre class="code-pre"><code>{{ item.snippet.code }}</code></pre>
-            <p v-if="item.snippet.explanation" class="code-explanation">{{ item.snippet.explanation }}</p>
-          </template>
-        </div>
-      </div>
-
-      <div v-else-if="section.codeSnippets.length > 0" class="code-snippets">
-        <h3>Code Examples</h3>
-        <div v-for="snippet in section.codeSnippets" :key="snippet.id" class="code-example">
-          <div class="code-toolbar">
-            <button @click="runCodeExample(snippet.code)" class="run-button">Run</button>
-            <span class="code-context">{{ snippet.context }}</span>
-          </div>
-          <pre class="code-pre"><code>{{ snippet.code }}</code></pre>
-          <p v-if="snippet.explanation" class="code-explanation">
-            {{ snippet.explanation }}
-          </p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -92,6 +42,7 @@ import { localContentService } from '@/services/localContentService'
 import type { TutorialSection, CodeSnippet, CodeSnippetGroup } from '@/types'
 import MarkdownIt from 'markdown-it'
 import AceCodeBlock from '@/components/AceCodeBlock.vue'
+import CodeSnippetGroupBlock from '@/components/CodeSnippetGroupBlock.vue'
 
 interface Props {
   sectionId: string
@@ -111,6 +62,16 @@ const renderedHtml = ref<string>('')
 // Keep track of dynamically mounted Ace editors so we can clean them up
 type MountedAce = { unmount: () => void; el: HTMLElement }
 const mountedAceBlocks = ref<MountedAce[]>([])
+
+// Track inline snippet group mounts and which group IDs are embedded inline
+type MountedInlineGroup = { unmount: () => void; el: HTMLElement }
+const mountedInlineGroups = ref<MountedInlineGroup[]>([])
+const inlineGroupIds = ref<string[]>([])
+
+// Track inline single snippet mounts and IDs used inline
+type MountedInlineSnippet = { unmount: () => void; el: HTMLElement }
+const mountedInlineSnippets = ref<MountedInlineSnippet[]>([])
+const inlineSnippetIds = ref<string[]>([])
 
 // ToC state
 type HeadingItem = { id: string; text: string; level: number; top: number }
@@ -247,24 +208,43 @@ const runCodeExample = (code: string) => {
   emit('run-code', code)
 }
 
-// Group helpers and state
-type NormalizedItem =
-  | { type: 'group'; id: string; group: CodeSnippetGroup }
-  | { type: 'snippet'; id: string; snippet: CodeSnippet }
+// Helpers for compact single-snippet rendering
+const oneLinePreview = (code: string) => {
+  const oneLine = code.replace(/\s+/g, ' ').trim()
+  const max = 90
+  return oneLine.length > max ? oneLine.slice(0, max) + '…' : oneLine
+}
 
+const commentPrefixFor = (lang?: string) => {
+  const l = (lang || '').toLowerCase()
+  if (['js', 'ts', 'javascript', 'typescript', 'go', 'java', 'c', 'cpp', 'c++', 'rust', 'php'].includes(l)) return '//'
+  if (['py', 'python', 'sh', 'bash', 'rb', 'ruby'].includes(l)) return '#'
+  if (['lua'].includes(l)) return '--'
+  if (['elixir'].includes(l)) return '#'
+  return '//'
+}
+
+const composePreview = (snippet: CodeSnippet) => {
+  const code = oneLinePreview(snippet.code)
+  const desc = (snippet.context || snippet.explanation || '').trim()
+  if (!desc) return code
+  const prefix = commentPrefixFor(snippet.language)
+  return `${code}  ${prefix} ${desc}`
+}
+
+const composeTitle = (snippet: CodeSnippet) => {
+  const desc = (snippet.context || snippet.explanation || '').trim()
+  if (!desc) return snippet.code
+  const prefix = commentPrefixFor(snippet.language)
+  return `${snippet.code}  ${prefix} ${desc}`
+}
+
+// Group helpers and state
 const isGroup = (item: CodeSnippet | CodeSnippetGroup): item is CodeSnippetGroup => {
   return 'snippets' in item
 }
 
-const normalizedItems = computed<NormalizedItem[]>(() => {
-  const items = section.value?.codeItems
-  if (items && items.length > 0) {
-    return items.map((it) => (isGroup(it) ? { type: 'group', id: it.id, group: it } : { type: 'snippet', id: (it as CodeSnippet).id, snippet: it as CodeSnippet }))
-  }
-  // Fallback: convert legacy codeSnippets list
-  const legacy = section.value?.codeSnippets || []
-  return legacy.map((s) => ({ type: 'snippet', id: s.id, snippet: s }))
-})
+// Note: previously used to render non-inline snippet lists; removed after inline injection adoption
 
 const groupExpanded = ref<Record<string, boolean>>({})
 const initializeGroupExpanded = () => {
@@ -281,22 +261,7 @@ const initializeGroupExpanded = () => {
   setTimeout(() => { recomputeHeadingPositions(); updateActiveHeading() }, 400)
 }
 
-const isExpanded = (groupId: string) => {
-  return !!groupExpanded.value[groupId]
-}
-const toggleGroup = (groupId: string) => {
-  groupExpanded.value[groupId] = !groupExpanded.value[groupId]
-}
-
-const runSnippetGroup = (group: CodeSnippetGroup) => {
-  const codes = group.snippets.map((s) => s.code)
-  emit('run-code-sequence', {
-    codes,
-    continueOnError: group.continueOnError ?? false,
-    groupId: group.id,
-    title: group.title,
-  })
-}
+// Note: group expand/collapse and run are handled inside CodeSnippetGroupBlock now.
 
 const renderMarkdown = (content: string): string => {
   if (import.meta.env.DEV) {
@@ -305,7 +270,28 @@ const renderMarkdown = (content: string): string => {
       console.log('[Markdown] Content contains fenced blocks:', content.includes('```'))
     } catch {}
   }
-  const html = getMarkdown().render(content)
+  // Preprocess custom inline snippet/group markers like [[snippet:ID]] and [[snippet-group:GROUP_ID]]
+  // Replace with mount placeholders and collect IDs used inline
+  inlineGroupIds.value = []
+  inlineSnippetIds.value = []
+  const groupMarker = /\[\[\s*snippet-group\s*:\s*([A-Za-z0-9_-]+)\s*\]\]/g
+  const snippetMarker = /\[\[\s*snippet\s*:\s*([A-Za-z0-9_-]+)\s*\]\]/g
+  const foundGroupIds: string[] = []
+  const foundSnippetIds: string[] = []
+  let preprocessed = content.replace(groupMarker, (_m, gid) => {
+    const id = String(gid)
+    foundGroupIds.push(id)
+    return `<div class="snippet-group-placeholder" data-group-id="${id}"></div>`
+  })
+  preprocessed = preprocessed.replace(snippetMarker, (_m, sid) => {
+    const id = String(sid)
+    foundSnippetIds.push(id)
+    return `<div class="snippet-placeholder" data-snippet-id="${id}"></div>`
+  })
+  inlineGroupIds.value = foundGroupIds
+  inlineSnippetIds.value = foundSnippetIds
+
+  const html = getMarkdown().render(preprocessed)
   if (import.meta.env.DEV) {
     try {
       console.log('[Markdown] Rendered HTML preview:', html.slice(0, 500))
@@ -347,6 +333,127 @@ const clearMountedAceBlocks = () => {
     try { el.remove() } catch {}
   })
   mountedAceBlocks.value = []
+}
+
+const clearMountedInlineGroups = () => {
+  mountedInlineGroups.value.forEach(({ unmount, el }) => {
+    try { unmount() } catch {}
+    try { el.remove() } catch {}
+  })
+  mountedInlineGroups.value = []
+}
+
+const clearMountedInlineSnippets = () => {
+  mountedInlineSnippets.value.forEach(({ unmount, el }) => {
+    try { unmount() } catch {}
+    try { el.remove() } catch {}
+  })
+  mountedInlineSnippets.value = []
+}
+
+// Mount inline snippet groups where placeholders were inserted during markdown render
+const mountInlineSnippetGroups = () => {
+  if (!contentRef.value) return
+  const placeholders = contentRef.value.querySelectorAll('.snippet-group-placeholder')
+  if (placeholders.length === 0) return
+  Array.from(placeholders).forEach((ph) => {
+    const groupId = ph.getAttribute('data-group-id') || ''
+    const items = section.value?.codeItems || []
+    const group = items.find((it) => isGroup(it) && it.id === groupId) as CodeSnippetGroup | undefined
+
+    const mountEl = document.createElement('div')
+    mountEl.className = 'inline-snippet-group-mount'
+    try {
+      ph.parentNode?.replaceChild(mountEl, ph)
+    } catch (e) {
+      console.warn('[InlineGroup] Failed to replace placeholder', e)
+      return
+    }
+
+    if (!group) {
+      mountEl.innerHTML = `<div class="code-example"><div class="code-toolbar"><span class="code-context"><strong>Snippet group not found:</strong> ${groupId}</span></div></div>`
+      return
+    }
+
+    try {
+      const app = createApp(CodeSnippetGroupBlock, {
+        group,
+        onRunCode: runCodeExample,
+        onRunCodeSequence: (payload: { codes: string[]; continueOnError?: boolean; groupId?: string; title?: string }) => emit('run-code-sequence', payload),
+      })
+      app.mount(mountEl)
+      mountedInlineGroups.value.push({ unmount: () => app.unmount(), el: mountEl })
+    } catch (e) {
+      console.error('[InlineGroup] Failed to mount CodeSnippetGroupBlock', e)
+    }
+  })
+}
+
+// Mount inline single snippets where placeholders were inserted during markdown render
+const mountInlineSnippets = () => {
+  if (!contentRef.value) return
+  const placeholders = contentRef.value.querySelectorAll('.snippet-placeholder')
+  if (placeholders.length === 0) return
+
+  Array.from(placeholders).forEach((ph) => {
+    const snippetId = ph.getAttribute('data-snippet-id') || ''
+
+    const items = section.value?.codeItems || []
+    let snippet = items.find((it) => !isGroup(it) && (it as CodeSnippet).id === snippetId) as CodeSnippet | undefined
+    if (!snippet) {
+      // Fallback to legacy list if present
+      const legacy = section.value?.codeSnippets || []
+      snippet = legacy.find((s) => s.id === snippetId)
+    }
+
+    const mountEl = document.createElement('div')
+    mountEl.className = 'inline-snippet-mount'
+    try {
+      ph.parentNode?.replaceChild(mountEl, ph)
+    } catch (e) {
+      console.warn('[InlineSnippet] Failed to replace placeholder', e)
+      return
+    }
+
+    if (!snippet) {
+      mountEl.innerHTML = `<div class="code-example"><div class="code-toolbar"><span class="code-context"><strong>Snippet not found:</strong> ${snippetId}</span></div></div>`
+      return
+    }
+
+    // Build compact snippet row
+    const row = document.createElement('div')
+    row.className = 'compact-snippet-row'
+
+    const codeEl = document.createElement('code')
+    codeEl.className = 'snippet-code-preview'
+    codeEl.title = composeTitle(snippet)
+    codeEl.textContent = composePreview(snippet)
+
+    const btn = document.createElement('button')
+    btn.className = 'run-button run-micro'
+    btn.textContent = 'Run'
+
+    const onClick = () => runCodeExample(snippet!.code)
+    btn.addEventListener('click', onClick)
+
+    row.appendChild(codeEl)
+    row.appendChild(btn)
+    mountEl.appendChild(row)
+
+    if (snippet.explanation) {
+      const p = document.createElement('p')
+      p.className = 'code-explanation'
+      p.textContent = snippet.explanation
+      mountEl.appendChild(p)
+    }
+
+    mountedInlineSnippets.value.push({
+      unmount: () => {
+        try { btn.removeEventListener('click', onClick) } catch {}
+      },
+      el: mountEl,
+    })
+  })
 }
 
 // Debug: log element and ancestors' dimensions and computed layout
@@ -672,6 +779,10 @@ watch(
     processTimeout = setTimeout(() => {
       // Unmount any existing Ace editors before replacing HTML to avoid leaks
       clearMountedAceBlocks()
+      // Also unmount any inline snippet groups mounted into the previous content
+      clearMountedInlineGroups()
+      // Also unmount any inline single snippets mounted into the previous content
+      clearMountedInlineSnippets()
       // Reset code map; new render will repopulate via placeholders
       codeBlocks.value = {}
       // Render markdown once and cache the HTML so it won't change on scroll
@@ -684,6 +795,10 @@ watch(
             try { console.log('[Pipeline] Mounting Ace editors after headings rendered') } catch {}
           }
           processAceCodeBlocks()
+          // Mount inline snippet groups at their placeholders
+          mountInlineSnippetGroups()
+          // Mount inline single snippets at their placeholders
+          mountInlineSnippets()
         }, 120)
       })
     }, 50) // 50ms debounce
@@ -701,6 +816,8 @@ onUnmounted(() => {
   // Remove event listener
   document.removeEventListener('click', handleCodeBlockClick)
   clearMountedAceBlocks()
+  clearMountedInlineGroups()
+  clearMountedInlineSnippets()
   if (prevScrollEl && scrollListener) prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
   if (resizeListener) window.removeEventListener('resize', resizeListener)
   if (processTimeout) clearTimeout(processTimeout)
@@ -1000,6 +1117,7 @@ const handleCodeBlockClick = (event: Event) => {
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
   margin: 1rem 0 1.5rem 0;
   overflow: hidden;
+  position: relative; /* allow absolute-positioned run button */
 }
 
 .content-text :deep(.code-toolbar),
@@ -1010,6 +1128,55 @@ const handleCodeBlockClick = (event: Event) => {
   padding: 0.55rem 0.8rem;
   background: #f8fafc;
   border-bottom: 1px solid #e5e7eb;
+}
+
+/* Compact single snippet row */
+.content-text :deep(.compact-snippet-row),
+.compact-snippet-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+  background: transparent;
+  border-bottom: none;
+}
+
+.content-text :deep(.snippet-code-preview),
+.snippet-code-preview {
+  font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 1rem;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+}
+
+.content-text :deep(.run-micro),
+.run-micro {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+/* Subtle bordered card for ungrouped inline snippets */
+.content-text :deep(.inline-snippet-mount),
+.inline-snippet-mount {
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #ffffff;
+  margin: 0.6rem 0;
+}
+
+/* Softer divider above inline snippet explanation only */
+.inline-snippet-mount > .code-explanation {
+  border-top: 1px solid #eef2f7;
+  background: #f9fafb;
+}
+
+/* Flex spacer to push Run Group button to the right */
+.content-text :deep(.group-toolbar .toolbar-spacer),
+.group-toolbar .toolbar-spacer {
+  flex: 1 1 auto;
 }
 
 .content-text :deep(.code-context),
@@ -1058,6 +1225,27 @@ const handleCodeBlockClick = (event: Event) => {
 .content-text :deep(.run-button:hover),
 .run-button:hover {
   background: #059669;
+}
+
+/* Code area wrapper to position Run button over the code */
+.content-text :deep(.code-body),
+.code-body {
+  position: relative;
+}
+
+/* Run button inside code area (top-right) */
+.content-text :deep(.code-body .snippet-run),
+.code-body .snippet-run {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+/* Avoid overlap between code and the floating button */
+.content-text :deep(.code-body .code-pre),
+.code-body .code-pre {
+  padding-right: 4.25rem;
 }
 
 .code-snippets {

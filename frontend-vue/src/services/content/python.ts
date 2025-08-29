@@ -13,6 +13,12 @@ Most of the widely used languages look and behave very similarly. They are all [
 
 Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
 
+You'll see groups of snippets like this:
+
+[[snippet-group:intro_group_hello_vars]]
+
+[[snippet:intro_single_snippet]]
+
 You'll also see editable code blocks like this:
 
 \`\`\`python
@@ -61,11 +67,11 @@ Let’s begin.`,
       },
       {
         id: 'intro_single_snippet',
-        code: "sum([1, 2, 3])",
+        code: 'sum([1, 2, 3])',
         language: 'python',
         isExecutable: true,
         context: 'A single snippet alongside a group',
-        explanation: 'Groups and single items can be mixed; the UI will render both.',
+        // explanation: 'Groups and single items can be mixed; the UI will render both.',
       },
     ],
     nextSection: 'comments',
