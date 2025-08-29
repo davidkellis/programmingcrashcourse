@@ -547,6 +547,7 @@ const updateActiveHeading = () => {
   
   for (let i = 0; i < headings.value.length; i++) {
     const h = headings.value[i]
+    if (!h) continue
     const nextH = headings.value[i + 1]
     
     // Calculate section boundaries based on the same anchor gap used by scrolling
