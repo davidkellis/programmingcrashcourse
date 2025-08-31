@@ -7,7 +7,7 @@ export const PYTHON_TUTORIAL_SECTIONS: TutorialSection[] = [
     order: 1,
     content: `Welcome!
 
-This is a programing tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
+This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
 Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
 
@@ -32,7 +32,7 @@ Code blocks have a green Run button in the top-right. Click it to send the whole
 
 You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
-Let’s begin.`,
+Let's begin.`,
     codeSnippets: [],
     codeItems: [
       {
@@ -81,6 +81,7 @@ Let’s begin.`,
     title: 'Comments',
     order: 2,
     content: `* lines that start with \`nr: #\` are comments
+  * for example: \`nr: # this is a comment\`
 * comments are used to explain what the code does
 * comments are ignored by the Python interpreter
 
@@ -94,21 +95,24 @@ print(message)  # this comment explains we're printing the message
 \`\`\``,
     codeSnippets: [],
     previousSection: 'introduction',
-    nextSection: 'operators',
+    nextSection: 'values',
   },
   {
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `Values are the basic pieces of data that programs read, store, and manipulate. In Python, the most commonly used value types are numbers, strings, booleans, lists, dictionaries (maps), and objects (instances of classes).
+    content: `Values are the basic pieces of data that programs read, store, and manipulate. In Python, the most common kinds of values are numbers, strings, booleans, lists, dictionaries (maps), and objects (instances of classes).
 
-### Numbers (int and float)
+These various kinds of values are also called "types". We will learn about sets and types in detail in the [Sets and Types](/section/types) section.
 
-- What they are used for: counting things, doing arithmetic, measuring quantities like time, distance, or cost.
-- Kinds of numbers:
+### Numbers
+
+- Numbers are used for counting things, doing math, measuring quantities like time, distance, or cost.
+- There are two main kinds of numeric representation:
   - \`nr: int\` are whole numbers: \`nr: ..., -2, -1, 0, 1, 2, ...\`
   - \`nr: float\` are numbers with a fractional part: \`nr: 3.14\`, \`nr: -0.5\`, \`nr: 1.0\`
-- Notes: You can use underscores for readability in big numbers.
+- You can use underscores instead of commas to make big numbers more readable.
+  - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
 
 \`\`\`python
 42
@@ -117,7 +121,7 @@ print(message)  # this comment explains we're printing the message
 -7
 \`\`\`
 
-### Strings (str)
+### Strings
 
 - What they are used for: representing text like names, messages, file paths, and any human‑readable data.
 - Features: written with quotes, can include spaces and punctuation, support Unicode.
@@ -177,7 +181,7 @@ my_dog
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.
 `,
     codeSnippets: [],
-    previousSection: 'operators',
+    previousSection: 'comments',
     nextSection: 'operators',
   },
   {
@@ -706,13 +710,14 @@ There are three variations:
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],
     previousSection: 'function-invocation',
-    nextSection: 'sets',
+    nextSection: 'types',
   },
   {
-    id: 'sets',
-    title: 'Sets',
+    id: 'types',
+    title: 'Sets and Types',
     order: 11,
-    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `## Sets
+A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
@@ -771,16 +776,10 @@ You can visualize a set as a circle containing its unique elements. For example,
     <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
   </svg>
 </div>
-`,
-    codeSnippets: [],
-    previousSection: 'conditionals',
-    nextSection: 'types',
-  },
-  {
-    id: 'types',
-    title: 'Types',
-    order: 12,
-    content: `A type is a set of values that we give a name to.
+
+## Types
+
+A type is a set of values that we give a name to.
 
 We can name a type anything we want. For example:
 
@@ -894,7 +893,7 @@ Python has a bunch of built in types:
 * and many more
 `,
     codeSnippets: [],
-    previousSection: 'sets',
+    previousSection: 'conditionals',
     nextSection: 'next-steps',
   },
 ]

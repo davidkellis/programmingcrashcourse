@@ -1,11 +1,13 @@
 <template>
   <div class="code-example is-group">
     <div class="code-toolbar group-toolbar">
-      <span class="code-context"><strong>{{ group.title }}</strong></span>
+      <div class="group-header">
+        <span class="code-context"><strong>{{ group.title }}</strong></span>
+        <span v-if="group.description" class="group-description">{{ group.description }}</span>
+      </div>
       <span class="toolbar-spacer"></span>
       <button @click="runGroup" class="run-button run-group-button">Run Group</button>
     </div>
-    <p v-if="group.description" class="code-explanation compact-desc">{{ group.description }}</p>
 
     <!-- Compact, scannable list -->
     <div class="group-snippets compact">
@@ -81,9 +83,11 @@ const composeTitle = (snippet: Snippet) => {
 </script>
 
 <style scoped>
-.code-toolbar { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.8rem; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
+.code-toolbar { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 1rem 0.55rem 0.8rem; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
 
 .group-toolbar .toolbar-spacer { flex: 1 1 auto; }
+
+.group-header { display: flex; flex-direction: column; gap: 0; }
 
 .code-context { font-size: 1rem; color: #6b7280; font-weight: 600; }
 
@@ -92,16 +96,18 @@ const composeTitle = (snippet: Snippet) => {
 .code-explanation { padding: 0.75rem 1rem; background: #f8f9fa; border-top: 1px solid #e5e7eb; font-size: 1rem; color: #6b7280; margin: 0; }
 .code-explanation.compact-desc { font-size: 0.95rem; padding: 0.5rem 0.8rem; }
 
+.group-description { margin: 0 !important; padding: 0; display: block; font-size: 0.95rem; color: #6b7280; line-height: 1.25; }
+
 .run-button { padding: 0.4rem 0.9rem; background: #10b981; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background-color 0.2s; }
 .run-button:hover { background: #059669; }
 .run-micro { padding: 0.25rem 0.6rem; font-size: 0.9rem; }
 
 /* Compact list styles */
 .group-snippets.compact { display: flex; flex-direction: column; gap: 0; margin-top: 0.5rem; }
-.snippet-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.45rem 0.2rem; background: transparent; border: none; border-radius: 0; }
+.snippet-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.45rem 1rem 0.45rem 0.2rem; background: transparent; border: none; border-radius: 0; }
 .group-snippets.compact .snippet-row + .snippet-row { border-top: 1px solid #eef2f7; }
 .snippet-main { display: flex; align-items: center; gap: 0.5rem; flex: 1 1 auto; min-width: 0; }
-.snippet-code-preview { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: #eef2f7; color: #111827; padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; }
+.snippet-code-preview { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: transparent; color: #111827; padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; }
 
 .code-example { margin: 0.75rem 0; }
 </style>

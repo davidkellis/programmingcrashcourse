@@ -7,11 +7,17 @@ export const JAVASCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
     order: 1,
     content: `Welcome!
 
-This is a programing tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
+This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
 Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
 
 Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
+
+You'll see groups of snippets like this:
+
+[[snippet-group:intro_group_hello_vars]]
+
+[[snippet:intro_single_snippet]]
 
 You'll also see editable code blocks like this:
 
@@ -27,8 +33,47 @@ Code blocks have a green Run button in the top-right. Click it to send the whole
 
 You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
-Let’s begin.`,
+Let's begin.`,
     codeSnippets: [],
+    codeItems: [
+      {
+        id: 'intro_group_hello_vars',
+        title: 'Warm-up: Hello and Variables',
+        description: 'Run these in order to see how the REPL keeps state between snippets.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          {
+            id: 'intro_g1_s1',
+            code: "console.log('Hello from a grouped snippet!')",
+            language: 'javascript',
+            isExecutable: true,
+            context: 'Print a greeting',
+          },
+          {
+            id: 'intro_g1_s2',
+            code: 'let x = 41',
+            language: 'javascript',
+            isExecutable: true,
+            context: 'Create a variable',
+          },
+          {
+            id: 'intro_g1_s3',
+            code: 'x + 1',
+            language: 'javascript',
+            isExecutable: true,
+            context: 'Use the variable defined earlier',
+          },
+        ],
+      },
+      {
+        id: 'intro_single_snippet',
+        code: '[1, 2, 3].reduce((a, b) => a + b, 0)',
+        language: 'javascript',
+        isExecutable: true,
+        context: 'A single snippet alongside a group',
+      },
+    ],
     nextSection: 'comments',
   },
   {
@@ -101,7 +146,9 @@ false
 [0, "cookies", false]
 {"1": "one", "2": "two", "3": "three"}
 {"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
-\`\`\``,
+\`\`\`
+
+See [Sets and Types](/section/types) to learn how values relate to sets and type names.`,
     codeSnippets: [],
     previousSection: 'comments',
     nextSection: 'sets',

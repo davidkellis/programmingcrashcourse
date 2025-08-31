@@ -38,6 +38,7 @@ class LanguageRuntimeService {
   private rubyWasmVM: { eval: (code: string) => unknown } | null = null;
   private rubyWasmLoaded = false;
   private rubyWasmCapture: string[] | null = null;
+  private rubyWasmStdoutBridged = false;
   private tsCompilerLoaded = false;
 
   /**
@@ -103,20 +104,19 @@ class LanguageRuntimeService {
     type DefaultRubyVMFn = (m: WebAssembly.Module, opts: { print: (s: string) => void; printErr: (s: string) => void }) => Promise<{ vm: RubyWasmVM }>
     const { DefaultRubyVM } = wasmModule as unknown as { DefaultRubyVM: DefaultRubyVMFn }
     const { vm } = await DefaultRubyVM(module, {
-      // Fallbacks in case $stdout/$stderr are not overridden yet
+      // Fallbacks used until we install $stdout/$stderr bridges.
+      // After bridges are active, avoid capturing here to prevent duplicates.
       print: (s: string) => {
-        if (this.rubyWasmCapture) {
+        if (!this.rubyWasmStdoutBridged && this.rubyWasmCapture) {
           this.rubyWasmCapture.push(String(s))
-        } else {
-          console.log(s)
         }
+        console.log(String(s))
       },
       printErr: (s: string) => {
-        if (this.rubyWasmCapture) {
+        if (!this.rubyWasmStdoutBridged && this.rubyWasmCapture) {
           this.rubyWasmCapture.push(`ERR: ${String(s)}`)
-        } else {
-          console.error(s)
         }
+        console.error(String(s))
       }
     })
 
@@ -159,6 +159,8 @@ class LanguageRuntimeService {
           end
         end
       `)
+      // Mark that our JS bridges are now active; avoid VM-level capture to prevent duplicates
+      this.rubyWasmStdoutBridged = true
     } catch (e) {
       // Non-fatal: continue with default print hooks if customization fails
       console.warn('Failed to configure Ruby $stdout/$stderr bridges:', e)
@@ -502,11 +504,16 @@ import datetime
             const captured = this.rubyWasmCapture
             this.rubyWasmCapture = null
             if (captured && captured.length > 0) {
-              output = captured.join('\n')
+              // Ruby's puts/write typically include their own newlines; avoid adding extra ones
+              output = captured.join('')
             }
             if (evalResult !== undefined && evalResult !== null) {
               const resultStr = String(evalResult)
-              output = output ? output + '\n' + resultStr : resultStr
+              // Ensure exactly one newline between printed output and the result value
+              if (output && !output.endsWith('\n')) {
+                output += '\n'
+              }
+              output = output ? output + resultStr : resultStr
             }
           } catch (rbwErr: unknown) {
             error = rbwErr instanceof Error ? rbwErr.message : 'Ruby (WASM) execution error'

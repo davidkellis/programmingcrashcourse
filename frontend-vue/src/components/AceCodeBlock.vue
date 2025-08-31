@@ -524,24 +524,19 @@ onUnmounted(() => {
   background: #10b981;
   color: white;
   border: none;
-  padding: 0.4rem 0.8rem;
+  padding: 0.4rem 0.9rem;
   border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s;
 }
 
 .ace-run-button:hover {
   background: #059669;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.ace-run-button:active {
-  transform: translateY(0);
-}
+.ace-run-button:active { }
 
 .ace-editor-container {
   width: 100% !important;
