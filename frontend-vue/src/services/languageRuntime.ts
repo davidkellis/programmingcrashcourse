@@ -182,7 +182,8 @@ class LanguageRuntimeService {
         return
       }
       const script = document.createElement('script')
-      script.src = 'https://unpkg.com/typescript@latest/lib/typescript.js'
+      // Use jsDelivr to comply with production CSP (allows cdn.jsdelivr.net)
+      script.src = 'https://cdn.jsdelivr.net/npm/typescript@latest/lib/typescript.js'
       script.onload = () => { this.tsCompilerLoaded = true; resolve() }
       script.onerror = () => reject(new Error('Failed to load TypeScript compiler'))
       document.head.appendChild(script)
