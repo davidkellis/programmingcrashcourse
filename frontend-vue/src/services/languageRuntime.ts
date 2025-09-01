@@ -40,6 +40,7 @@ class LanguageRuntimeService {
   private rubyWasmCapture: string[] | null = null;
   private rubyWasmStdoutBridged = false;
   private tsCompilerLoaded = false;
+  private tsToJsSession: Map<string, string> = new Map()
 
   /**
    * Initialize the language runtime service
@@ -269,11 +270,12 @@ import datetime
       case 'typescript':
         // TypeScript also runs as JavaScript in the browser; ensure compiler is available
         await this.loadTypeScriptCompiler()
-        runtime.variables = {
-          console: console,
-          Math: Math,
-          Date: Date,
-          JSON: JSON,
+        // Create a backing MathJS session to execute transpiled JS for this TS session
+        try {
+          const jsSessionId = await mathJSREPL.createSession({ id: 'javascript', name: 'JavaScript' } as Language)
+          this.tsToJsSession.set(sessionId, jsSessionId)
+        } catch (e) {
+          console.warn('Failed to create backing JS session for TS:', e)
         }
         break
       case 'ruby':
@@ -398,18 +400,8 @@ import datetime
             const tsGlobal = (window as unknown as { ts?: { transpileModule: (code: string, opts: unknown) => { outputText: string; diagnostics?: Array<{ messageText: unknown }> }; ScriptTarget: Record<string, number>; ModuleKind: Record<string, number>; JsxEmit: Record<string, number>; flattenDiagnosticMessageText?: (msg: unknown, newline: string) => string } }).ts
             if (!tsGlobal) throw new Error('TypeScript compiler not available')
 
-            // Capture last-expression result by appending an assignment before transpile
-            const trimmed = code.trim()
-            const lines = trimmed.split('\n').filter(l => l.trim() !== '')
-            const lastLine = lines[lines.length - 1] || ''
-            const isStmt = /^(let|const|var|function|class|interface|type|enum|if|for|while|switch|try|catch|finally|return|import|export|async\s+function)/.test(lastLine.trim())
-            const withResult = isStmt
-              ? code
-              : `${lines.slice(0, -1).join('\n')}${lines.length > 1 ? '\n' : ''}__result__ = (${lastLine}\n);`
-            const codeForTranspile = `declare var __result__: any;\n${withResult}`
-
-            // Transpile TS to JS using official compiler
-            const transpileResult = tsGlobal.transpileModule(codeForTranspile, {
+            // Transpile raw TS to JS; let the JavaScript REPL handle result capture and persistence
+            const transpileResult = tsGlobal.transpileModule(code, {
               compilerOptions: {
                 target: tsGlobal.ScriptTarget.ES2020,
                 module: tsGlobal.ModuleKind.None,
@@ -421,93 +413,23 @@ import datetime
             if (transpileResult.diagnostics && transpileResult.diagnostics.length > 0) {
               const msgs = transpileResult.diagnostics.map((d: { messageText: unknown }) => tsGlobal.flattenDiagnosticMessageText ? tsGlobal.flattenDiagnosticMessageText(d.messageText, '\n') : String(d.messageText))
               error = msgs.join('\n')
-              // Still try to run if we have output
+              // continue if output is available
             }
 
             const jsCode: string = transpileResult.outputText || ''
 
-            // Capture console output and format Sets/Maps nicely
-            const capturedOutput: string[] = []
-            const formatArg = (arg: unknown): string => {
-              try {
-                if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') return String(arg)
-                if (arg === null || arg === undefined) return String(arg)
-                if (typeof Set !== 'undefined' && arg instanceof Set) {
-                  const arr = Array.from(arg as Set<unknown>)
-                  return `Set(${(arg as Set<unknown>).size}) { ${arr.map((x) => String(x)).join(', ')} }`
-                }
-                if (typeof Map !== 'undefined' && arg instanceof Map) {
-                  const arr = Array.from(arg as Map<unknown, unknown>)
-                  return `Map(${(arg as Map<unknown, unknown>).size}) { ${arr.map(([k, v]) => `${String(k)} => ${String(v)}`).join(', ')} }`
-                }
-                const json = JSON.stringify(arg)
-                return json ?? String(arg)
-              } catch {
-                return String(arg)
-              }
-            }
-            const customConsole = {
-              ...console,
-              log: (...args: unknown[]) => {
-                const outputStr = args.map((arg) => formatArg(arg)).join(' ')
-                capturedOutput.push(outputStr)
-                console.log(...args)
-              },
+            // Ensure a backing JS session exists
+            let jsSessionId = this.tsToJsSession.get(sessionId)
+            if (!jsSessionId) {
+              jsSessionId = await mathJSREPL.createSession({ id: 'javascript', name: 'JavaScript' } as Language)
+              this.tsToJsSession.set(sessionId, jsSessionId)
             }
 
-            // Persistent scope across TS executions
-            type GlobalScope = {
-              console: Console
-              Math: Math
-              Date: DateConstructor
-              JSON: JSON
-              _vars: Record<string, unknown>
-            }
-            const runtimeVars = runtime.variables as Record<string, unknown>
-            if (!(runtimeVars as Record<string, unknown>)._globalScope) {
-              ;(runtimeVars as Record<string, unknown>)._globalScope = { _vars: {} } as Partial<GlobalScope>
-            }
-            const globalScope = (runtimeVars as Record<string, unknown>)._globalScope as GlobalScope
-            globalScope.console = customConsole
-            globalScope.Math = Math
-            globalScope.Date = Date
-            globalScope.JSON = JSON
-            if (!globalScope._vars) globalScope._vars = {}
-
-            // Variable declarations from original TS code
-            const varDeclarations = this.extractVariableDeclarations(code)
-
-            const executionScript = `
-              (function(__SCOPE__) {
-                ${Object.keys(globalScope._vars).map((key) => `var ${key} = __SCOPE__['${key}'];`).join('\n')}
-                var __result__ = undefined;
-                ${jsCode}
-                const newVars = {};
-                ${varDeclarations.map((varName) => `if (typeof ${varName} !== 'undefined') { newVars['${varName}'] = ${varName}; }`).join('\n')}
-                if (typeof __result__ !== 'undefined') {
-                  try { console.log(__result__) } catch {}
-                  newVars['__result__'] = __result__;
-                }
-                return newVars;
-              })(__SCOPE__)
-            `
-
-            const func = new Function('console', 'Math', 'Date', 'JSON', '__SCOPE__', executionScript)
-            const result = func(customConsole, Math, Date, JSON, globalScope._vars)
-
-            if (result && typeof result === 'object') {
-              Object.assign(globalScope._vars, result as Record<string, unknown>)
-            }
-
-            output = capturedOutput.length > 0 ? capturedOutput.join('\n') : ''
-            if (result && typeof result === 'object' && Object.prototype.hasOwnProperty.call(result, '__result__')) {
-              const val = (result as Record<string, unknown>).__result__
-              if (val !== undefined) {
-                const formatted = formatArg(val)
-                output = output ? `${output}\n${formatted}` : formatted
-              }
-            }
-            variables = { ...globalScope }
+            const jsLang = { id: 'javascript', name: 'JavaScript' } as Language
+            const jsResult = await mathJSREPL.executeCode(jsCode, jsLang, jsSessionId)
+            output = jsResult.output
+            error = jsResult.error
+            variables = jsResult.variables
           } catch (tsError: unknown) {
             error = tsError instanceof Error ? tsError.message : 'TypeScript execution error'
           }
@@ -590,6 +512,21 @@ import datetime
       return null
     }
 
+    // If this is a TypeScript session backed by a MathJS session, proxy state
+    const jsBacker = this.tsToJsSession.get(sessionId)
+    if (jsBacker) {
+      const mathJSState = mathJSREPL.getRuntimeState(jsBacker)
+      if (mathJSState) {
+        return {
+          variables: mathJSState.variables,
+          functions: mathJSState.functions,
+          imports: mathJSState.imports,
+          executionHistory: mathJSState.executionHistory,
+        }
+      }
+      return null
+    }
+
     return this.runtimes.get(sessionId) || null
   }
 
@@ -600,9 +537,16 @@ import datetime
     // Check if it's a MathJS session
     if (sessionId.startsWith('mathjs_')) {
       mathJSREPL.clearSession(sessionId)
-    } else {
-      this.runtimes.delete(sessionId)
+      return
     }
+
+    // If this is a TypeScript session with a backing JS session, clear both
+    const jsBacker = this.tsToJsSession.get(sessionId)
+    if (jsBacker) {
+      mathJSREPL.clearSession(jsBacker)
+      this.tsToJsSession.delete(sessionId)
+    }
+    this.runtimes.delete(sessionId)
   }
 
   /**
@@ -615,6 +559,8 @@ import datetime
     const patterns = [
       /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,
       /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*;/g,
+      /(?:export\s+)?class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\{/g,
+      /(?:export\s+)?(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g,
     ]
 
     for (const pattern of patterns) {
