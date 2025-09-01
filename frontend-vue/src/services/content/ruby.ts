@@ -100,131 +100,225 @@ puts message # this comment explains we're printing the message
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `A value is either:
+    content: `Values are the basic pieces of data that programs read, store, and manipulate. In Ruby, the most common kinds of values are numbers, strings, booleans, arrays, hashes (maps), and objects (instances of classes).
 
-* a number, for example:
-   * \`1\`
-   * \`1.4\`
-   * \`3.141592653589793\`
-   * \`1000\`
-   * \`1000000\`
-   * \`1_000_000 # numbers may not have commas in them, but may use underscores instead\`
-* a quoted string, for example:
-   * \`"my name is David"\`
-   * \`"I ate a sleeve of cookies"\`
-   * \`"I had to exercise"\`
-* a boolean true or false value, for example:
-   * \`true\`
-   * \`false\`
-* an array of values, for example:
-   * \`[1, 3, 5, 7, 9]\`
-   * \`[3.141592653589793, "pi", "pie"]\`
-   * \`[1000, "cookies", true]\`
-   * \`[0, "cookies", false]\`
-* a hash is a collection of associated key/value pairs, for example:
-   * \`{1 => "one", 2 => "two", 3 => "three"}\`
-   * \`{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}\`
-* an instance of a class (more on this later)
+These various kinds of values are also called "types". We will learn about sets and types in detail in the [Sets and Types](/section/types) section.
 
-Let's see how these values evaluate in the Ruby REPL (IRB):
 
-\`\`\`ruby
-1
-1.4
-3.141592653589793
-1000
-1000000
-1_000_000
-"my name is David"
-"I ate a sleeve of cookies"
-"I had to exercise"
-true
-false
-[1, 3, 5, 7, 9]
-[3.141592653589793, "pi", "pie"]
-[1000, "cookies", true]
-[0, "cookies", false]
-{1 => "one", 2 => "two", 3 => "three"}
-{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}
-\`\`\`
+### Numbers
 
-See [Sets and Types](/section/types) to learn how values relate to sets and type names.`,
+- Numbers are used for counting things, doing math, measuring quantities like time, distance, or cost.
+- Two common numeric classes:
+  - \`nr: Integer\` are whole numbers: \`nr: ..., -2, -1, 0, 1, 2, ...\`
+  - \`nr: Float\` are numbers with a fractional part: \`nr: 3.14\`, \`nr: -0.5\`, \`nr: 1.0\`
+- You can use underscores instead of commas to make big numbers more readable.
+  - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
+
+[[snippet-group:values_numbers_group]]
+
+### Strings
+
+- What they are used for: representing text like names, messages, file paths, and any human‑readable data.
+- Features: written with quotes, can include spaces and punctuation, support Unicode, support interpolation with \`nr: #{...}\`.
+
+[[snippet-group:values_strings_group]]
+
+### Booleans (TrueClass/FalseClass)
+
+- What they are used for: representing truth values for decisions, conditions, and flags.
+- Values: \`nr: true\` and \`nr: false\`.
+
+[[snippet-group:values_booleans_group]]
+
+### Arrays (Array)
+
+- What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
+- Features: can hold values of any type, can be empty, can be nested.
+
+[[snippet-group:values_arrays_group]]
+
+### Hashes (Hash)
+
+- What they are used for: mapping keys to values; great for lookups, configurations, and records.
+- Features: keys must be unique; common keys are strings or numbers.
+
+[[snippet-group:values_hashes_group]]
+
+### Objects (instances of classes)
+
+- What they are used for: representing real‑world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
+- Example: creating an instance of a simple class.
+
+[[snippet-group:values_objects_group]]
+
+You will use these values inside expressions, assignments, method calls, and conditionals in the rest of this tutorial.`,
     codeSnippets: [],
+    codeItems: [
+      {
+        id: 'values_numbers_group',
+        title: 'Numbers — literal values',
+        description: 'Evaluate some integer and float literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_numbers_s1', code: '42', language: 'ruby', isExecutable: true, context: 'An integer literal' },
+          { id: 'values_numbers_s2', code: '1_000_000', language: 'ruby', isExecutable: true, context: 'Readable integer with underscores' },
+          { id: 'values_numbers_s3', code: '3.141592653589793', language: 'ruby', isExecutable: true, context: 'A float literal' },
+          { id: 'values_numbers_s4', code: '-7', language: 'ruby', isExecutable: true, context: 'A negative integer' },
+        ],
+      },
+      {
+        id: 'values_strings_group',
+        title: 'Strings — literal values',
+        description: 'Evaluate some string literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_strings_s1', code: '"Hello, world!"', language: 'ruby', isExecutable: true, context: 'Double-quoted string' },
+          { id: 'values_strings_s2', code: '\'Ruby is fun\'', language: 'ruby', isExecutable: true, context: 'Single-quoted string' },
+          { id: 'values_strings_s3', code: '"😀 emojis are text, too"', language: 'ruby', isExecutable: true, context: 'Unicode string' },
+        ],
+      },
+      {
+        id: 'values_booleans_group',
+        title: 'Booleans — true/false',
+        description: 'Evaluate the two boolean values.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_booleans_s1', code: 'true', language: 'ruby', isExecutable: true, context: 'Boolean true' },
+          { id: 'values_booleans_s2', code: 'false', language: 'ruby', isExecutable: true, context: 'Boolean false' },
+        ],
+      },
+      {
+        id: 'values_arrays_group',
+        title: 'Arrays — literal values',
+        description: 'Evaluate array literals of different shapes.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_arrays_s1', code: '[1, 3, 5, 7, 9]', language: 'ruby', isExecutable: true, context: 'An array of numbers' },
+          { id: 'values_arrays_s2', code: '["apples", "bananas", "cherries"]', language: 'ruby', isExecutable: true, context: 'An array of strings' },
+          { id: 'values_arrays_s3', code: '[1000, "cookies", true]', language: 'ruby', isExecutable: true, context: 'A mixed array' },
+          { id: 'values_arrays_s4', code: '[]  # an empty array', language: 'ruby', isExecutable: true, context: 'An empty array' },
+        ],
+      },
+      {
+        id: 'values_hashes_group',
+        title: 'Hashes — literal values',
+        description: 'Evaluate hash (map) literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_hashes_s1', code: '{1 => "one", 2 => "two", 3 => "three"}', language: 'ruby', isExecutable: true, context: 'Integer keys' },
+          { id: 'values_hashes_s2', code: '{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}', language: 'ruby', isExecutable: true, context: 'String keys' },
+        ],
+      },
+      {
+        id: 'values_objects_group',
+        title: 'Objects — class instances',
+        description: 'Define a simple class, create an instance, and evaluate it.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_objects_s1', code: 'class Dog\n  def initialize(name)\n    @name = name\n  end\nend', language: 'ruby', isExecutable: true, context: 'Define a class' },
+          { id: 'values_objects_s2', code: 'my_dog = Dog.new("Max")', language: 'ruby', isExecutable: true, context: 'Instantiate the class' },
+          { id: 'values_objects_s3', code: 'my_dog', language: 'ruby', isExecutable: true, context: 'Evaluate the instance' },
+        ],
+      },
+    ],
     previousSection: 'comments',
-    nextSection: 'sets',
+    nextSection: 'operators',
   },
   {
-    id: 'sets',
-    title: 'Sets',
+    id: 'operators',
+    title: 'Operators',
     order: 4,
-    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `Operators combine or transform values to produce new values. You'll use them with numbers, strings, arrays, and booleans.
 
-In other words, a set is a group of values where every value is different; there cannot be two of anything.
+### Arithmetic operators (numbers)
 
-### This is a set of three numbers:
+- Addition: \`nr: +\`
+- Subtraction: \`nr: -\`
+- Multiplication: \`nr: *\`
+- Division: \`nr: /\` (integer division when both operands are integers)
+- Integer division method: \`nr: div\`
+- Remainder (modulo): \`nr: %\`
+- Exponent: \`nr: **\`
 
-* \`nr: [ 1, 2, 3 ]\`
+\`\`\`ruby
+1 + 2
+7 - 3
+4 * 5
+9 / 2      #=> 4 (integer division)
+9.0 / 2    #=> 4.5
+9.div(2)   #=> 4
+9 % 2
+2 ** 3
+\`\`\`
 
-You can visualize a set as a circle containing its unique elements. For example, the following SVG shows a set with the numbers 1, 2, and 3:
+### Comparison operators (booleans)
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="100" cy="100" r="80" fill="#4CAF50" stroke="#000" stroke-width="2"/>
-    <text x="90" y="80" fill="#FFFFFF" font-size="18">1</text>
-    <text x="110" y="100" fill="#FFFFFF" font-size="18">2</text>
-    <text x="90" y="120" fill="#FFFFFF" font-size="18">3</text>
-  </svg>
-</div>
+- Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+- Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+- Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
 
+\`\`\`ruby
+3 == 3
+3 != 4
+2 < 5
+5 <= 5
+7 > 1
+7 >= 10
+\`\`\`
 
-### This is a set of two names:
+### Boolean operators
 
-* \`nr: [ "Jack", "Jill" ]\`
+- And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
+- Short‑circuit: \`A && B\` skips \`B\` if \`A\` is false; \`A || B\` skips \`B\` if \`A\` is true.
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="100" cy="100" r="80" fill="#9C27B0" stroke="#000" stroke-width="2"/>
-    <text x="80" y="100" fill="#FFFFFF" font-size="18">Jack</text>
-    <text x="90" y="120" fill="#FFFFFF" font-size="18">Jill</text>
-  </svg>
-</div>
+\`\`\`ruby
+true && false
+true || false
+!(2 < 3)
+\`\`\`
 
+### Sequence operators (strings and arrays)
 
-### This is a set of different kinds of things:
+- Concatenation: \`nr: +\`
+- Repetition: \`nr: *\`
+- Membership: \`nr: include?\` (method on strings and arrays)
+- Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start..stop]\`, \`nr: seq[start...stop]\`
 
-* \`nr: [ 1, 3.141592653589793, "Steve", True ]\`
+\`\`\`ruby
+"Hi, " + "there"
+"ha" * 3
+"ruby".include?("ru")
+[1, 2] + [3]
+[0] * 4
+[1,2,3,4][1..2]
+"ruby"[1..2]
+\`\`\`
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-   <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-   <circle cx="100" cy="100" r="80" fill="#2196F3" stroke="#000" stroke-width="2"/>
-   <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
-   <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
-   <text x="90" y="130" fill="#FFFFFF" font-size="16">Steve</text>
-   <text x="90" y="150" fill="#FFFFFF" font-size="16">True</text>
-   </svg>
-</div>
+### Precedence and grouping
 
-### This is **NOT** a set (because \`nr: 1\` is repeated):
+- Parentheses \`nr: ( )\` change evaluation order.
+- Rough precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
 
-* \`nr: [ 1, 1, 3.141592653589793 ]\`
+\`\`\`ruby
+1 + 2 * 3
+(1 + 2) * 3
+\`\`\`
 
-<div style="display: flex; justify-content: center; margin: 1em 0;">
-  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="100" cy="100" r="80" fill="#F44336" stroke="#000" stroke-width="2"/>
-    <text x="85" y="70" fill="#FFFFFF" font-size="16">1</text>
-    <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
-    <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
-  </svg>
-</div>
-`,
+You now know the basic operators; next you will use them with variables and assignments.`,
     codeSnippets: [],
     previousSection: 'values',
-    nextSection: 'types',
+    nextSection: 'variables',
   },
   {
     id: 'types',
-    title: 'Types',
-    order: 5,
+    title: 'Sets and Types',
+    order: 11,
     content: `A type is a set of values that we give a name to.
 
 We can name a type anything we want. For example:
@@ -333,8 +427,8 @@ Ruby has a bunch of built in classes:
 * and many more
 `,
     codeSnippets: [],
-    previousSection: 'sets',
-    nextSection: 'variables',
+    previousSection: 'conditionals',
+    nextSection: 'next-steps',
   },
   {
     id: 'variables',
@@ -412,7 +506,7 @@ puts "my_age -> #{my_age}"   # this prints 11
 
 `,
     codeSnippets: [],
-    previousSection: 'types',
+    previousSection: 'operators',
     nextSection: 'expressions',
   },
   {
@@ -470,7 +564,102 @@ The common expression types across every popular programming language are:
 * conditional expressions
 * loop expressions
 
-These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in Python, then you know what it looks like in most every language.`,
+These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in Ruby, then you know what it looks like in most every language.
+
+### Comparison expressions
+
+Comparison expressions evaluate to a boolean (\`nr: true\` or \`nr: false\`).
+
+Try these:
+
+\`\`\`ruby
+1 == 1
+1 != 2
+3 < 5
+5 <= 5
+7 > 2
+2 >= 9
+\`\`\`
+
+### Boolean logic expressions
+
+Use \`nr: &&\`, \`nr: ||\`, and \`nr: !\` to combine or negate boolean values.
+
+\`\`\`ruby
+true && true
+true && false
+true || false
+false || false
+!true
+!(1 < 2)
+\`\`\`
+
+Short-circuiting: in \`nr: A && B\`, if \`nr: A\` is false, Ruby does not evaluate \`nr: B\`. In \`nr: A || B\`, if \`nr: A\` is true, Ruby does not evaluate \`nr: B\`.
+
+### Grouping and operator precedence
+
+Parentheses \`nr: ( )\` change evaluation order. Arithmetic has the usual precedence (\`nr: * / %\` before \`nr: + -\`), then comparisons, then \`nr: !\`, then \`nr: &&\`, then \`nr: ||\`.
+
+\`\`\`ruby
+1 + 2 * 3
+(1 + 2) * 3
+10 - 4 - 1
+10 - (4 - 1)
+(2 < 3) && (3 < 5)
+\`\`\`
+
+### String expressions
+
+\`nr: +\` concatenates strings; \`nr: *\` repeats them; interpolation uses \`nr: #{...}\`.
+
+\`\`\`ruby
+"Hello, " + "world!"
+"ha" * 3
+name = "Sam"
+"Hello, " + name
+"Hello, #{name}!"  # string interpolation
+\`\`\`
+
+### Array expressions
+
+Arrays also support concatenation and repetition.
+
+\`\`\`ruby
+[1, 2] + [3, 4]
+[0] * 5
+[1, 2, 3].length
+\`\`\`
+
+### Indexing and slicing
+
+Use square brackets to get elements or ranges from arrays and strings.
+
+\`\`\`ruby
+letters = ["a", "b", "c", "d", "e"]
+letters[0]
+letters[-1]
+letters[1..3]
+letters[0...3]
+
+text = "ruby"
+text[0]
+text[-1]
+text[1..3]
+text[0...2]
+\`\`\`
+
+### Membership
+
+Use \`nr: include?\` to test membership on arrays and strings.
+
+\`\`\`ruby
+[1, 2, 3].include?(3)
+"ruby".include?("ru")
+![1, 2, 3].include?(9)
+!"ruby".include?("x")
+\`\`\`
+
+These forms are the building blocks you will combine inside conditionals, loops, and method calls in the next sections.`,
     codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
@@ -483,28 +672,57 @@ These common kinds of expression are what we are focusing on in this tutorial, b
 
 For example, here is a recipe for making a peanut butter sandwich:
 
-**Make Peanut Butter Sandwich:**
-1. Get two slices of bread
-2. Get jar of peanut butter
+**Peanut Butter Sandwich**
+
+1. Get two pieces of bread
+2. Get a jar of peanut butter
 3. Get a knife
 4. Open the jar of peanut butter
-5. Use the knife to scoop peanut butter from the jar
-6. Spread the peanut butter on one slice of bread
-7. Put the two slices of bread together
-8. Clean the knife
-9. Put away the jar of peanut butter
+5. Use the knife to spread peanut butter on one side of one piece of bread
+6. Use the knife to spread peanut butter on one side of the other piece of bread
+7. Put the two pieces of toast together, with the peanut butter covered sides facing one another
+8. Put the knife in the sink
+9. Put the lid back on the peanut butter jar
+10. Place the peanut butter sandwich on a plate
 
-A function in Ruby is called a method. Here is a method for printing a message:
+The recipe has a name: Peanut Butter Sandwich
+
+The recipe has a list of instructions to follow in order.
+
+The list of instructions is just an expression sequence, so a function is just an expression sequence that has a name.
+
+There are 2 simple rules that you must follow when naming a method in Ruby:
+
+1. The name can't have any spaces or hyphens (dashes) in it. Replace spaces and hyphens with underscores.
+   * Peanut Butter Sandwich → Peanut_Butter_Sandwich
+   * Peanut-Butter-Sandwich → Peanut_Butter_Sandwich
+2. The name can't begin with a number. It must begin with a letter or an underscore.
+   * Bad names (won't work): \`nr: 1dog\`, \`nr: 2_apples\`
+   * Good names (will work): \`nr: one_dog\`, \`nr: two_apples\`, \`nr: _20_people\`, \`nr: book_x5\`
+
+In Ruby, we create a method by using the keyword \`nr: def\`, followed by the name of the method, optionally followed by parameters, and ending with \`nr: end\`, like this:
 
 \`\`\`ruby
-def print_hello
-  puts "Hello"
+def make_peanut_butter_sandwich
+  # method body goes here
 end
 \`\`\`
 
-This method has a name (\`print_hello\`) and a list of instructions to follow (print "Hello").
+A method also has a body, which is just the list of instructions we want the method to evaluate. The method body is an expression sequence. For example:
 
-Methods can also accept parameters (inputs). Here is a method that accepts one parameter:
+\`\`\`ruby
+def make_peanut_butter_sandwich(kind_of_bread, quantity)
+  quantity.times do
+    # toast_the_bread(kind_of_bread)
+    # spread_peanut_butter_onto_the_toast()
+    # smash_the_pieces_of_toast_with_peanut_butter_together()
+    # clean_up()
+    # put_the_sandwich_on_a_plate()
+  end
+end
+\`\`\`
+
+This method has one parameter: \`age\`
 
 \`\`\`ruby
 def print_my_age(age)
@@ -529,17 +747,24 @@ end
     order: 9,
     content: `You can use a method by calling it, or invoking it. Calling a method is the same thing as invoking it.
 
-A method may be called, or invoked, by typing the name of the method, optionally followed by parenthesis. If the method was defined to accept parameters, then you must supply values for those parameters.
+A method may be called, or invoked, by typing the name of the method, optionally followed by parentheses. If the method was defined to accept parameters, then you must supply values for those parameters.
 
-For example, to call the \`print_hello\` method:
+For example, if we define a method without any parameters:
 
-\`print_hello\` or \`print_hello()\`
+\`\`\`ruby
+def print_hello
+  puts "Hello"
+end
+\`\`\`
 
-To call the \`print_my_age\` method, we must supply a value for the \`age\` parameter:
+we can call it by typing its name, with or without parentheses:
 
-\`print_my_age(8)\` or \`print_my_age 8\`
+\`\`\`ruby
+print_hello
+print_hello()
+\`\`\`
 
-Here is what this looks like in IRB:
+When we call this method in an interactive interpreter session (IRB), here is what happens:
 
 \`\`\`
 irb(main):001:0> def print_hello
@@ -549,13 +774,35 @@ irb(main):003:1> end
 irb(main):004:0> print_hello
 Hello
 => nil
-irb(main):005:0> def print_my_age(age)
-irb(main):006:1>   puts "I am #{age} years old"
-irb(main):007:1> end
-=> :print_my_age
-irb(main):008:0> print_my_age(8)
-I am 8 years old
-=> nil
+\`\`\`
+
+If we have the following method with one parameter:
+
+\`\`\`ruby
+def print_my_age(age)
+  puts "I am #{age} years old"
+end
+\`\`\`
+
+we can call it by supplying the argument:
+
+\`\`\`ruby
+print_my_age(8)
+print_my_age 8
+\`\`\`
+
+If we have the following method with two parameters:
+
+\`\`\`ruby
+def print_introduction(name, age)
+  puts "Hello, my name is #{name} and I am #{age} years old"
+end
+\`\`\`
+
+we can call it like this:
+
+\`\`\`ruby
+print_introduction("Jim", 9)
 \`\`\`
 
 Methods can also return values. Here is a method that returns a value:
@@ -583,21 +830,46 @@ irb(main):005:0> three_plus_five
 There are three variations:
 
 * \`if\`
-   * \`if i_am_hungry then puts "I'm starving!" end\`
+  * The \`if\` keyword is always followed by a boolean expression - an expression that evaluates to \`true\` or \`false\`.
+  * When the boolean expression evaluates to \`true\`, the body of the \`if\` expression is evaluated; otherwise the body is skipped.
+
+\`\`\`ruby
+if i_am_hungry
+  puts "I'm starving!"
+end
+\`\`\`
+
 * \`if\` / \`else\`
-   * \`if i_am_hungry then puts "I'm starving!" else puts "I am full." end\`
+
+\`\`\`ruby
+if i_am_hungry
+  puts "I'm starving!"
+else
+  puts "I am full."
+end
+\`\`\`
+
 * \`if\` / \`elsif\` / \`else\`
-   * \`if age < 5 then puts "You are younger than five years old." elsif age < 10 then puts "You are five to nine years old." else puts "You are ten or older" end\`
+
+\`\`\`ruby
+if age < 5
+  puts "You are younger than five years old."
+elsif age < 10
+  puts "You are five to nine years old."
+else
+  puts "You are ten or older"
+end
+\`\`\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],
     previousSection: 'function-invocation',
-    nextSection: 'next-steps',
+    nextSection: 'types',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 11,
+    order: 12,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice
@@ -609,6 +881,6 @@ In each case, the \`if\` expression is always followed by an expression that eva
   ### Where to go next
   - Learn blocks, enumerables, and simple file scripts.`,
     codeSnippets: [],
-    previousSection: 'conditionals',
+    previousSection: 'types',
   },
 ]

@@ -250,26 +250,44 @@ class MathJSREPLService {
       const originalConsoleInfo = console.info
 
       // Override console methods to capture output
+      const formatArg = (arg: unknown): string => {
+        try {
+          if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') return String(arg)
+          if (arg === null || arg === undefined) return String(arg)
+          if (typeof Set !== 'undefined' && arg instanceof Set) {
+            const arr = Array.from(arg as Set<unknown>)
+            return `Set(${(arg as Set<unknown>).size}) { ${arr.map((x) => String(x)).join(', ')} }`
+          }
+          if (typeof Map !== 'undefined' && arg instanceof Map) {
+            const arr = Array.from(arg as Map<unknown, unknown>)
+            return `Map(${(arg as Map<unknown, unknown>).size}) { ${arr.map(([k, v]) => `${String(k)} => ${String(v)}`).join(', ')} }`
+          }
+          const json = JSON.stringify(arg)
+          return json ?? String(arg)
+        } catch {
+          return String(arg)
+        }
+      }
       console.log = (...args: unknown[]) => {
-        const outputStr = args.map(arg => String(arg)).join(' ')
+        const outputStr = args.map(arg => formatArg(arg)).join(' ')
         capturedOutput.push(outputStr)
         originalConsoleLog(...args)
       }
 
       console.error = (...args: unknown[]) => {
-        const outputStr = args.map(arg => String(arg)).join(' ')
+        const outputStr = args.map(arg => formatArg(arg)).join(' ')
         capturedOutput.push(`ERROR: ${outputStr}`)
         originalConsoleError(...args)
       }
 
       console.warn = (...args: unknown[]) => {
-        const outputStr = args.map(arg => String(arg)).join(' ')
+        const outputStr = args.map(arg => formatArg(arg)).join(' ')
         capturedOutput.push(`WARN: ${outputStr}`)
         originalConsoleWarn(...args)
       }
 
       console.info = (...args: unknown[]) => {
-        const outputStr = args.map(arg => String(arg)).join(' ')
+        const outputStr = args.map(arg => formatArg(arg)).join(' ')
         capturedOutput.push(`INFO: ${outputStr}`)
         originalConsoleInfo(...args)
       }
@@ -360,6 +378,10 @@ class MathJSREPLService {
                   const arr = Array.from(v as Set<unknown>)
                   return `Set(${(v as Set<unknown>).size}) { ${arr.map((x) => String(x)).join(', ')} }`
                 }
+                if (typeof Map !== 'undefined' && v instanceof Map) {
+                  const arr = Array.from(v as Map<unknown, unknown>)
+                  return `Map(${(v as Map<unknown, unknown>).size}) { ${arr.map(([k, vv]) => `${String(k)} => ${String(vv)}`).join(', ')} }`
+                }
                 const json = JSON.stringify(v)
                 return json ?? String(v)
               } catch {
@@ -429,7 +451,11 @@ class MathJSREPLService {
     // Simple regex to match let, const, and var declarations
     const patterns = [
       /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,
-      /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*;/g
+      /(?:let|const|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*;/g,
+      // Also capture named function declarations
+      /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g,
+      // And class declarations
+      /class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?:extends\s+[a-zA-Z_$][a-zA-Z0-9_$]*)?\s*\{/g,
     ]
 
     for (const pattern of patterns) {

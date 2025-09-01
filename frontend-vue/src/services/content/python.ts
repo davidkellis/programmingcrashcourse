@@ -114,73 +114,120 @@ These various kinds of values are also called "types". We will learn about sets 
 - You can use underscores instead of commas to make big numbers more readable.
   - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
 
-\`\`\`python
-42
-1_000_000
-3.141592653589793
--7
-\`\`\`
+[[snippet-group:values_numbers_group]]
 
 ### Strings
 
 - What they are used for: representing text like names, messages, file paths, and any human‑readable data.
 - Features: written with quotes, can include spaces and punctuation, support Unicode.
 
-\`\`\`python
-"Hello, world!"
-'Python is fun'
-"😀 emojis are text, too"
-\`\`\`
+[[snippet-group:values_strings_group]]
 
 ### Booleans (bool)
 
 - What they are used for: representing truth values for decisions, conditions, and flags.
 - Values: \`nr: True\` and \`nr: False\`.
 
-\`\`\`python
-True
-False
-\`\`\`
+[[snippet-group:values_booleans_group]]
 
 ### Lists (list)
 
 - What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
 - Features: can hold values of any type, can be empty, can be nested.
 
-\`\`\`python
-[1, 3, 5, 7, 9]
-["apples", "bananas", "cherries"]
-[1000, "cookies", True]
-[]  # an empty list
-\`\`\`
+[[snippet-group:values_lists_group]]
 
 ### Dictionaries (dict)
 
 - What they are used for: mapping keys to values; great for lookups, configurations, and records.
 - Features: keys must be unique; common keys are strings or numbers.
 
-\`\`\`python
-{1: "one", 2: "two", 3: "three"}
-{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
-\`\`\`
+[[snippet-group:values_dicts_group]]
 
 ### Objects (instances of classes)
 
 - What they are used for: representing real‑world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
 - Example: creating an instance of a simple class.
 
-\`\`\`python
-class Dog:
-  def __init__(self, name):
-    self.name = name
-
-my_dog = Dog("Max")
-my_dog
-\`\`\`
+[[snippet-group:values_objects_group]]
 
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.
 `,
     codeSnippets: [],
+    codeItems: [
+      {
+        id: 'values_numbers_group',
+        title: 'Numbers — literal values',
+        description: 'Evaluate some integer and float literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_numbers_s1', code: '42', language: 'python', isExecutable: true, context: 'An integer literal' },
+          { id: 'values_numbers_s2', code: '1_000_000', language: 'python', isExecutable: true, context: 'Readable integer with underscores' },
+          { id: 'values_numbers_s3', code: '3.141592653589793', language: 'python', isExecutable: true, context: 'A float literal' },
+          { id: 'values_numbers_s4', code: '-7', language: 'python', isExecutable: true, context: 'A negative integer' },
+        ],
+      },
+      {
+        id: 'values_strings_group',
+        title: 'Strings — literal values',
+        description: 'Evaluate some string literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_strings_s1', code: '"Hello, world!"', language: 'python', isExecutable: true, context: 'Double-quoted string' },
+          { id: 'values_strings_s2', code: '\'Python is fun\'', language: 'python', isExecutable: true, context: 'Single-quoted string' },
+          { id: 'values_strings_s3', code: '"😀 emojis are text, too"', language: 'python', isExecutable: true, context: 'Unicode string' },
+        ],
+      },
+      {
+        id: 'values_booleans_group',
+        title: 'Booleans — True/False',
+        description: 'Evaluate the two boolean values.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_booleans_s1', code: 'True', language: 'python', isExecutable: true, context: 'Boolean True' },
+          { id: 'values_booleans_s2', code: 'False', language: 'python', isExecutable: true, context: 'Boolean False' },
+        ],
+      },
+      {
+        id: 'values_lists_group',
+        title: 'Lists — literal values',
+        description: 'Evaluate list literals of different shapes.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_lists_s1', code: '[1, 3, 5, 7, 9]', language: 'python', isExecutable: true, context: 'A list of numbers' },
+          { id: 'values_lists_s2', code: '["apples", "bananas", "cherries"]', language: 'python', isExecutable: true, context: 'A list of strings' },
+          { id: 'values_lists_s3', code: '[1000, "cookies", True]', language: 'python', isExecutable: true, context: 'A mixed list' },
+          { id: 'values_lists_s4', code: '[]  # an empty list', language: 'python', isExecutable: true, context: 'An empty list' },
+        ],
+      },
+      {
+        id: 'values_dicts_group',
+        title: 'Dictionaries — literal values',
+        description: 'Evaluate dictionary (map) literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_dicts_s1', code: '{1: "one", 2: "two", 3: "three"}', language: 'python', isExecutable: true, context: 'Integer keys' },
+          { id: 'values_dicts_s2', code: '{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}', language: 'python', isExecutable: true, context: 'String keys' },
+        ],
+      },
+      {
+        id: 'values_objects_group',
+        title: 'Objects — class instances',
+        description: 'Define a simple class, create an instance, and evaluate it.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_objects_s1', code: 'class Dog:\n  def __init__(self, name):\n    self.name = name', language: 'python', isExecutable: true, context: 'Define a class' },
+          { id: 'values_objects_s2', code: 'my_dog = Dog("Max")', language: 'python', isExecutable: true, context: 'Instantiate the class' },
+          { id: 'values_objects_s3', code: 'my_dog', language: 'python', isExecutable: true, context: 'Evaluate the instance' },
+        ],
+      },
+    ],
     previousSection: 'comments',
     nextSection: 'operators',
   },

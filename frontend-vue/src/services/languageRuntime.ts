@@ -345,6 +345,33 @@ import datetime
                 output = result ? String(result) : ''
               }
 
+              // If the last non-empty line is a simple assignment (e.g., x = <expr>),
+              // evaluate the assigned variable once and append its value to the output.
+              // This avoids re-running the entire user code (and any side effects).
+              try {
+                const trimmed = code.trim()
+                const lines = trimmed.split('\n').filter(l => l.trim() !== '')
+                const lastLine = lines[lines.length - 1] || ''
+                // Match a simple single-name assignment: name = <expr>
+                // - Require only whitespace between name and '=' (so 'x +=' won't match)
+                // - Ensure it's not '==' by requiring next char after '=' is not '='
+                const m = lastLine.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^=].*)$/)
+                if (m && m[1]) {
+                  const varName = m[1]
+                  const assignedVal = await this.pyodide.runPythonAsync(varName)
+                  const assignedStr = String(assignedVal)
+                  if (assignedStr !== undefined) {
+                    if (output) {
+                      output += (output.endsWith('\n') ? '' : '\n') + assignedStr
+                    } else {
+                      output = assignedStr
+                    }
+                  }
+                }
+              } catch {
+                // Non-fatal: if we fail to detect/evaluate the assignment, ignore
+              }
+
               // Don't try to restore the original print - just leave our custom one
               // This is simpler and avoids the restoration issues
 

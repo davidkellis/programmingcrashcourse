@@ -100,64 +100,222 @@ console.log(message); // this comment explains we're printing the message
     id: 'values',
     title: 'Values',
     order: 3,
-    content: `A value is either:
+    content: `Values are the basic pieces of data that programs read, store, and manipulate. In TypeScript, the most common kinds of values are numbers, strings, booleans, arrays, maps (Map instances), and objects created from classes (instances).
 
-* a number, for example:
-   * \`1\`
-   * \`1.4\`
-   * \`3.141592653589793\`
-   * \`1000\`
-   * \`1000000\`
-   * \`1_000_000 // numbers may not have commas in them, but may use underscores instead\`
-* a quoted string, for example:
-   * \`"my name is David"\`
-   * \`"I ate a sleeve of cookies"\`
-   * \`"I had to exercise"\`
-* a boolean true or false value, for example:
-   * \`true\`
-   * \`false\`
-* an array of values, for example:
-   * \`[1, 3, 5, 7, 9]\`
-   * \`[3.141592653589793, "pi", "pie"]\`
-   * \`[1000, "cookies", true]\`
-   * \`[0, "cookies", false]\`
-* an object is a collection of associated key/value pairs, for example:
-   * \`{"1": "one", "2": "two", "3": "three"}\`
-   * \`{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}\`
-* an instance of a class (more on this later)
+These various kinds of values are also called "types". We will learn about sets and types in detail in the [Sets and Types](/section/types) section.
 
-Let's see how these values evaluate in the TypeScript REPL:
+### Numbers
 
-\`\`\`typescript
-1
-1.4
-3.141592653589793
-1000
-1000000
-1_000_000
-"my name is David"
-"I ate a sleeve of cookies"
-"I had to exercise"
-true
-false
-[1, 3, 5, 7, 9]
-[3.141592653589793, "pi", "pie"]
-[1000, "cookies", true]
-[0, "cookies", false]
-{"1": "one", "2": "two", "3": "three"}
-{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
-\`\`\`
+- Numbers are used for counting things, doing math, measuring quantities like time, distance, or cost.
+- TypeScript has a single number type for integers and floating‑point values.
+- You can use underscores instead of commas to make big numbers more readable.
+  - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
 
-See [Sets and Types](/section/types) to learn how values relate to sets and type names.`,
+[[snippet-group:values_numbers_group]]
+
+### Strings
+
+- What they are used for: representing text like names, messages, file paths, and any human‑readable data.
+- Features: written with quotes, can include spaces and punctuation, support Unicode.
+
+[[snippet-group:values_strings_group]]
+
+### Booleans (boolean)
+
+- What they are used for: representing truth values for decisions, conditions, and flags.
+- Values: \`nr: true\` and \`nr: false\`.
+
+[[snippet-group:values_booleans_group]]
+
+### Arrays (Array)
+
+- What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
+- Features: can hold values of any type, can be empty, can be nested.
+
+[[snippet-group:values_arrays_group]]
+
+### Maps (Map)
+
+- What they are used for: mapping keys to values; great for lookups, configurations, and records.
+- Features: keys must be unique; keys can be of any type; preserves insertion order.
+
+[[snippet-group:values_maps_group]]
+
+### Class instances (instances of classes)
+
+- What they are used for: representing real‑world things with data (properties) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
+- Example: creating an instance of a simple class.
+
+[[snippet-group:values_objects_group]]
+
+You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.`,
     codeSnippets: [],
+    codeItems: [
+      {
+        id: 'values_numbers_group',
+        title: 'Numbers — literal values',
+        description: 'Evaluate number literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_numbers_s1', code: '42', language: 'typescript', isExecutable: true, context: 'An integer literal' },
+          { id: 'values_numbers_s2', code: '1_000_000', language: 'typescript', isExecutable: true, context: 'Readable integer with underscores' },
+          { id: 'values_numbers_s3', code: '3.141592653589793', language: 'typescript', isExecutable: true, context: 'A float literal' },
+          { id: 'values_numbers_s4', code: '-7', language: 'typescript', isExecutable: true, context: 'A negative integer' },
+        ],
+      },
+      {
+        id: 'values_strings_group',
+        title: 'Strings — literal values',
+        description: 'Evaluate string literals.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_strings_s1', code: '"Hello, world!"', language: 'typescript', isExecutable: true, context: 'Double-quoted string' },
+          { id: 'values_strings_s2', code: '\'TypeScript is fun\'', language: 'typescript', isExecutable: true, context: 'Single-quoted string' },
+          { id: 'values_strings_s3', code: '"😀 emojis are text, too"', language: 'typescript', isExecutable: true, context: 'Unicode string' },
+        ],
+      },
+      {
+        id: 'values_booleans_group',
+        title: 'Booleans — true/false',
+        description: 'Evaluate the two boolean values.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_booleans_s1', code: 'true', language: 'typescript', isExecutable: true, context: 'Boolean true' },
+          { id: 'values_booleans_s2', code: 'false', language: 'typescript', isExecutable: true, context: 'Boolean false' },
+        ],
+      },
+      {
+        id: 'values_arrays_group',
+        title: 'Arrays — literal values',
+        description: 'Evaluate array literals of different shapes.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_arrays_s1', code: '[1, 3, 5, 7, 9]', language: 'typescript', isExecutable: true, context: 'A list of numbers' },
+          { id: 'values_arrays_s2', code: '["apples", "bananas", "cherries"]', language: 'typescript', isExecutable: true, context: 'A list of strings' },
+          { id: 'values_arrays_s3', code: '[1000, "cookies", true]', language: 'typescript', isExecutable: true, context: 'A mixed array' },
+          { id: 'values_arrays_s4', code: '[]  // an empty array', language: 'typescript', isExecutable: true, context: 'An empty array' },
+        ],
+      },
+      {
+        id: 'values_maps_group',
+        title: 'Maps — Map instances',
+        description: 'Construct Map instances with different key types.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_maps_s1', code: 'new Map([[1, "one"], [2, "two"], [3, "three"]])', language: 'typescript', isExecutable: true, context: 'Integer keys' },
+          { id: 'values_maps_s2', code: 'new Map([["Jack", "Cookies"], ["Jill", "Ice Cream"], ["Phil", "Asparagus"]])', language: 'typescript', isExecutable: true, context: 'String keys' },
+        ],
+      },
+      {
+        id: 'values_objects_group',
+        title: 'Objects — class instances',
+        description: 'Define a class, create an instance, and evaluate it.',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: [
+          { id: 'values_objects_s1', code: 'class Dog {\n  constructor(public name: string) {}\n}', language: 'typescript', isExecutable: true, context: 'Define a class' },
+          { id: 'values_objects_s2', code: 'const my_dog = new Dog("Max")', language: 'typescript', isExecutable: true, context: 'Instantiate the class' },
+          { id: 'values_objects_s3', code: 'my_dog', language: 'typescript', isExecutable: true, context: 'Evaluate the instance' },
+        ],
+      },
+    ],
     previousSection: 'comments',
-    nextSection: 'sets',
+    nextSection: 'operators',
   },
   {
-    id: 'sets',
-    title: 'Sets',
+    id: 'operators',
+    title: 'Operators',
     order: 4,
-    content: `A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
+    content: `Operators combine or transform values to produce new values. You will use them constantly with numbers, strings, arrays, and booleans.
+
+### Arithmetic operators (numbers)
+
+- Addition: \`nr: +\`
+- Subtraction: \`nr: -\`
+- Multiplication: \`nr: *\`
+- Division: \`nr: /\`
+- Remainder (modulo): \`nr: %\`
+- Exponent: \`nr: **\`
+
+\`\`\`typescript
+1 + 2
+7 - 3
+4 * 5
+9 / 2
+9 % 2
+2 ** 3
+\`\`\`
+
+### Comparison operators (booleans)
+
+- Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+- Strict equal: \`nr: ===\`  |  Strict not equal: \`nr: !==\`
+- Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+- Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
+
+\`\`\`typescript
+3 == 3
+3 === 3
+3 != 4
+2 < 5
+5 <= 5
+7 > 1
+7 >= 10
+\`\`\`
+
+### Boolean operators
+
+- And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
+- Short‑circuit: \`A && B\` skips \`B\` if \`A\` is false; \`A || B\` skips \`B\` if \`A\` is true.
+
+\`\`\`typescript
+true && false
+true || false
+!(2 < 3)
+\`\`\`
+
+### Sequence operators (strings and arrays)
+
+- Strings: concatenation with \`nr: +\`, repetition with \`nr: "ha".repeat(3)\`.
+- Arrays: concatenate with \`nr: arr1.concat(arr2)\` or spread \`nr: [...arr1, ...arr2]\`.
+- Membership: \`nr: "py".includes("p")\`, \`nr: [1,2,3].includes(2)\`.
+
+\`\`\`typescript
+"Hi, " + "there"
+"ha".repeat(3)
+[1, 2].concat([3])
+[...['a', 'b'], ...['c']]
+"python".includes("py")
+[1,2,3].includes(2)
+\`\`\`
+
+### Precedence and grouping
+
+- Parentheses \`nr: ( )\` change evaluation order.
+- Precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
+
+\`\`\`typescript
+1 + 2 * 3
+(1 + 2) * 3
+\`\`\`
+
+You now know the basic operators; next you will use them with variables and assignments.
+`,
+    codeSnippets: [],
+    previousSection: 'values',
+    nextSection: 'variables',
+  },
+  {
+    id: 'types',
+    title: 'Sets and Types',
+    order: 11,
+    content: `## Sets
+A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
 
@@ -176,7 +334,6 @@ You can visualize a set as a circle containing its unique elements. For example,
   </svg>
 </div>
 
-
 ### This is a set of two names:
 
 * \`nr: [ "Jack", "Jill" ]\`
@@ -189,10 +346,9 @@ You can visualize a set as a circle containing its unique elements. For example,
   </svg>
 </div>
 
-
 ### This is a set of different kinds of things:
 
-* \`nr: [ 1, 3.141592653589793, "Steve", True ]\`
+* \`nr: [ 1, 3.141592653589793, "Steve", true ]\`
 
 <div style="display: flex; justify-content: center; margin: 1em 0;">
    <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
@@ -200,7 +356,7 @@ You can visualize a set as a circle containing its unique elements. For example,
    <text x="85" y="90" fill="#FFFFFF" font-size="16">1</text>
    <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
    <text x="90" y="130" fill="#FFFFFF" font-size="16">Steve</text>
-   <text x="90" y="150" fill="#FFFFFF" font-size="16">True</text>
+   <text x="90" y="150" fill="#FFFFFF" font-size="16">true</text>
    </svg>
 </div>
 
@@ -216,16 +372,9 @@ You can visualize a set as a circle containing its unique elements. For example,
     <text x="25" y="110" fill="#FFFFFF" font-size="16">3.141592653589793</text>
   </svg>
 </div>
-`,
-    codeSnippets: [],
-    previousSection: 'values',
-    nextSection: 'types',
-  },
-  {
-    id: 'types',
-    title: 'Types',
-    order: 5,
-    content: `A type is a set of values that we give a name to.
+
+## Types
+A type is a set of values that we give a name to.
 
 We can name a type anything we want. For example:
 
@@ -334,8 +483,8 @@ TypeScript has a bunch of built in types:
 * and many more
 `,
     codeSnippets: [],
-    previousSection: 'sets',
-    nextSection: 'variables',
+    previousSection: 'conditionals',
+    nextSection: 'next-steps',
   },
   {
     id: 'variables',
@@ -418,7 +567,7 @@ console.log(` +
 
 `,
     codeSnippets: [],
-    previousSection: 'types',
+    previousSection: 'operators',
     nextSection: 'expressions',
   },
   {
@@ -433,7 +582,7 @@ console.log(` +
   * \`true\` - boolean literal expressions
   * \`"Max"\` - string literal expressions
   * \`[1, 2, 3, 1, 2, 3]\` - array literal expressions
-  * \`{1: "one", 2: "two"}\` - object literal expressions (as maps)
+  * \`new Map([[1, "one"], [2, "two"]])\` - map construction expressions (Map)
 * assignment expressions
   * \`my_age = 25\`
   * \`what_i_ate_for_breakfast = "cereal"\`
@@ -476,7 +625,104 @@ The common expression types across every popular programming language are:
 * conditional expressions
 * loop expressions
 
-These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in Python, then you know what it looks like in most every language.`,
+These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in Python, then you know what it looks like in most every language.
+
+### Comparison expressions
+
+Comparison expressions evaluate to a boolean (\`nr: true\` or \`nr: false\`).
+
+Try these:
+
+\`\`\`typescript
+3 === 3
+3 !== 4
+2 < 5
+5 <= 5
+7 > 2
+2 >= 9
+\`\`\`
+
+### Boolean logic expressions
+
+Use \`nr: &&\`, \`nr: ||\`, and \`nr: !\` to combine or negate boolean values.
+
+\`\`\`typescript
+true && true
+true && false
+true || false
+false || false
+!true
+!(1 < 2)
+\`\`\`
+
+Short-circuiting: in \`nr: A && B\`, if \`nr: A\` is false, JavaScript/TypeScript does not evaluate \`nr: B\`. In \`nr: A || B\`, if \`nr: A\` is true, it does not evaluate \`nr: B\`.
+
+### Grouping and operator precedence
+
+Parentheses \`nr: ( )\` change evaluation order. Arithmetic has the usual precedence (\`nr: * / %\` before \`nr: + -\`), then comparisons, then \`nr: !\`, then \`nr: &&\`, then \`nr: ||\`.
+
+\`\`\`typescript
+1 + 2 * 3
+(1 + 2) * 3
+10 - 4 - 1
+10 - (4 - 1)
+(2 < 3) && (3 < 5)
+\`\`\`
+
+### String expressions
+
+\`nr: +\` concatenates strings; \`nr: "ha".repeat(3)\` repeats them. Template literals interpolate values.
+
+\`\`\`typescript
+"Hello, " + "world!"
+"ha".repeat(3)
+const name = "Sam"
+"Hello, " + name
+\`Hello, \${name}!\`
+\`\`\`
+
+### Array expressions
+
+Arrays support concatenation and repetition‑like creation.
+
+\`\`\`typescript
+[1, 2].concat([3, 4])
+[...['a', 'b'], ...['c']]
+Array(5).fill(0)
+[1, 2, 3].length
+\`\`\`
+
+### Indexing and slicing
+
+Use square brackets to get elements; use \`.slice(start, end)\` for slices (end is exclusive). Works for strings and arrays.
+
+\`\`\`typescript
+const letters = ["a", "b", "c", "d", "e"]
+letters[0]
+letters[letters.length - 1]
+letters.slice(1, 4)
+letters.slice(0, 3)
+letters.filter((_, i) => i % 2 === 0) // every other element
+
+const text = "typescript"
+text[0]
+text[text.length - 1]
+text.slice(1, 4)
+text.split("").reverse().join("")
+\`\`\`
+
+### Membership
+
+Use \`nr: includes\` to test membership in strings and arrays.
+
+\`\`\`typescript
+[1, 2, 3].includes(3)
+"python".includes("py")
+!([1, 2, 3].includes(9))
+!"python".includes("x")
+\`\`\`
+
+These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.`,
     codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
@@ -598,12 +844,12 @@ There are three variations:
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
     codeSnippets: [],
     previousSection: 'function-invocation',
-    nextSection: 'next-steps',
+    nextSection: 'types',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 11,
+    order: 12,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice
@@ -615,6 +861,6 @@ In each case, the \`if\` expression is always followed by an expression that eva
   ### Where to go next
   - Explore types, generics, and tooling (tsc, eslint, jest).`,
     codeSnippets: [],
-    previousSection: 'conditionals',
+    previousSection: 'types',
   },
 ]

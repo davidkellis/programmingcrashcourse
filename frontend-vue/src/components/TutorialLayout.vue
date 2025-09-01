@@ -8,10 +8,13 @@
             <div class="header-content three-col">
               <div class="header-left">
                 <h1 class="tutorial-title">
-                  <a href="/" class="brand">
+                  <RouterLink
+                    class="brand"
+                    :to="{ name: 'section', params: { language: (route.params.language as string) || uiState.selectedLanguage?.id || DEFAULT_LANGUAGE.id, sectionId: 'introduction' } }"
+                  >
                     <img src="/favicon.png" alt="" class="brand-icon" aria-hidden="true" />
                     Programming Crash Course
-                  </a>
+                  </RouterLink>
                 </h1>
               </div>
               <div class="header-center">
@@ -57,9 +60,10 @@
 
           <div class="content-wrapper">
             <div class="inner-centered">
-              <RouterView v-slot="{ Component }">
+              <RouterView v-slot="{ Component, route: r }">
                 <component
                   :is="Component"
+                  v-bind="r.params"
                   :current-language="uiState.selectedLanguage?.id"
                   @run-code="handleRunCode"
                   @run-code-sequence="handleRunCodeSequence"
@@ -96,7 +100,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { RouterView } from 'vue-router'
-import { SUPPORTED_LANGUAGES, STORAGE_KEYS } from '@/constants'
+import { useRoute } from 'vue-router'
+import { SUPPORTED_LANGUAGES, STORAGE_KEYS, DEFAULT_LANGUAGE } from '@/constants'
 import { languageRuntime } from '@/services/languageRuntime'
 import { localContentService } from '@/services/localContentService'
 import type { Language, UIState, REPLState, TutorialSection } from '@/types'
@@ -106,6 +111,7 @@ import DockableREPL from './DockableREPL.vue'
 const uiState = ref<UIState>({ selectedLanguage: null, currentSection: null, isREPLVisible: true, isLoading: false, error: null })
 const replState = ref<REPLState>({ sessionId: null, isExecuting: false, history: [], currentInput: '', variables: {} })
 const router = useRouter()
+const route = useRoute()
 
 const replLayout = ref({ position: 'right' as 'bottom' | 'right', size: { width: 400, height: 300 } })
 
@@ -188,6 +194,9 @@ const handleLanguageChange = async (languageOrNull: Language | null) => {
   replState.value.sessionId = null
   await loadSections()
   await createREPLSession(language)
+  // Navigate to the same section under the new language
+  const sect = currentSectionId.value || 'introduction'
+  router.push({ name: 'section', params: { language: language.id, sectionId: sect } })
 }
 
 const handleCodeExecution = async (code: string) => {
@@ -217,7 +226,11 @@ const toggleREPLVisibility = () => { uiState.value.isREPLVisible = !uiState.valu
 const handleREPLPositionChange = (position: 'bottom' | 'right', size: { width: number; height: number }) => { replLayout.value = { position, size } }
 const clearError = () => { uiState.value.error = null }
 const toggleTOC = () => { isTOCVisible.value = !isTOCVisible.value }
-const navigateToSection = (sectionId: string) => { isTOCVisible.value = false; router.push(`/section/${sectionId}`) }
+const navigateToSection = (sectionId: string) => {
+  isTOCVisible.value = false
+  const lang = (route.params.language as string) || uiState.value.selectedLanguage?.id || DEFAULT_LANGUAGE.id
+  router.push({ name: 'section', params: { language: lang, sectionId } })
+}
 const navigateToPrevious = () => { if (previousSection.value) navigateToSection(previousSection.value.id) }
 const navigateToNext = () => { if (nextSection.value) navigateToSection(nextSection.value.id) }
 
@@ -250,24 +263,55 @@ const handleRunCodeSequence = async (payload: RunCodeSequencePayload) => {
 const parseInputLines = (code: string): Array<{ prompt: string; text: string }> => code.split('\n').map((line, index) => ({ prompt: index === 0 ? '>>> ' : '... ', text: line }))
 
 onMounted(async () => {
-  const savedLanguage = localStorage.getItem(STORAGE_KEYS.SELECTED_LANGUAGE)
-  const languageCandidate = savedLanguage ? SUPPORTED_LANGUAGES.find(lang => lang.id === savedLanguage) : undefined
-  if (languageCandidate) {
-    uiState.value.selectedLanguage = languageCandidate as Language
-    uiState.value.isREPLVisible = true
-    await loadSections()
-    await createREPLSession(languageCandidate as Language)
-  } else {
-    // No language selected yet: hide REPL and wait for user to choose
-    uiState.value.selectedLanguage = null
-    uiState.value.isREPLVisible = false
-    await loadSections()
+  const routeLang = route.params.language as string | undefined
+  let selected: Language | undefined
+  if (routeLang) {
+    selected = SUPPORTED_LANGUAGES.find(l => l.id === routeLang)
   }
+  if (!selected) {
+    const savedLanguage = localStorage.getItem(STORAGE_KEYS.SELECTED_LANGUAGE) || undefined
+    if (savedLanguage) selected = SUPPORTED_LANGUAGES.find(l => l.id === savedLanguage)
+  }
+  if (!selected) {
+    selected = DEFAULT_LANGUAGE
+  }
+
+  if (selected) {
+    uiState.value.selectedLanguage = selected
+    uiState.value.isREPLVisible = true
+    localStorage.setItem(STORAGE_KEYS.SELECTED_LANGUAGE, selected.id)
+    await loadSections()
+    await createREPLSession(selected)
+    if (!routeLang) {
+      // Ensure URL reflects selected language
+      const sect = currentSectionId.value || 'introduction'
+      router.replace({ name: 'section', params: { language: selected.id, sectionId: sect } })
+    }
+  }
+
   document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => { document.removeEventListener('click', handleClickOutside) })
 watch(() => uiState.value.selectedLanguage, (newLanguage) => { if (newLanguage && !replState.value.sessionId) createREPLSession(newLanguage) })
+
+// Keep selected language in sync with route changes
+watch(
+  () => route.params.language,
+  async (newLang) => {
+    if (typeof newLang !== 'string') return
+    const match = SUPPORTED_LANGUAGES.find(l => l.id === newLang)
+    if (!match) return
+    if (uiState.value.selectedLanguage?.id !== match.id) {
+      uiState.value.selectedLanguage = match
+      uiState.value.isREPLVisible = true
+      localStorage.setItem(STORAGE_KEYS.SELECTED_LANGUAGE, match.id)
+      await loadSections()
+      await createREPLSession(match)
+    }
+  },
+  { immediate: false }
+)
 </script>
 
 <style scoped>

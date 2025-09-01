@@ -47,6 +47,7 @@ import CodeSnippetGroupBlock from '@/components/CodeSnippetGroupBlock.vue'
 interface Props {
   sectionId: string
   currentLanguage?: string
+  language?: string
 }
 
 const props = defineProps<Props>()
@@ -182,8 +183,8 @@ const loadSection = async () => {
     isLoading.value = true
     error.value = null
 
-    // Get the current language from props or default to python
-    const currentLanguage = props.currentLanguage || 'python'
+    // Prefer language from route params, fallback to currentLanguage prop, then default
+    const currentLanguage = props.language || props.currentLanguage || 'python'
     const sectionData = await localContentService.getSection(props.sectionId, currentLanguage)
     if (sectionData) {
       section.value = sectionData
@@ -320,6 +321,20 @@ const renderMarkdown = (content: string): string => {
     seen.set(base, count + 1)
     const id = count === 0 ? base : `${base}-${count + 1}`
     heading.setAttribute('id', id)
+  })
+  
+  // Rewrite internal section links to include current language in the path.
+  // This ensures links like "/section/types" keep the user within the active language
+  // (e.g., "/javascript/section/types").
+  const lang = props.language || props.currentLanguage || 'python'
+  const anchors = Array.from(doc.querySelectorAll('a[href]')) as HTMLAnchorElement[]
+  anchors.forEach((a) => {
+    const href = a.getAttribute('href') || ''
+    if (href.startsWith('/section/')) {
+      a.setAttribute('href', `/${lang}${href}`)
+    } else if (href.startsWith('section/')) {
+      a.setAttribute('href', `/${lang}/${href}`)
+    }
   })
   
   return doc.body.innerHTML
@@ -823,21 +838,11 @@ onUnmounted(() => {
   if (processTimeout) clearTimeout(processTimeout)
 })
 
-// Watch for route changes to reload section content
+// Watch for route and language changes to reload section content
 watch(
-  () => props.sectionId,
-  (newSectionId) => {
+  () => [props.sectionId, props.language, props.currentLanguage],
+  ([newSectionId]) => {
     if (newSectionId) {
-      loadSection()
-    }
-  },
-)
-
-// Watch for language changes to reload section content
-watch(
-  () => props.currentLanguage,
-  () => {
-    if (props.sectionId) {
       loadSection()
     }
   },

@@ -57,11 +57,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { localContentService } from '@/services/localContentService'
+import { DEFAULT_LANGUAGE } from '@/constants'
 import type { TutorialSection } from '@/types'
 
 const router = useRouter()
+const route = useRoute()
 
 // No props needed - component works independently
 
@@ -73,11 +75,13 @@ const error = ref<string | null>(null)
 
 
 const startTutorial = () => {
-  router.push('/section/introduction')
+  const lang = (route.params.language as string) || DEFAULT_LANGUAGE.id
+  router.push({ name: 'section', params: { language: lang, sectionId: 'introduction' } })
 }
 
 const navigateToSection = (sectionId: string) => {
-  router.push(`/section/${sectionId}`)
+  const lang = (route.params.language as string) || DEFAULT_LANGUAGE.id
+  router.push({ name: 'section', params: { language: lang, sectionId } })
 }
 
 const loadSections = async () => {
@@ -85,7 +89,8 @@ const loadSections = async () => {
     isLoading.value = true
     error.value = null
 
-    const sectionsData = await localContentService.getAllSections('python') // Default to Python for structure
+    const lang = (route.params.language as string) || DEFAULT_LANGUAGE.id
+    const sectionsData = await localContentService.getAllSections(lang)
     sections.value = sectionsData
 
   } catch (err) {

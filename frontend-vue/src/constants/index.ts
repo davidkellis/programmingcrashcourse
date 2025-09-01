@@ -41,7 +41,9 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   }
 ];
 
-export const DEFAULT_LANGUAGE = SUPPORTED_LANGUAGES[0]; // Python
+export const DEFAULT_LANGUAGE_ID = 'python' as const
+const _DEFAULT_LANGUAGE = SUPPORTED_LANGUAGES.find(l => l.id === DEFAULT_LANGUAGE_ID) ?? SUPPORTED_LANGUAGES[0]!
+export const DEFAULT_LANGUAGE: Language = _DEFAULT_LANGUAGE
 
 export const UI_CONFIG = {
   REPL_HEIGHT_PERCENTAGE: 25, // Bottom quarter of screen
