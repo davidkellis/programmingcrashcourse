@@ -44,7 +44,6 @@ Code blocks have a green Run button in the top-right. Click it to send the whole
 You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
 Let's begin.`,
-    codeSnippets: [],
     nextSection: 'comments',
   },
   {
@@ -64,7 +63,6 @@ Let's begin.`,
 message = "Hello from Python!"  # this comment explains what this line does
 print(message)  # this comment explains we're printing the message
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values',
   },
@@ -174,7 +172,6 @@ my_dog
 
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.
 `,
-    codeSnippets: [],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -287,7 +284,6 @@ not (2 < 3)
 
 You now know the basic operators; next you will use them with variables and assignments.
 `,
-    codeSnippets: [],
     previousSection: 'values',
     nextSection: 'variables',
   },
@@ -376,7 +372,6 @@ print(f"my_age -> {my_age}")   # this prints 11
 \`\`\`
 
 `,
-    codeSnippets: [],
     previousSection: 'operators',
     nextSection: 'expressions',
   },
@@ -536,7 +531,6 @@ Use \`nr: in\` and \`nr: not in\` to test membership.
 
 These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.
 `,
-    codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
   },
@@ -617,7 +611,6 @@ This function has no parameters:
 
 def print_hello():
   print("Hello")`,
-    codeSnippets: [],
     previousSection: 'expressions',
     nextSection: 'function-invocation',
   },
@@ -710,7 +703,6 @@ We can see that in the following interactive interpreter session:
 >>> three_plus_five = add_five(3)
 >>> three_plus_five
 8`,
-    codeSnippets: [],
     previousSection: 'functions',
     nextSection: 'conditionals',
   },
@@ -741,7 +733,6 @@ There are three variations:
        print("You are ten or older")
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    codeSnippets: [],
     previousSection: 'function-invocation',
     nextSection: 'types',
   },
@@ -925,7 +916,6 @@ Python has a bunch of built in types:
 * \`nr: dict\` - dictionary (also called a map)
 * and many more
 `,
-    codeSnippets: [],
     previousSection: 'conditionals',
     nextSection: 'next-steps',
   },

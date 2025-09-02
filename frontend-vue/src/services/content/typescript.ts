@@ -45,7 +45,6 @@ Code blocks have a green Run button in the top-right. Click it to send the whole
 You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
 Let's begin.`,
-    codeSnippets: [],
     nextSection: 'comments',
   },
   {
@@ -64,7 +63,6 @@ Let's begin.`,
 let message: string = "Hello from TypeScript!"; // this comment explains what this line does
 console.log(message); // this comment explains we're printing the message
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values',
   },
@@ -171,7 +169,6 @@ my_dog
 \`\`\`
 
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.`,
-    codeSnippets: [],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -283,7 +280,6 @@ true || false
 
 You now know the basic operators; next you will use them with variables and assignments.
 `,
-    codeSnippets: [],
     previousSection: 'values',
     nextSection: 'variables',
   },
@@ -459,7 +455,6 @@ TypeScript has a bunch of built in types:
 * \`nr: Array<T>\` (this is a generic type; we will cover this later on)
 * and many more
 `,
-    codeSnippets: [],
     previousSection: 'conditionals',
     nextSection: 'next-steps',
   },
@@ -561,7 +556,6 @@ console.log(\`my_age -> \${my_age}\`)   // this prints 11
 \`\`\`
 
 `,
-    codeSnippets: [],
     previousSection: 'operators',
     nextSection: 'expressions',
   },
@@ -718,7 +712,6 @@ Use \`nr: includes\` to test membership in strings and arrays.
 \`\`\`
 
 These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.`,
-    codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
   },
@@ -766,7 +759,6 @@ function print_hello(): void {
   console.log("Hello");
 }
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'expressions',
     nextSection: 'function-invocation',
   },
@@ -817,7 +809,6 @@ undefined
 > three_plus_five
 8
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'functions',
     nextSection: 'conditionals',
   },
@@ -837,7 +828,6 @@ There are three variations:
    * \`if (age < 5) { console.log("You are younger than five years old."); } else if (age < 10) { console.log("You are five to nine years old."); } else { console.log("You are ten or older"); }\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    codeSnippets: [],
     previousSection: 'function-invocation',
     nextSection: 'types',
   },
@@ -855,7 +845,6 @@ In each case, the \`if\` expression is always followed by an expression that eva
 
   ### Where to go next
   - Explore types, generics, and tooling (tsc, eslint, jest).`,
-    codeSnippets: [],
     previousSection: 'types',
   },
 ]

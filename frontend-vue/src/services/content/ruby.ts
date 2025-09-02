@@ -45,7 +45,6 @@ Code blocks have a green Run button in the top-right. Click it to send the whole
 You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
 Let's begin.`,
-    codeSnippets: [],
     nextSection: 'comments',
   },
   {
@@ -64,7 +63,6 @@ Let's begin.`,
 message = "Hello from Ruby!" # this comment explains what this line does
 puts message # this comment explains we're printing the message
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values',
   },
@@ -176,7 +174,6 @@ my_dog
 \`\`\`
 
 You will use these values inside expressions, assignments, method calls, and conditionals in the rest of this tutorial.`,
-    codeSnippets: [],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -290,7 +287,6 @@ true || false
 \`\`\`
 
 You now know the basic operators; next you will use them with variables and assignments.`,
-    codeSnippets: [],
     codeItems: [],
     previousSection: 'values',
     nextSection: 'variables',
@@ -406,7 +402,6 @@ Ruby has a bunch of built in classes:
 * \`nr: Set\`
 * and many more
 `,
-    codeSnippets: [],
     previousSection: 'conditionals',
     nextSection: 'next-steps',
   },
@@ -495,7 +490,6 @@ puts "my_age -> #{my_age}"   # this prints 11
 \`\`\`
 
 `,
-    codeSnippets: [],
     previousSection: 'operators',
     nextSection: 'expressions',
   },
@@ -650,7 +644,6 @@ Use \`nr: include?\` to test membership on arrays and strings.
 \`\`\`
 
 These forms are the building blocks you will combine inside conditionals, loops, and method calls in the next sections.`,
-    codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
   },
@@ -727,7 +720,6 @@ def print_hello
   puts "Hello"
 end
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'expressions',
     nextSection: 'function-invocation',
   },
@@ -807,7 +799,6 @@ irb(main):004:0> three_plus_five = add_five(3)
 irb(main):005:0> three_plus_five
 => 8
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'functions',
     nextSection: 'conditionals',
   },
@@ -852,7 +843,6 @@ end
 \`\`\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    codeSnippets: [],
     previousSection: 'function-invocation',
     nextSection: 'types',
   },
@@ -870,7 +860,6 @@ In each case, the \`if\` expression is always followed by an expression that eva
 
   ### Where to go next
   - Learn blocks, enumerables, and simple file scripts.`,
-    codeSnippets: [],
     previousSection: 'types',
   },
 ]

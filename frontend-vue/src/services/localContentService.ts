@@ -55,8 +55,8 @@ class LocalContentService {
       return flattened
     }
     
-    // Final fallback to legacy codeSnippets array
-    return section.codeSnippets || []
+    // No snippets found
+    return []
   }
 
   /**

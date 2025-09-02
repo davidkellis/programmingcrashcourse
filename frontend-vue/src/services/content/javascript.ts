@@ -45,7 +45,6 @@ Code blocks have a green Run button in the top-right. Click it to send the whole
 You can edit the code in the code blocks by clicking on the code and typing. When the cursor is blinking inside a code block, you can press \`nr: ctrl+enter\` to run (hold Control, press Enter) the code.
 
 Let's begin.`,
-    codeSnippets: [],
     nextSection: 'comments',
   },
   {
@@ -64,7 +63,6 @@ Let's begin.`,
 const message = "Hello from JavaScript!"; // this comment explains what this line does
 console.log(message); // this comment explains we're printing the message
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'introduction',
     nextSection: 'values',
   },
@@ -163,7 +161,6 @@ my_dog
 \`\`\`
 
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.`,
-    codeSnippets: [],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -277,7 +274,6 @@ true || false
 
 You now know the basic operators; next you'll use them with variables and assignments.
 `,
-    codeSnippets: [],
     previousSection: 'values',
     nextSection: 'variables',
   },
@@ -371,7 +367,6 @@ console.log(` +
 \`\`\`
 
 `,
-    codeSnippets: [],
     previousSection: 'operators',
     nextSection: 'expressions',
   },
@@ -501,7 +496,6 @@ Use \`nr: includes\` to test membership in arrays and substrings in strings.
 \`\`\`
 
 These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.`,
-    codeSnippets: [],
     previousSection: 'variables',
     nextSection: 'functions',
   },
@@ -549,7 +543,6 @@ function print_hello() {
   console.log("Hello");
 }
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'expressions',
     nextSection: 'function-invocation',
   },
@@ -600,7 +593,6 @@ undefined
 > three_plus_five
 8
 \`\`\``,
-    codeSnippets: [],
     previousSection: 'functions',
     nextSection: 'conditionals',
   },
@@ -620,7 +612,6 @@ There are three variations:
    * \`if (age < 5) { console.log("You are younger than five years old."); } else if (age < 10) { console.log("You are five to nine years old."); } else { console.log("You are ten or older"); }\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    codeSnippets: [],
     previousSection: 'function-invocation',
     nextSection: 'types',
   },
@@ -797,7 +788,6 @@ JavaScript has a bunch of built-in types and core objects:
 * \`nr: Array\`
 * and many more
 `,
-    codeSnippets: [],
     previousSection: 'conditionals',
     nextSection: 'next-steps',
   },
@@ -815,7 +805,6 @@ JavaScript has a bunch of built-in types and core objects:
 
   ### Where to go next
   - Learn loops, arrays/objects methods, async/await, and modules.`,
-    codeSnippets: [],
     previousSection: 'types',
   },
 ]

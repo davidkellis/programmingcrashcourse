@@ -637,11 +637,6 @@ const mountInlineSnippets = () => {
           | undefined
       }
 
-      // Final fallback to legacy codeSnippets array
-      if (!snippet) {
-        const legacy = section.value?.codeSnippets || []
-        snippet = legacy.find((s) => s.id === snippetId)
-      }
     }
 
     const mountEl = document.createElement('div')

@@ -146,8 +146,6 @@ const getCodeExampleCount = (section: TutorialSection): number => {
           count += 1
         }
       }
-    } else {
-      count = section.codeSnippets.length
     }
   }
   
