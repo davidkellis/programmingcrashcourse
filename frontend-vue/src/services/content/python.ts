@@ -7,17 +7,28 @@ export const PYTHON_TUTORIAL_SECTIONS: TutorialSection[] = [
     order: 1,
     content: `Welcome!
 
-This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
+This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: Python, Ruby, C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
 Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
 
-Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
+Throughout the tutorial you'll see short code snippets illustrated like this: \`nr: 1 + 2\`. Some snippets have a green Run button with a little arrow like ➤, for example: \`1 + 2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read-evaluate-print loop) docked to the right side or bottom of the page.
 
 You'll see groups of snippets like this:
 
-[[snippet-group:intro_group_hello_vars]]
+\`\`\`python
+# title: Warm-up: Hello and Variables
+# description: Run these in order to see how the REPL keeps state between snippets.
+print('Hello from a grouped snippet!')
+---
+x = 41
+---
+x + 1
+\`\`\`
 
-[[snippet:intro_single_snippet]]
+\`\`\`python
+# title: A single snippet alongside a group
+sum([1, 2, 3])
+\`\`\`
 
 You'll also see editable code blocks like this:
 
@@ -34,46 +45,6 @@ You can edit the code in the code blocks by clicking on the code and typing. Whe
 
 Let's begin.`,
     codeSnippets: [],
-    codeItems: [
-      {
-        id: 'intro_group_hello_vars',
-        title: 'Warm-up: Hello and Variables',
-        description: 'Run these in order to see how the REPL keeps state between snippets.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          {
-            id: 'intro_g1_s1',
-            code: "print('Hello from a grouped snippet!')",
-            language: 'python',
-            isExecutable: true,
-            context: 'Print a greeting',
-          },
-          {
-            id: 'intro_g1_s2',
-            code: 'x = 41',
-            language: 'python',
-            isExecutable: true,
-            context: 'Create a variable',
-          },
-          {
-            id: 'intro_g1_s3',
-            code: 'x + 1',
-            language: 'python',
-            isExecutable: true,
-            context: 'Use the variable defined earlier',
-          },
-        ],
-      },
-      {
-        id: 'intro_single_snippet',
-        code: 'sum([1, 2, 3])',
-        language: 'python',
-        isExecutable: true,
-        context: 'A single snippet alongside a group',
-        // explanation: 'Groups and single items can be mixed; the UI will render both.',
-      },
-    ],
     nextSection: 'comments',
   },
   {
@@ -114,120 +85,96 @@ These various kinds of values are also called "types". We will learn about sets 
 - You can use underscores instead of commas to make big numbers more readable.
   - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
 
-[[snippet-group:values_numbers_group]]
+\`\`\`python
+# title: Numbers — literal values
+# description: Evaluate some integer and float literals.
+42
+---
+1_000_000
+---
+3.141592653589793
+---
+-7
+\`\`\`
 
 ### Strings
 
 - What they are used for: representing text like names, messages, file paths, and any human‑readable data.
 - Features: written with quotes, can include spaces and punctuation, support Unicode.
 
-[[snippet-group:values_strings_group]]
+\`\`\`python
+# title: Strings — literal values
+# description: Evaluate some string literals.
+"Hello, world!"
+---
+'Python is fun'
+---
+"😀 emojis are text, too"
+\`\`\`
 
 ### Booleans (bool)
 
 - What they are used for: representing truth values for decisions, conditions, and flags.
 - Values: \`nr: True\` and \`nr: False\`.
 
-[[snippet-group:values_booleans_group]]
+\`\`\`python
+# title: Booleans — True/False
+# description: Evaluate the two boolean values.
+True
+---
+False
+\`\`\`
 
 ### Lists (list)
 
 - What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
 - Features: can hold values of any type, can be empty, can be nested.
 
-[[snippet-group:values_lists_group]]
+\`\`\`python
+# title: Lists — literal values
+# description: Evaluate list literals of different shapes.
+[1, 3, 5, 7, 9]
+---
+["apples", "bananas", "cherries"]
+---
+[1000, "cookies", True]
+---
+[]  # an empty list
+\`\`\`
 
 ### Dictionaries (dict)
 
 - What they are used for: mapping keys to values; great for lookups, configurations, and records.
 - Features: keys must be unique; common keys are strings or numbers.
 
-[[snippet-group:values_dicts_group]]
+\`\`\`python
+# title: Dictionaries — literal values
+# description: Evaluate dictionary (map) literals.
+{1: "one", 2: "two", 3: "three"}
+---
+{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}
+\`\`\`
 
 ### Objects (instances of classes)
 
 - What they are used for: representing real‑world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
 - Example: creating an instance of a simple class.
 
-[[snippet-group:values_objects_group]]
+\`\`\`python
+# title: Objects — class instances
+# description: Define a simple class, create an instance, and evaluate it.
+class Dog:
+  def __init__(self, name):
+    self.name = name
+---
+my_dog = Dog("Max")
+---
+my_dog
+\`\`\`
 
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.
 `,
     codeSnippets: [],
-    codeItems: [
-      {
-        id: 'values_numbers_group',
-        title: 'Numbers — literal values',
-        description: 'Evaluate some integer and float literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_numbers_s1', code: '42', language: 'python', isExecutable: true, context: 'An integer literal' },
-          { id: 'values_numbers_s2', code: '1_000_000', language: 'python', isExecutable: true, context: 'Readable integer with underscores' },
-          { id: 'values_numbers_s3', code: '3.141592653589793', language: 'python', isExecutable: true, context: 'A float literal' },
-          { id: 'values_numbers_s4', code: '-7', language: 'python', isExecutable: true, context: 'A negative integer' },
-        ],
-      },
-      {
-        id: 'values_strings_group',
-        title: 'Strings — literal values',
-        description: 'Evaluate some string literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_strings_s1', code: '"Hello, world!"', language: 'python', isExecutable: true, context: 'Double-quoted string' },
-          { id: 'values_strings_s2', code: '\'Python is fun\'', language: 'python', isExecutable: true, context: 'Single-quoted string' },
-          { id: 'values_strings_s3', code: '"😀 emojis are text, too"', language: 'python', isExecutable: true, context: 'Unicode string' },
-        ],
-      },
-      {
-        id: 'values_booleans_group',
-        title: 'Booleans — True/False',
-        description: 'Evaluate the two boolean values.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_booleans_s1', code: 'True', language: 'python', isExecutable: true, context: 'Boolean True' },
-          { id: 'values_booleans_s2', code: 'False', language: 'python', isExecutable: true, context: 'Boolean False' },
-        ],
-      },
-      {
-        id: 'values_lists_group',
-        title: 'Lists — literal values',
-        description: 'Evaluate list literals of different shapes.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_lists_s1', code: '[1, 3, 5, 7, 9]', language: 'python', isExecutable: true, context: 'A list of numbers' },
-          { id: 'values_lists_s2', code: '["apples", "bananas", "cherries"]', language: 'python', isExecutable: true, context: 'A list of strings' },
-          { id: 'values_lists_s3', code: '[1000, "cookies", True]', language: 'python', isExecutable: true, context: 'A mixed list' },
-          { id: 'values_lists_s4', code: '[]  # an empty list', language: 'python', isExecutable: true, context: 'An empty list' },
-        ],
-      },
-      {
-        id: 'values_dicts_group',
-        title: 'Dictionaries — literal values',
-        description: 'Evaluate dictionary (map) literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_dicts_s1', code: '{1: "one", 2: "two", 3: "three"}', language: 'python', isExecutable: true, context: 'Integer keys' },
-          { id: 'values_dicts_s2', code: '{"Jack": "Cookies", "Jill": "Ice Cream", "Phil": "Asparagus"}', language: 'python', isExecutable: true, context: 'String keys' },
-        ],
-      },
-      {
-        id: 'values_objects_group',
-        title: 'Objects — class instances',
-        description: 'Define a simple class, create an instance, and evaluate it.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_objects_s1', code: 'class Dog:\n  def __init__(self, name):\n    self.name = name', language: 'python', isExecutable: true, context: 'Define a class' },
-          { id: 'values_objects_s2', code: 'my_dog = Dog("Max")', language: 'python', isExecutable: true, context: 'Instantiate the class' },
-          { id: 'values_objects_s3', code: 'my_dog', language: 'python', isExecutable: true, context: 'Evaluate the instance' },
-        ],
-      },
-    ],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -248,12 +195,20 @@ You will use these values inside expressions, assignments, function calls, and c
 - Exponent: \`nr: **\`
 
 \`\`\`python
+# title: Arithmetic operators
+# description: Practice arithmetic operations with numbers.
 1 + 2
+---
 7 - 3
+---
 4 * 5
+---
 9 / 2
+---
 9 // 2
+---
 9 % 2
+---
 2 ** 3
 \`\`\`
 
@@ -264,22 +219,33 @@ You will use these values inside expressions, assignments, function calls, and c
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
 
 \`\`\`python
+# title: Comparison operators
+# description: Compare values to get boolean results.
 3 == 3
+---
 3 != 4
+---
 2 < 5
+---
 5 <= 5
+---
 7 > 1
+---
 7 >= 10
 \`\`\`
 
 ### Boolean operators
 
 - And: \`nr: and\`  |  Or: \`nr: or\`  |  Not: \`nr: not\`
-- Short‑circuit: \`A and B\` skips \`B\` if \`A\` is False; \`A or B\` skips \`B\` if \`A\` is True.
+- Short‑circuit: \`nr: A and B\` skips \`nr: B\` if \`nr: A\` is False; \`nr: A or B\` skips \`nr: B\` if \`nr: A\` is True.
 
 \`\`\`python
+# title: Boolean operators
+# description: Combine boolean values with logical operators.
 True and False
+---
 True or False
+---
 not (2 < 3)
 \`\`\`
 
@@ -291,11 +257,18 @@ not (2 < 3)
 - Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start:stop:step]\`
 
 \`\`\`python
+# title: Sequence operators
+# description: Work with strings and lists using various operators.
 "Hi, " + "there"
+---
 "ha" * 3
+---
 "py" in "python"
+---
 [1, 2] + [3]
+---
 [0] * 4
+---
 [1,2,3,4][1:3]
 \`\`\`
 
@@ -305,7 +278,10 @@ not (2 < 3)
 - Precedence (high → low): \`nr: **\`, \`nr: * / // %\`, \`nr: + -\`, comparisons, \`nr: not\`, \`nr: and\`, \`nr: or\`.
 
 \`\`\`python
+# title: Precedence and grouping
+# description: See how operator precedence and parentheses affect evaluation.
 1 + 2 * 3
+---
 (1 + 2) * 3
 \`\`\`
 
@@ -321,25 +297,25 @@ You now know the basic operators; next you will use them with variables and assi
     order: 6,
     content: `A variable is a name that points at a particular value. For example:
 
-  <div>
-      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
-        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
-        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
-        <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
-        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
-      </svg>
-  </div>
+<div>
+    <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
+      <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
+      <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
+      <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+    </svg>
+</div>
 
-  <div>
-      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
-        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
-        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
-        <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
-        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
-      </svg>
-  </div>
+<div>
+    <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
+      <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
+      <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
+      <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+    </svg>
+</div>
 
 We name a variable with letters, numbers, and the underscore character, for example:
 
@@ -350,7 +326,17 @@ We name a variable with letters, numbers, and the underscore character, for exam
 
 We can't use spaces in variable names.
 
+In Python, you can create a new variable simply by assigning a value to it—no declaration is needed. Some languages like JavaScript and TypeScript require variables to be declared (with keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\`) before or during their first assignment, but Python and Ruby allow you to create new variables directly through assignment.
+
 A variable can only point at one value at a time; however, we can change the value that a variable points at.
+
+<div>
+  <img src="/whatiateforbreakfast_reassignment.png" alt="Variable reassignment example showing what_i_ate_for_breakfast changing from 'cereal' to 'toast'" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
+
+<div>
+  <img src="/mycurrentage_reassignment.png" alt="Variable reassignment example showing my_current_age changing from 10 to 10.5" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
 
 When we make a variable point at a value, we say that we are assigning a value to a variable; this process is called assignment.
 

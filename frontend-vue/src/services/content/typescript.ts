@@ -7,17 +7,28 @@ export const TYPESCRIPT_TUTORIAL_SECTIONS: TutorialSection[] = [
     order: 1,
     content: `Welcome!
 
-This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
+This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: Python, Ruby, C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
 Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
 
-Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
+Throughout the tutorial you'll see short code snippets illustrated like this: \`nr: 1 + 2\`. Some snippets have a green Run button with a little arrow like ➤, for example: \`1 + 2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read-evaluate-print loop) docked to the right side or bottom of the page.
 
 You'll see groups of snippets like this:
 
-[[snippet-group:intro_group_hello_vars]]
+\`\`\`typescript
+// title: Warm-up: Hello and Variables
+// description: Run these in order to see how the REPL keeps state between snippets.
+console.log('Hello from a grouped snippet!')
+---
+let x: number = 41
+---
+x + 1
+\`\`\`
 
-[[snippet:intro_single_snippet]]
+\`\`\`typescript
+// title: A single snippet alongside a group
+[1, 2, 3].reduce((a, b) => a + b, 0)
+\`\`\`
 
 You'll also see editable code blocks like this:
 
@@ -35,45 +46,6 @@ You can edit the code in the code blocks by clicking on the code and typing. Whe
 
 Let's begin.`,
     codeSnippets: [],
-    codeItems: [
-      {
-        id: 'intro_group_hello_vars',
-        title: 'Warm-up: Hello and Variables',
-        description: 'Run these in order to see how the REPL keeps state between snippets.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          {
-            id: 'intro_g1_s1',
-            code: "console.log('Hello from a grouped snippet!')",
-            language: 'typescript',
-            isExecutable: true,
-            context: 'Print a greeting',
-          },
-          {
-            id: 'intro_g1_s2',
-            code: 'let x: number = 41',
-            language: 'typescript',
-            isExecutable: true,
-            context: 'Create a variable',
-          },
-          {
-            id: 'intro_g1_s3',
-            code: 'x + 1',
-            language: 'typescript',
-            isExecutable: true,
-            context: 'Use the variable defined earlier',
-          },
-        ],
-      },
-      {
-        id: 'intro_single_snippet',
-        code: '[1, 2, 3].reduce((a, b) => a + b, 0)',
-        language: 'typescript',
-        isExecutable: true,
-        context: 'A single snippet alongside a group',
-      },
-    ],
     nextSection: 'comments',
   },
   {
@@ -111,119 +83,95 @@ These various kinds of values are also called "types". We will learn about sets 
 - You can use underscores instead of commas to make big numbers more readable.
   - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
 
-[[snippet-group:values_numbers_group]]
+\`\`\`typescript
+// title: Numbers — literal values
+// description: Evaluate number literals.
+42
+---
+1_000_000
+---
+3.141592653589793
+---
+-7
+\`\`\`
 
 ### Strings
 
 - What they are used for: representing text like names, messages, file paths, and any human‑readable data.
 - Features: written with quotes, can include spaces and punctuation, support Unicode.
 
-[[snippet-group:values_strings_group]]
+\`\`\`typescript
+// title: Strings — literal values
+// description: Evaluate string literals.
+"Hello, world!"
+---
+'TypeScript is fun'
+---
+"😀 emojis are text, too"
+\`\`\`
 
 ### Booleans (boolean)
 
 - What they are used for: representing truth values for decisions, conditions, and flags.
 - Values: \`nr: true\` and \`nr: false\`.
 
-[[snippet-group:values_booleans_group]]
+\`\`\`typescript
+// title: Booleans — true/false
+// description: Evaluate the two boolean values.
+true
+---
+false
+\`\`\`
 
 ### Arrays (Array)
 
 - What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
 - Features: can hold values of any type, can be empty, can be nested.
 
-[[snippet-group:values_arrays_group]]
+\`\`\`typescript
+// title: Arrays — literal values
+// description: Evaluate array literals of different shapes.
+[1, 3, 5, 7, 9]
+---
+["apples", "bananas", "cherries"]
+---
+[1000, "cookies", true]
+---
+[]  // an empty array
+\`\`\`
 
 ### Maps (Map)
 
 - What they are used for: mapping keys to values; great for lookups, configurations, and records.
 - Features: keys must be unique; keys can be of any type; preserves insertion order.
 
-[[snippet-group:values_maps_group]]
+\`\`\`typescript
+// title: Maps — Map instances
+// description: Construct Map instances with different key types.
+new Map([[1, "one"], [2, "two"], [3, "three"]])
+---
+new Map([["Jack", "Cookies"], ["Jill", "Ice Cream"], ["Phil", "Asparagus"]])
+\`\`\`
 
 ### Class instances (instances of classes)
 
 - What they are used for: representing real‑world things with data (properties) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
 - Example: creating an instance of a simple class.
 
-[[snippet-group:values_objects_group]]
+\`\`\`typescript
+// title: Objects — class instances
+// description: Define a class, create an instance, and evaluate it.
+class Dog {
+  constructor(public name: string) {}
+}
+---
+const my_dog = new Dog("Max")
+---
+my_dog
+\`\`\`
 
 You will use these values inside expressions, assignments, function calls, and conditionals in the rest of this tutorial.`,
     codeSnippets: [],
-    codeItems: [
-      {
-        id: 'values_numbers_group',
-        title: 'Numbers — literal values',
-        description: 'Evaluate number literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_numbers_s1', code: '42', language: 'typescript', isExecutable: true, context: 'An integer literal' },
-          { id: 'values_numbers_s2', code: '1_000_000', language: 'typescript', isExecutable: true, context: 'Readable integer with underscores' },
-          { id: 'values_numbers_s3', code: '3.141592653589793', language: 'typescript', isExecutable: true, context: 'A float literal' },
-          { id: 'values_numbers_s4', code: '-7', language: 'typescript', isExecutable: true, context: 'A negative integer' },
-        ],
-      },
-      {
-        id: 'values_strings_group',
-        title: 'Strings — literal values',
-        description: 'Evaluate string literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_strings_s1', code: '"Hello, world!"', language: 'typescript', isExecutable: true, context: 'Double-quoted string' },
-          { id: 'values_strings_s2', code: '\'TypeScript is fun\'', language: 'typescript', isExecutable: true, context: 'Single-quoted string' },
-          { id: 'values_strings_s3', code: '"😀 emojis are text, too"', language: 'typescript', isExecutable: true, context: 'Unicode string' },
-        ],
-      },
-      {
-        id: 'values_booleans_group',
-        title: 'Booleans — true/false',
-        description: 'Evaluate the two boolean values.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_booleans_s1', code: 'true', language: 'typescript', isExecutable: true, context: 'Boolean true' },
-          { id: 'values_booleans_s2', code: 'false', language: 'typescript', isExecutable: true, context: 'Boolean false' },
-        ],
-      },
-      {
-        id: 'values_arrays_group',
-        title: 'Arrays — literal values',
-        description: 'Evaluate array literals of different shapes.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_arrays_s1', code: '[1, 3, 5, 7, 9]', language: 'typescript', isExecutable: true, context: 'A list of numbers' },
-          { id: 'values_arrays_s2', code: '["apples", "bananas", "cherries"]', language: 'typescript', isExecutable: true, context: 'A list of strings' },
-          { id: 'values_arrays_s3', code: '[1000, "cookies", true]', language: 'typescript', isExecutable: true, context: 'A mixed array' },
-          { id: 'values_arrays_s4', code: '[]  // an empty array', language: 'typescript', isExecutable: true, context: 'An empty array' },
-        ],
-      },
-      {
-        id: 'values_maps_group',
-        title: 'Maps — Map instances',
-        description: 'Construct Map instances with different key types.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_maps_s1', code: 'new Map([[1, "one"], [2, "two"], [3, "three"]])', language: 'typescript', isExecutable: true, context: 'Integer keys' },
-          { id: 'values_maps_s2', code: 'new Map([["Jack", "Cookies"], ["Jill", "Ice Cream"], ["Phil", "Asparagus"]])', language: 'typescript', isExecutable: true, context: 'String keys' },
-        ],
-      },
-      {
-        id: 'values_objects_group',
-        title: 'Objects — class instances',
-        description: 'Define a class, create an instance, and evaluate it.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_objects_s1', code: 'class Dog {\n  constructor(public name: string) {}\n}', language: 'typescript', isExecutable: true, context: 'Define a class' },
-          { id: 'values_objects_s2', code: 'const my_dog = new Dog("Max")', language: 'typescript', isExecutable: true, context: 'Instantiate the class' },
-          { id: 'values_objects_s3', code: 'my_dog', language: 'typescript', isExecutable: true, context: 'Evaluate the instance' },
-        ],
-      },
-    ],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -243,11 +191,18 @@ You will use these values inside expressions, assignments, function calls, and c
 - Exponent: \`nr: **\`
 
 \`\`\`typescript
+// title: Arithmetic operators
+// description: Practice arithmetic operations with numbers.
 1 + 2
+---
 7 - 3
+---
 4 * 5
+---
 9 / 2
+---
 9 % 2
+---
 2 ** 3
 \`\`\`
 
@@ -259,23 +214,35 @@ You will use these values inside expressions, assignments, function calls, and c
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
 
 \`\`\`typescript
+// title: Comparison operators
+// description: Compare values
 3 == 3
+---
 3 === 3
+---
 3 != 4
+---
 2 < 5
+---
 5 <= 5
+---
 7 > 1
+---
 7 >= 10
 \`\`\`
 
 ### Boolean operators
 
 - And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
-- Short‑circuit: \`A && B\` skips \`B\` if \`A\` is false; \`A || B\` skips \`B\` if \`A\` is true.
+- Short‑circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
 
 \`\`\`typescript
+// title: Boolean operators
+// description: Combine boolean values with logical operators.
 true && false
+---
 true || false
+---
 !(2 < 3)
 \`\`\`
 
@@ -286,11 +253,18 @@ true || false
 - Membership: \`nr: "py".includes("p")\`, \`nr: [1,2,3].includes(2)\`.
 
 \`\`\`typescript
+// title: Sequence operators
+// description: Work with strings and arrays using various operators and methods.
 "Hi, " + "there"
+---
 "ha".repeat(3)
+---
 [1, 2].concat([3])
-[...['a', 'b'], ...['c']]
+---
+[...["a", "b"], ...["c"]]
+---
 "python".includes("py")
+---
 [1,2,3].includes(2)
 \`\`\`
 
@@ -300,7 +274,10 @@ true || false
 - Precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
 
 \`\`\`typescript
+// title: Precedence and grouping
+// description: See how operator precedence and parentheses affect evaluation.
 1 + 2 * 3
+---
 (1 + 2) * 3
 \`\`\`
 
@@ -490,28 +467,27 @@ TypeScript has a bunch of built in types:
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content:
-      `A variable is a name that points at a particular value. For example:
+    content: `A variable is a name that points at a particular value. For example:
 
-  <div>
-      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
-        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
-        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
-        <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
-        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
-      </svg>
-  </div>
+<div>
+    <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
+      <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
+      <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
+      <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+    </svg>
+</div>
 
-  <div>
-      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
-        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
-        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
-        <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
-        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
-      </svg>
-  </div>
+<div>
+    <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
+      <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
+      <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
+      <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+    </svg>
+</div>
 
 We name a variable with letters, numbers, and the underscore character, for example:
 
@@ -524,11 +500,19 @@ We can't use spaces in variable names.
 
 A variable can only point at one value at a time; however, we can change the value that a variable points at.
 
+<div>
+  <img src="/whatiateforbreakfast_reassignment.png" alt="Variable reassignment example showing what_i_ate_for_breakfast changing from 'cereal' to 'toast'" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
+
+<div>
+  <img src="/mycurrentage_reassignment.png" alt="Variable reassignment example showing my_current_age changing from 10 to 10.5" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
+
 When we make a variable point at a value, we say that we are assigning a value to a variable; this process is called assignment.
 
 ## Assignment
 
-We use the equal sign, \`nr: =\` , to make a variable point at a value, like this: \`my_age_last_year = 25\`
+We use the equal sign, \`nr: =\` , to make a variable point at a value, like this: \`nr: my_age_last_year = 25\`
 
 This makes the \`nr: my_age_last_year\` variable point to the value \`nr: 25\`.
 
@@ -538,31 +522,42 @@ When we use the assignment operator, \`nr: =\` , to make a variable point at a v
 
 These are all assignment expressions:
 
-* \`my_age = 10\`
-* \`my_first_word = "cookie"\`
-* \`number_of_cookies_i_want_to_eat = 100\`
+* \`nr: my_age = 10\`
+* \`nr: my_first_word = "cookie"\`
+* \`nr: number_of_cookies_i_want_to_eat = 100\`
+
+In TypeScript, variables must be declared using keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\` before or during their first assignment. This is different from languages like Python and Ruby, where you can create variables directly through assignment without any declaration keywords.
+
+For example, this is a variable declaration:
+
+\`\`\`typescript
+// snippet: Variable declaration with let and const
+let my_age: number = 25
+const my_name: string = "Alice"
+\`\`\`
 
 When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
 
 For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
 
 \`\`\`typescript
+// snippet: Working with variables step by step
 let my_age: number = 10
+---
 let my_age_next_year: number = my_age + 1
+---
 my_age_next_year
 \`\`\`
 
 Finally, we can change the value that a variable points at by assigning a new value to the variable:
 
 \`\`\`typescript
+// snippet: Variable reassignment example
 let my_age: number = 10
-console.log(` +
-      '`my_age -> ${my_age}`' +
-      `)   // this prints 10
+console.log(\`my_age -> \${my_age}\`)   // this prints 10
+---
 my_age = 11
-console.log(` +
-      '`my_age -> ${my_age}`' +
-      `)   // this prints 11
+console.log(\`my_age -> \${my_age}\`)   // this prints 11
 \`\`\`
 
 `,

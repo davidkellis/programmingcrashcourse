@@ -38,6 +38,7 @@ export interface TutorialSection {
   id: string;
   title: string;
   content: string;
+  // Legacy field - will be removed once inline snippet parsing is implemented
   codeSnippets: CodeSnippet[];
   // Optional mixed items: individual snippets and/or groups. If present, UI should prefer this over codeSnippets.
   codeItems?: Array<CodeSnippet | CodeSnippetGroup>;

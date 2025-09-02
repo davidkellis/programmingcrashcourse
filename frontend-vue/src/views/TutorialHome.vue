@@ -34,8 +34,8 @@
                 {{ getSectionPreview(section.content) }}
               </p>
               <div class="section-meta">
-                <span v-if="section.codeSnippets.length > 0" class="code-count">
-                  {{ section.codeSnippets.length }} code example{{ section.codeSnippets.length !== 1 ? 's' : '' }}
+                <span v-if="getCodeExampleCount(section) > 0" class="code-count">
+                  {{ getCodeExampleCount(section) }} code example{{ getCodeExampleCount(section) !== 1 ? 's' : '' }}
                 </span>
               </div>
             </div>
@@ -116,6 +116,42 @@ const getSectionPreview = (content: string): string => {
     .trim()
 
   return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText
+}
+
+const getCodeExampleCount = (section: TutorialSection): number => {
+  // Parse inline snippets from content
+  const codeBlockRegex = /```(\w+)\s*\n\/\/\s*snippet:\s*([^\n]+)\n([\s\S]*?)```/g
+  let count = 0
+  let match
+  
+  while ((match = codeBlockRegex.exec(section.content)) !== null) {
+    const [, , , code] = match
+    if (code && code.includes('---')) {
+      // Count sections in snippet group
+      const sections = code.split('---').filter(section => section.trim().length > 0)
+      count += sections.length
+    } else {
+      // Single snippet
+      count += 1
+    }
+  }
+  
+  // Fallback to legacy arrays if no inline snippets found
+  if (count === 0) {
+    if (section.codeItems && section.codeItems.length > 0) {
+      for (const item of section.codeItems) {
+        if ('snippets' in item) {
+          count += item.snippets.length
+        } else {
+          count += 1
+        }
+      }
+    } else {
+      count = section.codeSnippets.length
+    }
+  }
+  
+  return count
 }
 
 

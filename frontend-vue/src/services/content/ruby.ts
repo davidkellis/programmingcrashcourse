@@ -7,17 +7,28 @@ export const RUBY_TUTORIAL_SECTIONS: TutorialSection[] = [
     order: 1,
     content: `Welcome!
 
-This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
+This is a programming tutorial that aims to teach you how to read and write code in the most widely used programming languages: Python, Ruby, C, C++, C#, Java, Scala, Kotlin, Groovy, JavaScript, TypeScript, Go, Nim, Rust, etc.
 
 Most of the widely used languages look and behave very similarly. They are all [imperative languages](https://en.wikipedia.org/wiki/Imperative_programming). They are so similar that if you know one, you almost know them all.
 
-Throughout the tutorial you'll see short inline code snippets illustrated like \`nr: this\`. Some inline snippets have a green Run button with a little arrow like ➤, for example: \`1+2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read–evaluate–print loop) docked to the side or bottom of the page.
+Throughout the tutorial you'll see short code snippets illustrated like this: \`nr: 1 + 2\`. Some snippets have a green Run button with a little arrow like ➤, for example: \`1 + 2\`. Click the Run button with the arrow ➤ to evaluate it in the REPL (read-evaluate-print loop) docked to the right side or bottom of the page.
 
 You'll see groups of snippets like this:
 
-[[snippet-group:intro_group_hello_vars]]
+\`\`\`ruby
+# title: Warm-up: Hello and Variables
+# description: Run these in order to see how the REPL keeps state between snippets.
+puts 'Hello from a grouped snippet!'
+---
+x = 41
+---
+x + 1
+\`\`\`
 
-[[snippet:intro_single_snippet]]
+\`\`\`ruby
+# title: A single snippet alongside a group
+[1, 2, 3].sum
+\`\`\`
 
 You'll also see editable code blocks like this:
 
@@ -35,45 +46,6 @@ You can edit the code in the code blocks by clicking on the code and typing. Whe
 
 Let's begin.`,
     codeSnippets: [],
-    codeItems: [
-      {
-        id: 'intro_group_hello_vars',
-        title: 'Warm-up: Hello and Variables',
-        description: 'Run these in order to see how the REPL keeps state between snippets.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          {
-            id: 'intro_g1_s1',
-            code: "puts 'Hello from a grouped snippet!'",
-            language: 'ruby',
-            isExecutable: true,
-            context: 'Print a greeting',
-          },
-          {
-            id: 'intro_g1_s2',
-            code: 'x = 41',
-            language: 'ruby',
-            isExecutable: true,
-            context: 'Create a variable',
-          },
-          {
-            id: 'intro_g1_s3',
-            code: 'x + 1',
-            language: 'ruby',
-            isExecutable: true,
-            context: 'Use the variable defined earlier',
-          },
-        ],
-      },
-      {
-        id: 'intro_single_snippet',
-        code: '[1, 2, 3].sum',
-        language: 'ruby',
-        isExecutable: true,
-        context: 'A single snippet alongside a group',
-      },
-    ],
     nextSection: 'comments',
   },
   {
@@ -108,125 +80,103 @@ These various kinds of values are also called "types". We will learn about sets 
 ### Numbers
 
 - Numbers are used for counting things, doing math, measuring quantities like time, distance, or cost.
-- Two common numeric classes:
+- There are two main kinds of numeric representation:
   - \`nr: Integer\` are whole numbers: \`nr: ..., -2, -1, 0, 1, 2, ...\`
   - \`nr: Float\` are numbers with a fractional part: \`nr: 3.14\`, \`nr: -0.5\`, \`nr: 1.0\`
 - You can use underscores instead of commas to make big numbers more readable.
   - Write 1,000,000 as \`nr: 1_000_000\` or \`nr: 1000000\`
 
-[[snippet-group:values_numbers_group]]
+\`\`\`ruby
+# title: Numbers — literal values
+# description: Evaluate some integer and float literals.
+42
+---
+1_000_000
+---
+3.141592653589793
+---
+-7
+\`\`\`
 
 ### Strings
 
 - What they are used for: representing text like names, messages, file paths, and any human‑readable data.
 - Features: written with quotes, can include spaces and punctuation, support Unicode, support interpolation with \`nr: #{...}\`.
 
-[[snippet-group:values_strings_group]]
+\`\`\`ruby
+# title: Strings — literal values
+# description: Evaluate some string literals.
+"Hello, world!"
+---
+'Ruby is fun'
+---
+"😀 emojis are text, too"
+\`\`\`
 
 ### Booleans (TrueClass/FalseClass)
 
 - What they are used for: representing truth values for decisions, conditions, and flags.
 - Values: \`nr: true\` and \`nr: false\`.
 
-[[snippet-group:values_booleans_group]]
+\`\`\`ruby
+# title: Booleans — true/false
+# description: Evaluate the two boolean values.
+true
+---
+false
+\`\`\`
 
 ### Arrays (Array)
 
 - What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
 - Features: can hold values of any type, can be empty, can be nested.
 
-[[snippet-group:values_arrays_group]]
+\`\`\`ruby
+# title: Arrays — literal values
+# description: Evaluate array literals of different shapes.
+[1, 3, 5, 7, 9]
+---
+["apples", "bananas", "cherries"]
+---
+[1000, "cookies", true]
+---
+[]  # an empty array
+\`\`\`
 
 ### Hashes (Hash)
 
 - What they are used for: mapping keys to values; great for lookups, configurations, and records.
 - Features: keys must be unique; common keys are strings or numbers.
 
-[[snippet-group:values_hashes_group]]
+\`\`\`ruby
+# title: Hashes — literal values
+# description: Evaluate hash (map) literals.
+{1 => "one", 2 => "two", 3 => "three"}
+---
+{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}
+\`\`\`
 
 ### Objects (instances of classes)
 
 - What they are used for: representing real‑world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
 - Example: creating an instance of a simple class.
 
-[[snippet-group:values_objects_group]]
+\`\`\`ruby
+# title: Objects — class instances
+# description: Define a simple class, create an instance, and evaluate it.
+class Dog
+  def initialize(name)
+    @name = name
+  end
+end
+---
+my_dog = Dog.new("Max")
+---
+my_dog
+\`\`\`
 
 You will use these values inside expressions, assignments, method calls, and conditionals in the rest of this tutorial.`,
     codeSnippets: [],
-    codeItems: [
-      {
-        id: 'values_numbers_group',
-        title: 'Numbers — literal values',
-        description: 'Evaluate some integer and float literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_numbers_s1', code: '42', language: 'ruby', isExecutable: true, context: 'An integer literal' },
-          { id: 'values_numbers_s2', code: '1_000_000', language: 'ruby', isExecutable: true, context: 'Readable integer with underscores' },
-          { id: 'values_numbers_s3', code: '3.141592653589793', language: 'ruby', isExecutable: true, context: 'A float literal' },
-          { id: 'values_numbers_s4', code: '-7', language: 'ruby', isExecutable: true, context: 'A negative integer' },
-        ],
-      },
-      {
-        id: 'values_strings_group',
-        title: 'Strings — literal values',
-        description: 'Evaluate some string literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_strings_s1', code: '"Hello, world!"', language: 'ruby', isExecutable: true, context: 'Double-quoted string' },
-          { id: 'values_strings_s2', code: '\'Ruby is fun\'', language: 'ruby', isExecutable: true, context: 'Single-quoted string' },
-          { id: 'values_strings_s3', code: '"😀 emojis are text, too"', language: 'ruby', isExecutable: true, context: 'Unicode string' },
-        ],
-      },
-      {
-        id: 'values_booleans_group',
-        title: 'Booleans — true/false',
-        description: 'Evaluate the two boolean values.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_booleans_s1', code: 'true', language: 'ruby', isExecutable: true, context: 'Boolean true' },
-          { id: 'values_booleans_s2', code: 'false', language: 'ruby', isExecutable: true, context: 'Boolean false' },
-        ],
-      },
-      {
-        id: 'values_arrays_group',
-        title: 'Arrays — literal values',
-        description: 'Evaluate array literals of different shapes.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_arrays_s1', code: '[1, 3, 5, 7, 9]', language: 'ruby', isExecutable: true, context: 'An array of numbers' },
-          { id: 'values_arrays_s2', code: '["apples", "bananas", "cherries"]', language: 'ruby', isExecutable: true, context: 'An array of strings' },
-          { id: 'values_arrays_s3', code: '[1000, "cookies", true]', language: 'ruby', isExecutable: true, context: 'A mixed array' },
-          { id: 'values_arrays_s4', code: '[]  # an empty array', language: 'ruby', isExecutable: true, context: 'An empty array' },
-        ],
-      },
-      {
-        id: 'values_hashes_group',
-        title: 'Hashes — literal values',
-        description: 'Evaluate hash (map) literals.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_hashes_s1', code: '{1 => "one", 2 => "two", 3 => "three"}', language: 'ruby', isExecutable: true, context: 'Integer keys' },
-          { id: 'values_hashes_s2', code: '{"Jack" => "Cookies", "Jill" => "Ice Cream", "Phil" => "Asparagus"}', language: 'ruby', isExecutable: true, context: 'String keys' },
-        ],
-      },
-      {
-        id: 'values_objects_group',
-        title: 'Objects — class instances',
-        description: 'Define a simple class, create an instance, and evaluate it.',
-        collapsedByDefault: false,
-        continueOnError: false,
-        snippets: [
-          { id: 'values_objects_s1', code: 'class Dog\n  def initialize(name)\n    @name = name\n  end\nend', language: 'ruby', isExecutable: true, context: 'Define a class' },
-          { id: 'values_objects_s2', code: 'my_dog = Dog.new("Max")', language: 'ruby', isExecutable: true, context: 'Instantiate the class' },
-          { id: 'values_objects_s3', code: 'my_dog', language: 'ruby', isExecutable: true, context: 'Evaluate the instance' },
-        ],
-      },
-    ],
     previousSection: 'comments',
     nextSection: 'operators',
   },
@@ -247,13 +197,22 @@ You will use these values inside expressions, assignments, method calls, and con
 - Exponent: \`nr: **\`
 
 \`\`\`ruby
+# title: Arithmetic operators
+# description: Practice arithmetic operations with numbers.
 1 + 2
+---
 7 - 3
+---
 4 * 5
+---
 9 / 2      #=> 4 (integer division)
+---
 9.0 / 2    #=> 4.5
+---
 9.div(2)   #=> 4
+---
 9 % 2
+---
 2 ** 3
 \`\`\`
 
@@ -264,22 +223,33 @@ You will use these values inside expressions, assignments, method calls, and con
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
 
 \`\`\`ruby
+# title: Comparison operators
+# description: Compare values to get boolean results.
 3 == 3
+---
 3 != 4
+---
 2 < 5
+---
 5 <= 5
+---
 7 > 1
+---
 7 >= 10
 \`\`\`
 
 ### Boolean operators
 
 - And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
-- Short‑circuit: \`A && B\` skips \`B\` if \`A\` is false; \`A || B\` skips \`B\` if \`A\` is true.
+- Short‑circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
 
 \`\`\`ruby
+# title: Boolean operators
+# description: Combine boolean values with logical operators.
 true && false
+---
 true || false
+---
 !(2 < 3)
 \`\`\`
 
@@ -291,13 +261,19 @@ true || false
 - Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start..stop]\`, \`nr: seq[start...stop]\`
 
 \`\`\`ruby
+# title: Sequence operators
+# description: Work with strings and arrays using various operators.
 "Hi, " + "there"
+---
 "ha" * 3
-"ruby".include?("ru")
+---
+"ruby".include?("by")
+---
 [1, 2] + [3]
+---
 [0] * 4
+---
 [1,2,3,4][1..2]
-"ruby"[1..2]
 \`\`\`
 
 ### Precedence and grouping
@@ -306,12 +282,16 @@ true || false
 - Rough precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
 
 \`\`\`ruby
+# title: Precedence and grouping
+# description: See how operator precedence and parentheses affect evaluation.
 1 + 2 * 3
+---
 (1 + 2) * 3
 \`\`\`
 
 You now know the basic operators; next you will use them with variables and assignments.`,
     codeSnippets: [],
+    codeItems: [],
     previousSection: 'values',
     nextSection: 'variables',
   },
@@ -436,25 +416,25 @@ Ruby has a bunch of built in classes:
     order: 6,
     content: `A variable is a name that points at a particular value. For example:
 
-  <div>
-      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
-        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
-        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
-        <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
-        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
-      </svg>
-  </div>
+<div>
+    <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">what_i_ate_for_breakfast</text>
+      <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">"cereal"</text>
+      <path d="M250,50 H390" stroke="#111827" stroke-width="2"/>
+      <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+    </svg>
+</div>
 
-  <div>
-      <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
-        <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
-        <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
-        <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
-        <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
-      </svg>
-  </div>
+<div>
+    <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="510" height="90" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="20" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">my_current_age</text>
+      <text x="410" y="55" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111827">10.5</text>
+      <path d="M170,50 H390" stroke="#111827" stroke-width="2"/>
+      <path d="M390,45 L400,50 L390,55" fill="none" stroke="#111827" stroke-width="2"/>
+    </svg>
+</div>
 
 We name a variable with letters, numbers, and the underscore character, for example:
 
@@ -465,7 +445,17 @@ We name a variable with letters, numbers, and the underscore character, for exam
 
 We can't use spaces in variable names.
 
+In Ruby, you can create a new variable simply by assigning a value to it—no declaration is needed. Some languages like JavaScript and TypeScript require variables to be declared (with keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\`) before or during their first assignment, but Ruby and Python allow you to create new variables directly through assignment.
+
 A variable can only point at one value at a time; however, we can change the value that a variable points at.
+
+<div>
+  <img src="/whatiateforbreakfast_reassignment.png" alt="Variable reassignment example showing what_i_ate_for_breakfast changing from 'cereal' to 'toast'" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
+
+<div>
+  <img src="/mycurrentage_reassignment.png" alt="Variable reassignment example showing my_current_age changing from 10 to 10.5" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
 
 When we make a variable point at a value, we say that we are assigning a value to a variable; this process is called assignment.
 

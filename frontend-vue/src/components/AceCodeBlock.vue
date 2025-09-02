@@ -430,7 +430,7 @@ onMounted(async () => {
   try {
     const scrollParent = getScrollParent(containerRef.value || null)
     const { y: scrollY } = useScroll(scrollParent || window, { throttle: 16 })
-    
+
     // Watch scroll position and resize editor when visible
     watch(scrollY, () => {
       try {
@@ -481,7 +481,9 @@ onUnmounted(() => {
     resizeObserver.disconnect()
   }
   if (intersectionObserver) {
-    try { intersectionObserver.disconnect() } catch {}
+    try {
+      intersectionObserver.disconnect()
+    } catch {}
     intersectionObserver = null
   }
   try {
@@ -518,8 +520,8 @@ onUnmounted(() => {
 
 .ace-run-button {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 0.6rem;
+  right: 0.75rem;
   z-index: 10;
   background: #10b981;
   color: white;
@@ -536,7 +538,8 @@ onUnmounted(() => {
   background: #059669;
 }
 
-.ace-run-button:active { }
+.ace-run-button:active {
+}
 
 .ace-editor-container {
   width: 100% !important;

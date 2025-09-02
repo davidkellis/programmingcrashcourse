@@ -30,12 +30,20 @@ class LocalContentService {
 
   /**
    * Get code snippets for a specific section and language
+   * Now parses inline snippets from content markdown
    */
   async getCodeSnippets(sectionId: string, language: string): Promise<CodeSnippet[]> {
     const section = await this.getSection(sectionId, language)
     if (!section) return []
+    
+    // Parse inline snippets from content
+    const inlineSnippets = this.parseInlineSnippets(section.content)
+    if (inlineSnippets.length > 0) {
+      return inlineSnippets
+    }
+    
+    // Fallback to legacy codeItems
     if (section.codeItems && section.codeItems.length > 0) {
-      // Flatten groups into a single list of snippets
       const flattened: CodeSnippet[] = []
       for (const item of section.codeItems) {
         if ('snippets' in item) {
@@ -46,7 +54,57 @@ class LocalContentService {
       }
       return flattened
     }
+    
+    // Final fallback to legacy codeSnippets array
     return section.codeSnippets || []
+  }
+
+  /**
+   * Parse inline snippets from markdown content
+   */
+  private parseInlineSnippets(content: string): CodeSnippet[] {
+    const snippets: CodeSnippet[] = []
+    
+    // Regex to match code blocks with snippet comments
+    const codeBlockRegex = /```(\w+)\s*\n\/\/\s*snippet:\s*([^\n]+)\n([\s\S]*?)```/g
+    
+    let match
+    let snippetIndex = 0
+    
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      const [, blockLanguage, description, code] = match
+      
+      // Ensure we have valid matches
+      if (!blockLanguage || !description || !code) continue
+      
+      // Check if this is a snippet group (contains ---)
+      if (code.includes('---')) {
+        const sections = code.split('---').map(section => section.trim()).filter(section => section.length > 0)
+        
+        sections.forEach((section, index) => {
+          snippets.push({
+            id: `inline_snippet_${snippetIndex}_${index}`,
+            code: section,
+            language: blockLanguage,
+            isExecutable: true,
+            context: `${description} - Part ${index + 1}`
+          })
+        })
+      } else {
+        // Single snippet
+        snippets.push({
+          id: `inline_snippet_${snippetIndex}`,
+          code: code.trim(),
+          language: blockLanguage,
+          isExecutable: true,
+          context: description.trim()
+        })
+      }
+      
+      snippetIndex++
+    }
+    
+    return snippets
   }
 
   /**

@@ -2,17 +2,40 @@
   <div class="tutorial-section">
     <!-- Floating ToC rail -->
     <div class="toc-rail">
-      <div class="toc-panel" v-show="tocHover" :class="{ open: tocHover }" :style="{ top: `${tocTop}px` }" role="navigation" aria-label="On this page" @mouseenter="tocHover = true" @mouseleave="tocHover = false">
+      <div
+        class="toc-panel"
+        v-show="tocHover"
+        :class="{ open: tocHover }"
+        :style="{ top: `${tocTop}px` }"
+        role="navigation"
+        aria-label="On this page"
+        @mouseenter="tocHover = true"
+        @mouseleave="tocHover = false"
+      >
         <div class="toc-header">On this page</div>
         <div v-if="headings.length === 0" class="toc-empty">No subsections</div>
         <ul v-else class="toc-list">
-          <li v-for="h in headings" :key="h.id" :class="['toc-item', `level-${h.level}` , { active: h.id === activeHeadingId }]">
-            <button type="button" class="toc-link" @click.stop.prevent="scrollToHeading(h.id)">{{ h.text }}</button>
+          <li
+            v-for="h in headings"
+            :key="h.id"
+            :class="['toc-item', `level-${h.level}`, { active: h.id === activeHeadingId }]"
+          >
+            <button type="button" class="toc-link" @click.stop.prevent="scrollToHeading(h.id)">
+              {{ h.text }}
+            </button>
           </li>
         </ul>
       </div>
       <!-- Always-visible Notion-like handle to reveal the ToC -->
-      <button class="toc-handle" v-show="!tocHover" :style="{ top: `${tocTop}px` }" title="On this page" aria-label="Open table of contents" @mouseenter="tocHover = true" @click="tocHover = true">
+      <button
+        class="toc-handle"
+        v-show="!tocHover"
+        :style="{ top: `${tocTop}px` }"
+        title="On this page"
+        aria-label="Open table of contents"
+        @mouseenter="tocHover = true"
+        @click="tocHover = true"
+      >
         <span class="line line-1"></span>
         <span class="line line-2"></span>
         <span class="line line-3"></span>
@@ -121,18 +144,24 @@ const getMarkdown = (): MarkdownIt => {
     breaks: true,
   })
 
-  type RendererRules = { fence?: (tokens: Array<{ info: string; content: string }>, idx: number) => string; code_inline?: (tokens: Array<{ content: string }>, idx: number) => string }
-
-  ;(md.renderer.rules as RendererRules).code_inline = (tokens: Array<{ content: string }>, idx: number) => {
+  type RendererRules = {
+    fence?: (tokens: Array<{ info: string; content: string }>, idx: number) => string
+    code_inline?: (tokens: Array<{ content: string }>, idx: number) => string
+  }
+  ;(md.renderer.rules as RendererRules).code_inline = (
+    tokens: Array<{ content: string }>,
+    idx: number,
+  ) => {
     const token = tokens[idx]
     if (!token) return ''
     const code = token.content
-    const escapeHtml = (str: string) => str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/'/g, '&#39;')
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;')
 
     // Opt-out directive for inline run button
     // Author can write `norun:...` (or `nr:...`) inside the backticks to render
@@ -165,7 +194,11 @@ const getMarkdown = (): MarkdownIt => {
 
     if (import.meta.env.DEV) {
       try {
-        console.log('[Fence] Created placeholder', { codeId, language, codePreview: code.slice(0, 60) })
+        console.log('[Fence] Created placeholder', {
+          codeId,
+          language,
+          codePreview: code.slice(0, 60),
+        })
       } catch {}
     }
 
@@ -201,7 +234,9 @@ const loadSection = async () => {
 
 const emit = defineEmits<{
   'run-code': [code: string]
-  'run-code-sequence': [payload: { codes: string[]; continueOnError?: boolean; groupId?: string; title?: string }]
+  'run-code-sequence': [
+    payload: { codes: string[]; continueOnError?: boolean; groupId?: string; title?: string },
+  ]
 }>()
 
 const runCodeExample = (code: string) => {
@@ -218,19 +253,26 @@ const oneLinePreview = (code: string) => {
 
 const commentPrefixFor = (lang?: string) => {
   const l = (lang || '').toLowerCase()
-  if (['js', 'ts', 'javascript', 'typescript', 'go', 'java', 'c', 'cpp', 'c++', 'rust', 'php'].includes(l)) return '//'
+  if (
+    [
+      'js',
+      'ts',
+      'javascript',
+      'typescript',
+      'go',
+      'java',
+      'c',
+      'cpp',
+      'c++',
+      'rust',
+      'php',
+    ].includes(l)
+  )
+    return '//'
   if (['py', 'python', 'sh', 'bash', 'rb', 'ruby'].includes(l)) return '#'
   if (['lua'].includes(l)) return '--'
   if (['elixir'].includes(l)) return '#'
   return '//'
-}
-
-const composePreview = (snippet: CodeSnippet) => {
-  const code = oneLinePreview(snippet.code)
-  const desc = (snippet.context || snippet.explanation || '').trim()
-  if (!desc) return code
-  const prefix = commentPrefixFor(snippet.language)
-  return `${code}  ${prefix} ${desc}`
 }
 
 const composeTitle = (snippet: CodeSnippet) => {
@@ -258,8 +300,14 @@ const initializeGroupExpanded = () => {
   })
 
   // After Ace mounts adjust layout, recompute heading positions so ToC ranges align
-  setTimeout(() => { recomputeHeadingPositions(); updateActiveHeading() }, 150)
-  setTimeout(() => { recomputeHeadingPositions(); updateActiveHeading() }, 400)
+  setTimeout(() => {
+    recomputeHeadingPositions()
+    updateActiveHeading()
+  }, 150)
+  setTimeout(() => {
+    recomputeHeadingPositions()
+    updateActiveHeading()
+  }, 400)
 }
 
 // Note: group expand/collapse and run are handled inside CodeSnippetGroupBlock now.
@@ -277,18 +325,47 @@ const renderMarkdown = (content: string): string => {
   inlineSnippetIds.value = []
   const groupMarker = /\[\[\s*snippet-group\s*:\s*([A-Za-z0-9_-]+)\s*\]\]/g
   const snippetMarker = /\[\[\s*snippet\s*:\s*([A-Za-z0-9_-]+)\s*\]\]/g
+
+  // Also detect inline code blocks with title/description comments (supports both // and # comment styles)
+  const inlineSnippetRegex =
+    /```(\w+)\s*\n(?:\/\/|#)\s*title:\s*([^\n]+)(?:\n(?:\/\/|#)\s*description:\s*([^\n]+))?\n([\s\S]*?)```/g
+
   const foundGroupIds: string[] = []
   const foundSnippetIds: string[] = []
+
   let preprocessed = content.replace(groupMarker, (_m, gid) => {
     const id = String(gid)
     foundGroupIds.push(id)
     return `<div class="snippet-group-placeholder" data-group-id="${id}"></div>`
   })
+
   preprocessed = preprocessed.replace(snippetMarker, (_m, sid) => {
     const id = String(sid)
     foundSnippetIds.push(id)
     return `<div class="snippet-placeholder" data-snippet-id="${id}"></div>`
   })
+
+  // Replace inline snippet code blocks with placeholders
+  let snippetIndex = 0
+  preprocessed = preprocessed.replace(
+    inlineSnippetRegex,
+    (_match, language, title, description, code) => {
+      if (code.includes('---')) {
+        // Snippet group
+        const groupId = `inline_group_${snippetIndex}`
+        foundGroupIds.push(groupId)
+        snippetIndex++
+        return `<div class="snippet-group-placeholder" data-group-id="${groupId}" data-inline-title="${title}" data-inline-description="${description || ''}" data-inline-code="${encodeURIComponent(code)}" data-inline-language="${language}"></div>`
+      } else {
+        // Single snippet
+        const snippetId = `inline_snippet_${snippetIndex}`
+        foundSnippetIds.push(snippetId)
+        snippetIndex++
+        return `<div class="snippet-placeholder" data-snippet-id="${snippetId}" data-inline-title="${title}" data-inline-description="${description || ''}" data-inline-code="${encodeURIComponent(code)}" data-inline-language="${language}"></div>`
+      }
+    },
+  )
+
   inlineGroupIds.value = foundGroupIds
   inlineSnippetIds.value = foundSnippetIds
 
@@ -309,20 +386,20 @@ const renderMarkdown = (content: string): string => {
       console.log('[Markdown] Placeholders in rendered HTML:', phCount)
     } catch {}
   }
-  
+
   headingElements.forEach((heading) => {
     const text = heading.textContent?.trim() || ''
     if (!text) return
-    
+
     const base = slugify(text)
     if (!base) return
-    
+
     const count = seen.get(base) || 0
     seen.set(base, count + 1)
     const id = count === 0 ? base : `${base}-${count + 1}`
     heading.setAttribute('id', id)
   })
-  
+
   // Rewrite internal section links to include current language in the path.
   // This ensures links like "/section/types" keep the user within the active language
   // (e.g., "/javascript/section/types").
@@ -336,7 +413,7 @@ const renderMarkdown = (content: string): string => {
       a.setAttribute('href', `/${lang}/${href}`)
     }
   })
-  
+
   return doc.body.innerHTML
 }
 
@@ -344,26 +421,88 @@ const renderMarkdown = (content: string): string => {
 // an AceCodeBlock inline at each placeholder location
 const clearMountedAceBlocks = () => {
   mountedAceBlocks.value.forEach(({ unmount, el }) => {
-    try { unmount() } catch {}
-    try { el.remove() } catch {}
+    try {
+      unmount()
+    } catch {}
+    try {
+      el.remove()
+    } catch {}
   })
   mountedAceBlocks.value = []
 }
 
 const clearMountedInlineGroups = () => {
   mountedInlineGroups.value.forEach(({ unmount, el }) => {
-    try { unmount() } catch {}
-    try { el.remove() } catch {}
+    try {
+      unmount()
+    } catch {}
+    try {
+      el.remove()
+    } catch {}
   })
   mountedInlineGroups.value = []
 }
 
 const clearMountedInlineSnippets = () => {
   mountedInlineSnippets.value.forEach(({ unmount, el }) => {
-    try { unmount() } catch {}
-    try { el.remove() } catch {}
+    try {
+      unmount()
+    } catch {}
+    try {
+      el.remove()
+    } catch {}
   })
   mountedInlineSnippets.value = []
+}
+
+// Parse inline snippets from markdown content
+const parseInlineSnippets = (content: string): CodeSnippet[] => {
+  const snippets: CodeSnippet[] = []
+
+  // Regex to match code blocks with title/description comments (supports both // and # comment styles)
+  const codeBlockRegex =
+    /```(\w+)\s*\n(?:\/\/|#)\s*title:\s*([^\n]+)(?:\n(?:\/\/|#)\s*description:\s*([^\n]+))?\n([\s\S]*?)```/g
+
+  let match
+  let snippetIndex = 0
+
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    const [, blockLanguage, title, description, code] = match
+
+    // Ensure we have valid matches
+    if (!blockLanguage || !title || !code) continue
+
+    // Check if this is a snippet group (contains ---)
+    if (code.includes('---')) {
+      const sections = code
+        .split('---')
+        .map((section) => section.trim())
+        .filter((section) => section.length > 0)
+
+      sections.forEach((section, index) => {
+        snippets.push({
+          id: `inline_snippet_${snippetIndex}_${index}`,
+          code: section,
+          language: blockLanguage,
+          isExecutable: true,
+          context: description || title,
+        })
+      })
+    } else {
+      // Single snippet
+      snippets.push({
+        id: `inline_snippet_${snippetIndex}`,
+        code: code.trim(),
+        language: blockLanguage,
+        isExecutable: true,
+        context: description ? description.trim() : title,
+      })
+    }
+
+    snippetIndex++
+  }
+
+  return snippets
 }
 
 // Mount inline snippet groups where placeholders were inserted during markdown render
@@ -373,8 +512,41 @@ const mountInlineSnippetGroups = () => {
   if (placeholders.length === 0) return
   Array.from(placeholders).forEach((ph) => {
     const groupId = ph.getAttribute('data-group-id') || ''
-    const items = section.value?.codeItems || []
-    const group = items.find((it) => isGroup(it) && it.id === groupId) as CodeSnippetGroup | undefined
+
+    // Check if this is an inline snippet group
+    const inlineTitle = ph.getAttribute('data-inline-title')
+    const inlineDescription = ph.getAttribute('data-inline-description')
+    const inlineCode = ph.getAttribute('data-inline-code')
+    const inlineLanguage = ph.getAttribute('data-inline-language')
+
+    let group: CodeSnippetGroup | undefined
+
+    if (inlineTitle && inlineCode && inlineLanguage) {
+      // Create group from inline data
+      const decodedCode = decodeURIComponent(inlineCode)
+      const sections = decodedCode
+        .split('---')
+        .map((section) => section.trim())
+        .filter((section) => section.length > 0)
+      group = {
+        id: groupId,
+        title: inlineTitle,
+        description: inlineDescription || '',
+        collapsedByDefault: false,
+        continueOnError: false,
+        snippets: sections.map((section, index) => ({
+          id: `${groupId}_${index}`,
+          code: section,
+          language: inlineLanguage,
+          isExecutable: true,
+          context: '',
+        })),
+      }
+    } else {
+      // Legacy: find from codeItems
+      const items = section.value?.codeItems || []
+      group = items.find((it) => isGroup(it) && it.id === groupId) as CodeSnippetGroup | undefined
+    }
 
     const mountEl = document.createElement('div')
     mountEl.className = 'inline-snippet-group-mount'
@@ -394,7 +566,12 @@ const mountInlineSnippetGroups = () => {
       const app = createApp(CodeSnippetGroupBlock, {
         group,
         onRunCode: runCodeExample,
-        onRunCodeSequence: (payload: { codes: string[]; continueOnError?: boolean; groupId?: string; title?: string }) => emit('run-code-sequence', payload),
+        onRunCodeSequence: (payload: {
+          codes: string[]
+          continueOnError?: boolean
+          groupId?: string
+          title?: string
+        }) => emit('run-code-sequence', payload),
       })
       app.mount(mountEl)
       mountedInlineGroups.value.push({ unmount: () => app.unmount(), el: mountEl })
@@ -413,12 +590,58 @@ const mountInlineSnippets = () => {
   Array.from(placeholders).forEach((ph) => {
     const snippetId = ph.getAttribute('data-snippet-id') || ''
 
-    const items = section.value?.codeItems || []
-    let snippet = items.find((it) => !isGroup(it) && (it as CodeSnippet).id === snippetId) as CodeSnippet | undefined
-    if (!snippet) {
-      // Fallback to legacy list if present
-      const legacy = section.value?.codeSnippets || []
-      snippet = legacy.find((s) => s.id === snippetId)
+    // Check if this is an inline snippet
+    const inlineTitle = ph.getAttribute('data-inline-title')
+    const inlineDescription = ph.getAttribute('data-inline-description')
+    const inlineCode = ph.getAttribute('data-inline-code')
+    const inlineLanguage = ph.getAttribute('data-inline-language')
+
+    let snippet: CodeSnippet | undefined
+
+    if (inlineTitle && inlineCode && inlineLanguage) {
+      // Create snippet from inline data
+      const decodedCode = decodeURIComponent(inlineCode)
+
+      // Remove duplicate title comment from code if it matches the title
+      let cleanedCode = decodedCode.trim()
+      const titleComment = `// ${inlineTitle}`
+      console.log('[DEBUG] Title:', inlineTitle)
+      console.log('[DEBUG] Original code:', cleanedCode)
+      console.log('[DEBUG] Looking for comment:', titleComment)
+      if (cleanedCode.startsWith(titleComment)) {
+        cleanedCode = cleanedCode.substring(titleComment.length).trim()
+        console.log('[DEBUG] Cleaned code:', cleanedCode)
+      } else {
+        console.log('[DEBUG] Comment not found at start')
+      }
+
+      snippet = {
+        id: snippetId,
+        code: cleanedCode,
+        language: inlineLanguage,
+        isExecutable: true,
+        context: inlineDescription ? inlineDescription.trim() : inlineTitle,
+      }
+    } else {
+      // Try to get snippet from inline parsing first
+      if (section.value) {
+        const inlineSnippets = parseInlineSnippets(section.value.content)
+        snippet = inlineSnippets.find((s: CodeSnippet) => s.id === snippetId)
+      }
+
+      // Fallback to legacy codeItems
+      if (!snippet) {
+        const items = section.value?.codeItems || []
+        snippet = items.find((it) => !isGroup(it) && (it as CodeSnippet).id === snippetId) as
+          | CodeSnippet
+          | undefined
+      }
+
+      // Final fallback to legacy codeSnippets array
+      if (!snippet) {
+        const legacy = section.value?.codeSnippets || []
+        snippet = legacy.find((s) => s.id === snippetId)
+      }
     }
 
     const mountEl = document.createElement('div')
@@ -435,14 +658,45 @@ const mountInlineSnippets = () => {
       return
     }
 
-    // Build compact snippet row
+    // Build snippet with minimal header
+    const wrapper = document.createElement('div')
+    wrapper.className = 'code-example is-single-snippet'
+
+    // Create minimal header for individual snippet (title only)
+    const toolbar = document.createElement('div')
+    toolbar.className = 'code-toolbar single-snippet-toolbar'
+
+    // Debug logging
+    console.log(
+      '[DEBUG] Creating single snippet with classes:',
+      wrapper.className,
+      toolbar.className,
+    )
+
+    const titleSpan = document.createElement('span')
+    titleSpan.className = 'code-context'
+    titleSpan.innerHTML = `<strong>${inlineTitle}</strong>`
+    toolbar.appendChild(titleSpan)
+
+    if (inlineDescription && inlineDescription.trim()) {
+      const descSpan = document.createElement('span')
+      descSpan.className = 'single-snippet-description'
+      descSpan.textContent = inlineDescription
+      toolbar.appendChild(descSpan)
+    }
+
+    // Create code row with run button (using same structure as snippet groups)
     const row = document.createElement('div')
-    row.className = 'compact-snippet-row'
+    row.className = 'snippet-row'
+
+    const snippetMain = document.createElement('div')
+    snippetMain.className = 'snippet-main'
 
     const codeEl = document.createElement('code')
     codeEl.className = 'snippet-code-preview'
     codeEl.title = composeTitle(snippet)
-    codeEl.textContent = composePreview(snippet)
+    // For single snippets, just show the code without the title comment since it's already in the header
+    codeEl.textContent = oneLinePreview(snippet.code)
 
     const btn = document.createElement('button')
     btn.className = 'run-button run-micro'
@@ -451,9 +705,13 @@ const mountInlineSnippets = () => {
     const onClick = () => runCodeExample(snippet!.code)
     btn.addEventListener('click', onClick)
 
-    row.appendChild(codeEl)
+    snippetMain.appendChild(codeEl)
+    row.appendChild(snippetMain)
     row.appendChild(btn)
-    mountEl.appendChild(row)
+
+    wrapper.appendChild(toolbar)
+    wrapper.appendChild(row)
+    mountEl.appendChild(wrapper)
 
     if (snippet.explanation) {
       const p = document.createElement('p')
@@ -464,7 +722,9 @@ const mountInlineSnippets = () => {
 
     mountedInlineSnippets.value.push({
       unmount: () => {
-        try { btn.removeEventListener('click', onClick) } catch {}
+        try {
+          btn.removeEventListener('click', onClick)
+        } catch {}
       },
       el: mountEl,
     })
@@ -485,7 +745,9 @@ const logAncestorLayout = (el: HTMLElement, label = '') => {
       const id = node.id ? `#${node.id}` : ''
       const w = node.offsetWidth
       const h = node.offsetHeight
-      lines.push(`${depth}: <${tag}${id} class="${cls}"> ${w}x${h} display:${cs.display} position:${cs.position} visibility:${cs.visibility} overflow:${cs.overflow}/${cs.overflowX}/${cs.overflowY}`)
+      lines.push(
+        `${depth}: <${tag}${id} class="${cls}"> ${w}x${h} display:${cs.display} position:${cs.position} visibility:${cs.visibility} overflow:${cs.overflow}/${cs.overflowX}/${cs.overflowY}`,
+      )
       node = node.parentElement as HTMLElement | null
       depth++
     }
@@ -515,14 +777,16 @@ const recomputeHeadingPositions = () => {
 const processAceCodeBlocks = () => {
   if (!contentRef.value) {
     if (import.meta.env.DEV) {
-      try { console.log('[AceMount] No contentRef available') } catch {}
+      try {
+        console.log('[AceMount] No contentRef available')
+      } catch {}
     }
     return
   }
 
   const placeholders = contentRef.value.querySelectorAll('.ace-code-block-placeholder')
   if (import.meta.env.DEV) {
-    try { 
+    try {
       console.log('[AceMount] Found placeholders:', placeholders.length)
       console.log('[AceMount] Existing mounted blocks:', mountedAceBlocks.value.length)
     } catch {}
@@ -531,7 +795,9 @@ const processAceCodeBlocks = () => {
   // Only clear and remount if we actually have placeholders to process
   if (placeholders.length === 0) {
     if (import.meta.env.DEV) {
-      try { console.log('[AceMount] No placeholders found, skipping remount') } catch {}
+      try {
+        console.log('[AceMount] No placeholders found, skipping remount')
+      } catch {}
     }
     return
   }
@@ -549,15 +815,20 @@ const processAceCodeBlocks = () => {
       // (HTML attributes may be sanitized or truncated by the browser)
       code = codeBlocks.value[codeId] ?? null
       if (!code && encodedCode) {
-        try { code = decodeURIComponent(encodedCode) } catch { code = encodedCode }
+        try {
+          code = decodeURIComponent(encodedCode)
+        } catch {
+          code = encodedCode
+        }
       }
     }
 
     if (codeId && code != null) {
       const mountEl = document.createElement('div')
-      mountEl.style.cssText = 'width: 100% !important; height: 200px !important; min-height: 200px !important; display: block !important; position: relative !important; margin: 1rem 0 !important; visibility: visible !important; box-sizing: border-box !important;'
+      mountEl.style.cssText =
+        'width: 100% !important; height: 200px !important; min-height: 200px !important; display: block !important; position: relative !important; margin: 1rem 0 !important; visibility: visible !important; box-sizing: border-box !important;'
       mountEl.className = 'ace-mount-container'
-      
+
       try {
         placeholder.parentNode?.replaceChild(mountEl, placeholder)
       } catch (e) {
@@ -569,7 +840,12 @@ const processAceCodeBlocks = () => {
       logAncestorLayout(mountEl as HTMLElement, `before-mount ${codeId}`)
       try {
         const r = (mountEl as HTMLElement).getBoundingClientRect()
-        console.log('[AceMount] mountEl rect before-mount:', { x: r.x, y: r.y, w: r.width, h: r.height })
+        console.log('[AceMount] mountEl rect before-mount:', {
+          x: r.x,
+          y: r.y,
+          w: r.width,
+          h: r.height,
+        })
       } catch {}
 
       try {
@@ -578,17 +854,25 @@ const processAceCodeBlocks = () => {
           language,
           onRunCode: runCodeExample,
         })
-        
+
         // Wait for DOM to be ready before mounting
         setTimeout(() => {
           app.mount(mountEl)
           mountedAceBlocks.value.push({ unmount: () => app.unmount(), el: mountEl })
           if (import.meta.env.DEV) {
-            try { console.log('[AceMount] Mounted AceCodeBlock for', codeId) } catch {}
+            try {
+              console.log('[AceMount] Mounted AceCodeBlock for', codeId)
+            } catch {}
             // Re-log after mount to see if size has resolved
             logAncestorLayout(mountEl as HTMLElement, `after-mount ${codeId}`)
-            setTimeout(() => logAncestorLayout(mountEl as HTMLElement, `after-mount+100ms ${codeId}`), 100)
-            setTimeout(() => logAncestorLayout(mountEl as HTMLElement, `after-mount+300ms ${codeId}`), 300)
+            setTimeout(
+              () => logAncestorLayout(mountEl as HTMLElement, `after-mount+100ms ${codeId}`),
+              100,
+            )
+            setTimeout(
+              () => logAncestorLayout(mountEl as HTMLElement, `after-mount+300ms ${codeId}`),
+              300,
+            )
           }
         }, 10)
       } catch (e) {
@@ -615,16 +899,16 @@ const buildHeadings = () => {
   if (!scrollContainer) return
   const sc = scrollContainer as HTMLElement
   const containerRect = sc.getBoundingClientRect()
-  
+
   // Find headings in markdown content
   const contentHeadings = Array.from(el.querySelectorAll('h1, h2, h3, h4')) as HTMLElement[]
-  
+
   // Find the section header (outside markdown content)
   const sectionHeader = document.querySelector('.section-header h1') as HTMLElement | null
-  
+
   const allHeadings = sectionHeader ? [sectionHeader, ...contentHeadings] : contentHeadings
   const list: HeadingItem[] = []
-  
+
   allHeadings.forEach((h) => {
     const raw = (h.textContent || '').trim()
     if (!raw || !h.id) return
@@ -635,7 +919,10 @@ const buildHeadings = () => {
     console.log('[ToC] Found heading with ID:', { id: h.id, text: raw, element: h })
   })
   headings.value = list
-  console.log('[ToC] Built headings:', headings.value.map(h => h.id))
+  console.log(
+    '[ToC] Built headings:',
+    headings.value.map((h) => h.id),
+  )
   // Ensure listeners are bound to the correct scroll container once content exists
   attachScrollHandlers()
   updateActiveHeading()
@@ -648,9 +935,15 @@ const getHeaderOffset = () => {
 
 const updateActiveHeading = () => {
   const first = headings.value[0]
-  if (!first) { activeHeadingId.value = ''; return }
+  if (!first) {
+    activeHeadingId.value = ''
+    return
+  }
   scrollContainer = scrollContainer || getScrollContainer()
-  if (!scrollContainer) { activeHeadingId.value = first.id; return }
+  if (!scrollContainer) {
+    activeHeadingId.value = first.id
+    return
+  }
   const sc = scrollContainer as HTMLElement
   const scrollY = sc.scrollTop // Use exact scroll position for accurate section detection
   // Use the same anchor gap used by scrollToHeading() so clicking a ToC item lands
@@ -658,29 +951,36 @@ const updateActiveHeading = () => {
   const anchorGap = getHeaderOffset() + 20
   const epsilon = 0.5
   let current: HeadingItem = first
-  
+
   if (import.meta.env.DEV) {
-    console.log('[ToC] updateActiveHeading - scrollY:', scrollY, 'headings:', headings.value.map(h => ({ id: h.id, text: h.text, top: h.top })))
+    console.log(
+      '[ToC] updateActiveHeading - scrollY:',
+      scrollY,
+      'headings:',
+      headings.value.map((h) => ({ id: h.id, text: h.text, top: h.top })),
+    )
   }
-  
+
   // Find the closest heading by checking which section boundary we're in
   let bestMatch: HeadingItem = first
   let bestDistance = Infinity
-  
+
   for (let i = 0; i < headings.value.length; i++) {
     const h = headings.value[i]
     if (!h) continue
     const nextH = headings.value[i + 1]
-    
+
     // Calculate section boundaries based on the same anchor gap used by scrolling
     // Non-overlapping: a section ends exactly where the next section begins.
     const sectionStart = h.top - anchorGap
     const sectionEnd = nextH ? nextH.top - anchorGap : Infinity
-    
+
     if (import.meta.env.DEV) {
-      console.log(`[ToC] Section "${h.text}": ${sectionStart} to ${sectionEnd} (scrollY: ${scrollY})`)
+      console.log(
+        `[ToC] Section "${h.text}": ${sectionStart} to ${sectionEnd} (scrollY: ${scrollY})`,
+      )
     }
-    
+
     // Check if we're within this section's boundaries
     if (scrollY + 0 >= sectionStart - epsilon && scrollY < sectionEnd - epsilon) {
       bestMatch = h
@@ -689,7 +989,7 @@ const updateActiveHeading = () => {
       }
       break
     }
-    
+
     // Also track the closest heading as fallback
     const distance = Math.abs(scrollY - h.top)
     if (distance < bestDistance) {
@@ -697,10 +997,10 @@ const updateActiveHeading = () => {
       current = h
     }
   }
-  
+
   // Use section-based match if found, otherwise use closest heading
   const selected = bestMatch || current
-  
+
   // Only update if it's actually changed to avoid unnecessary re-renders
   if (activeHeadingId.value !== selected.id) {
     activeHeadingId.value = selected.id
@@ -711,7 +1011,8 @@ const updateActiveHeading = () => {
 const attachScrollHandlers = () => {
   const newEl = getScrollContainer()
   if (!newEl) return
-  if (prevScrollEl && scrollListener) prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
+  if (prevScrollEl && scrollListener)
+    prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
   scrollContainer = newEl
   if (resizeListener) window.removeEventListener('resize', resizeListener)
   scrollListener = () => updateActiveHeading()
@@ -721,7 +1022,11 @@ const attachScrollHandlers = () => {
     updateActiveHeading()
   }
   const sc = scrollContainer as HTMLElement
-  sc.addEventListener('scroll', scrollListener as EventListener, { passive: true } as AddEventListenerOptions)
+  sc.addEventListener(
+    'scroll',
+    scrollListener as EventListener,
+    { passive: true } as AddEventListenerOptions,
+  )
   window.addEventListener('resize', resizeListener)
   prevScrollEl = sc
 }
@@ -741,29 +1046,36 @@ const scrollToHeading = (id: string) => {
   const sc = scrollContainer as HTMLElement
   console.log('[ToC] Scroll container:', sc, sc.tagName, sc.className)
   const offset = getHeaderOffset()
-  
+
   // Use the same position calculation as buildHeadings for consistency
   const containerRect = sc.getBoundingClientRect()
   const elRect = el.getBoundingClientRect()
   const headingTop = elRect.top - containerRect.top + sc.scrollTop
-  
+
   // Target position: heading position minus header offset minus small buffer
   let target = headingTop - offset - 20 // 20px buffer to ensure heading is visible
-  
+
   // Clamp to valid range
   target = Math.max(0, Math.min(target, sc.scrollHeight - sc.clientHeight))
-  console.log('[ToC] Scroll details:', { id, offset, headingTop, target, current: sc.scrollTop, scrollHeight: sc.scrollHeight })
-  
+  console.log('[ToC] Scroll details:', {
+    id,
+    offset,
+    headingTop,
+    target,
+    current: sc.scrollTop,
+    scrollHeight: sc.scrollHeight,
+  })
+
   const before = sc.scrollTop
   sc.scrollTop = target
   // Recompute heading positions right after programmatic scroll to account for
   // any lazy layout shifts so our section detection uses fresh coordinates.
   recomputeHeadingPositions()
   console.log('[ToC] After setting scrollTop:', target, 'was:', before)
-  
+
   // Hide the panel so the handle reappears
   tocHover.value = false
-  
+
   // Ensure highlight is correct after scroll completes
   window.setTimeout(() => updateActiveHeading(), 100)
 }
@@ -784,12 +1096,12 @@ watch(
   (newContent, oldContent) => {
     // Only process if content actually changed
     if (newContent === oldContent) return
-    
+
     // Clear any pending timeout
     if (processTimeout) {
       clearTimeout(processTimeout)
     }
-    
+
     // Debounce the processing to avoid multiple rapid calls
     processTimeout = setTimeout(() => {
       // Unmount any existing Ace editors before replacing HTML to avoid leaks
@@ -807,7 +1119,9 @@ watch(
         buildHeadings()
         setTimeout(() => {
           if (import.meta.env.DEV) {
-            try { console.log('[Pipeline] Mounting Ace editors after headings rendered') } catch {}
+            try {
+              console.log('[Pipeline] Mounting Ace editors after headings rendered')
+            } catch {}
           }
           processAceCodeBlocks()
           // Mount inline snippet groups at their placeholders
@@ -833,7 +1147,8 @@ onUnmounted(() => {
   clearMountedAceBlocks()
   clearMountedInlineGroups()
   clearMountedInlineSnippets()
-  if (prevScrollEl && scrollListener) prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
+  if (prevScrollEl && scrollListener)
+    prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
   if (resizeListener) window.removeEventListener('resize', resizeListener)
   if (processTimeout) clearTimeout(processTimeout)
 })
@@ -897,12 +1212,14 @@ const handleCodeBlockClick = (event: Event) => {
   left: 8px; /* appear closer to the handle/left edge */
   top: 80px; /* below sticky header */
   transform: translateX(-100%);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
   opacity: 0.95;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px; /* full rounding as it's no longer butted to handle */
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   min-width: 240px;
   max-width: 320px;
   max-height: calc(100vh - 100px);
@@ -920,10 +1237,21 @@ const handleCodeBlockClick = (event: Event) => {
   margin-bottom: 0.25rem;
 }
 
-.toc-empty { color: #6b7280; font-size: 0.9rem; padding: 0.5rem 0.25rem; }
+.toc-empty {
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.25rem;
+}
 
-.toc-list { list-style: none; margin: 0; padding: 0.25rem 0; }
-.toc-item { margin: 0; padding: 0; }
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+.toc-item {
+  margin: 0;
+  padding: 0;
+}
 .toc-item .toc-link {
   appearance: none;
   background: transparent;
@@ -936,15 +1264,31 @@ const handleCodeBlockClick = (event: Event) => {
   color: #374151;
   font-size: 0.95rem;
 }
-.toc-item .toc-link:hover { background: #f3f4f6; }
-.toc-item.active .toc-link { background: #e3f2fd; color: #007bff; font-weight: 600; }
+.toc-item .toc-link:hover {
+  background: #f3f4f6;
+}
+.toc-item.active .toc-link {
+  background: #e3f2fd;
+  color: #007bff;
+  font-weight: 600;
+}
 
-.toc-item.level-2 .toc-link { padding-left: 0.5rem; }
-.toc-item.level-3 .toc-link { padding-left: 1.25rem; font-size: 0.92rem; }
-.toc-item.level-4 .toc-link { padding-left: 2rem; font-size: 0.9rem; }
+.toc-item.level-2 .toc-link {
+  padding-left: 0.5rem;
+}
+.toc-item.level-3 .toc-link {
+  padding-left: 1.25rem;
+  font-size: 0.92rem;
+}
+.toc-item.level-4 .toc-link {
+  padding-left: 2rem;
+  font-size: 0.9rem;
+}
 
 @media (max-width: 1024px) {
-  .toc-rail { display: none; }
+  .toc-rail {
+    display: none;
+  }
 }
 
 /* ToC handle: visible hint for discoverability */
@@ -962,13 +1306,16 @@ const handleCodeBlockClick = (event: Event) => {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 .toc-handle:hover {
   transform: translateX(2px);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
   border-color: #d1d5db;
 }
 .toc-panel.open ~ .toc-handle {
@@ -981,9 +1328,19 @@ const handleCodeBlockClick = (event: Event) => {
   height: 3px;
   border-radius: 2px;
 }
-.toc-handle .line-1 { width: 18px; background: #111827; opacity: 0.9; }
-.toc-handle .line-2 { width: 14px; background: #cbd5e1; }
-.toc-handle .line-3 { width: 10px; background: #e5e7eb; }
+.toc-handle .line-1 {
+  width: 18px;
+  background: #111827;
+  opacity: 0.9;
+}
+.toc-handle .line-2 {
+  width: 14px;
+  background: #cbd5e1;
+}
+.toc-handle .line-3 {
+  width: 10px;
+  background: #e5e7eb;
+}
 
 .section-header {
   display: flex;
@@ -1130,9 +1487,9 @@ const handleCodeBlockClick = (event: Event) => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.55rem 0.8rem;
-  background: #f8fafc;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.55rem 0.75rem;
+  background: #e3f2fd;
+  border-bottom: none;
 }
 
 /* Compact single snippet row */
@@ -1141,7 +1498,7 @@ const handleCodeBlockClick = (event: Event) => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.55rem 0.8rem;
+  padding: 0.2rem 0.75rem;
   background: transparent;
   border-bottom: none;
 }
@@ -1317,7 +1674,84 @@ const handleCodeBlockClick = (event: Event) => {
   margin-left: 0 !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), inset 1px 0 0 rgba(255, 255, 255, 0.6) !important;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    inset 1px 0 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Single snippet minimal header styles */
+.content-text :deep(.is-single-snippet) {
+  margin: 0.75rem 0 !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.content-text :deep(.code-example.is-single-snippet) {
+  margin: 0 !important;
+}
+
+.content-text :deep(.is-single-snippet) * {
+  margin: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.content-text :deep(.single-snippet-toolbar) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+  background: #e3f2fd !important;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+  border-bottom: none !important;
+  margin: 0 !important;
+}
+
+.content-text :deep(.single-snippet-header) {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.content-text :deep(.single-snippet-description) {
+  margin: 0 !important;
+  padding: 0;
+  display: block;
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.25;
+}
+
+/* Unified snippet row styling for both groups and single snippets */
+.content-text :deep(.snippet-row) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 0.2rem 0.75rem !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border-top: 1px solid #eef2f7 !important;
+}
+
+/* Add separator line between rows in single snippets (like in groups) */
+.content-text :deep(.is-single-snippet .snippet-row) {
+  background: white !important;
+  border-radius: 0 0 0.5rem 0.5rem !important;
+}
+
+.content-text :deep(.snippet-main) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.content-text :deep(.toolbar-spacer) {
+  flex: 1 1 auto;
 }
 
 .inline-code-wrapper:hover .inline-run-button {
