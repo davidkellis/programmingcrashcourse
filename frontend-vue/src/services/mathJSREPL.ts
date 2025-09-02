@@ -44,8 +44,10 @@ class MathJSREPLService {
             const node = s as unknown as { start: number; end: number; expression: { start: number; end: number; type?: string } }
             const exprStr = src.slice(node.expression.start, node.expression.end)
             const exprType = (node.expression as unknown as { type?: string }).type || ''
-            const sideEffecting = exprType === 'CallExpression' || exprType === 'UpdateExpression' || exprType === 'AssignmentExpression' || exprType === 'AwaitExpression' || exprType === 'YieldExpression'
-            // If not side-effecting, we can REPLACE the statement with an assignment once
+            // Most expressions are safe to re-evaluate for display purposes
+            // Only avoid re-evaluation for truly side-effecting operations
+            const sideEffecting = exprType === 'UpdateExpression' || exprType === 'AssignmentExpression'
+            // CallExpression, AwaitExpression, YieldExpression are now considered safe for result display
             return { expr: exprStr, isSafeToReevaluate: !sideEffecting, stmtStart: node.start, stmtEnd: node.end, mode: 'replace' }
           }
           case 'VariableDeclaration': {
