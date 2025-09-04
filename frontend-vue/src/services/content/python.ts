@@ -26,7 +26,7 @@ x + 1
 \`\`\`
 
 \`\`\`python
-# title: A single snippet alongside a group
+# title: A one-line summation expression
 sum([1, 2, 3])
 \`\`\`
 
@@ -97,7 +97,7 @@ These various kinds of values are also called "types". We will learn about sets 
 
 ### Strings
 
-- What they are used for: representing text like names, messages, file paths, and any human‑readable data.
+- What they are used for: representing text like names, messages, file paths, and any human-readable data.
 - Features: written with quotes, can include spaces and punctuation, support Unicode.
 
 \`\`\`python
@@ -125,7 +125,7 @@ False
 
 ### Lists (list)
 
-- What they are used for: ordered collections of items; great for sequences like to‑do items, scores, or search results.
+- What they are used for: ordered collections of items; great for sequences like to-do items, scores, or search results.
 - Features: can hold values of any type, can be empty, can be nested.
 
 \`\`\`python
@@ -155,7 +155,7 @@ False
 
 ### Objects (instances of classes)
 
-- What they are used for: representing real‑world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
+- What they are used for: representing real-world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
 - Example: creating an instance of a simple class.
 
 \`\`\`python
@@ -181,19 +181,31 @@ You will use these values inside expressions, assignments, function calls, and c
     order: 4,
     content: `Operators combine or transform values to produce new values. You will use them constantly with numbers, strings, lists, and booleans.
 
-### Arithmetic operators (numbers)
+There are two primary shapes of operator:
+
+- Binary operators: take two inputs — \`nr: A <operator> B\`
+- Unary operators: take one input — \`nr: <operator> A\`
+
+## Binary operators
+
+### Arithmetic (numbers)
 
 - Addition: \`nr: +\`
+  - Adds two numbers: \`nr: 3 + 5\` evaluates to \`nr: 8\`
 - Subtraction: \`nr: -\`
+  - Subtracts one number from another: \`nr: 10 - 3\` evaluates to \`nr: 7\`
 - Multiplication: \`nr: *\`
+  - Repeats addition: \`nr: 4 * 3\` means \`nr: 4 + 4 + 4\` which evaluates to \`nr: 12\`
 - Division (float): \`nr: /\`
-- Floor division: \`nr: //\`
+  - Splits into equal parts: \`nr: 10 / 2\` evaluates to \`nr: 5.0\` (always a decimal)
 - Remainder (modulo): \`nr: %\`
+  - What's left after division: \`nr: 10 % 3\` evaluates to \`nr: 1\` (10 ÷ 3 = 3 remainder 1)
 - Exponent: \`nr: **\`
+  - Repeated multiplication: \`nr: 2 ** 3\` means \`nr: 2 * 2 * 2\` which evaluates to \`nr: 8\`
 
 \`\`\`python
-# title: Arithmetic operators
-# description: Practice arithmetic operations with numbers.
+# title: Arithmetic (binary)
+# description: Practice common arithmetic operations.
 1 + 2
 ---
 7 - 3
@@ -202,21 +214,22 @@ You will use these values inside expressions, assignments, function calls, and c
 ---
 9 / 2
 ---
-9 // 2
----
 9 % 2
 ---
 2 ** 3
 \`\`\`
 
-### Comparison operators (booleans)
+### Comparison (booleans)
 
 - Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+  - Tests if values are the same: \`nr: 5 == 5\` evaluates to \`nr: True\`, \`nr: 5 != 3\` evaluates to \`nr: True\`
 - Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+  - Compares size: \`nr: 3 < 5\` evaluates to \`nr: True\`, \`nr: 5 <= 5\` evaluates to \`nr: True\`
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
+  - Compares size: \`nr: 7 > 3\` evaluates to \`nr: True\`, \`nr: 5 >= 5\` evaluates to \`nr: True\`
 
 \`\`\`python
-# title: Comparison operators
+# title: Comparison (binary)
 # description: Compare values to get boolean results.
 3 == 3
 ---
@@ -231,58 +244,139 @@ You will use these values inside expressions, assignments, function calls, and c
 7 >= 10
 \`\`\`
 
-### Boolean operators
+### Logical (booleans)
 
-- And: \`nr: and\`  |  Or: \`nr: or\`  |  Not: \`nr: not\`
-- Short‑circuit: \`nr: A and B\` skips \`nr: B\` if \`nr: A\` is False; \`nr: A or B\` skips \`nr: B\` if \`nr: A\` is True.
+- And: \`nr: and\`  |  Or: \`nr: or\`
+  - \`nr: and\`: Both must be True: \`nr: True and False\` evaluates to \`nr: False\`
+  - \`nr: or\`: At least one must be True: \`nr: True or False\` evaluates to \`nr: True\`
+- Short-circuit: \`nr: A and B\` skips \`nr: B\` if \`nr: A\` is False; \`nr: A or B\` skips \`nr: B\` if \`nr: A\` is True.
 
 \`\`\`python
-# title: Boolean operators
-# description: Combine boolean values with logical operators.
+# title: Logical (binary)
+# description: Combine boolean values with and/or.
 True and False
 ---
 True or False
----
-not (2 < 3)
 \`\`\`
 
-### Sequence operators (strings and lists)
+### Sequence operations (strings and lists)
 
 - Concatenation: \`nr: +\`
+  - Joins sequences together: \`nr: "Hi" + "there"\` evaluates to \`nr: "Hithere"\`, \`nr: [1, 2] + [3]\` evaluates to \`nr: [1, 2, 3]\`
 - Repetition: \`nr: *\`
-- Membership: \`nr: in\`, \`nr: not in\`
-- Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start:stop:step]\`
+  - Repeats a sequence: \`nr: "ha" * 3\` evaluates to \`nr: "hahaha"\`, \`nr: [0] * 4\` evaluates to \`nr: [0, 0, 0, 0]\`
 
 \`\`\`python
-# title: Sequence operators
-# description: Work with strings and lists using various operators.
+# title: Sequence operations (binary)
+# description: Concatenate and repeat strings/lists.
 "Hi, " + "there"
 ---
 "ha" * 3
 ---
-"py" in "python"
----
 [1, 2] + [3]
 ---
 [0] * 4
----
-[1,2,3,4][1:3]
 \`\`\`
 
-### Precedence and grouping
+## Unary operators
+
+- Numeric sign: \`nr: +a\` (unary plus), \`nr: -a\` (negation)
+  - \`nr: +a\`: Makes a number positive (rarely needed): \`nr: +5\` evaluates to \`nr: 5\`
+  - \`nr: -a\`: Flips the sign: \`nr: -5\` evaluates to \`nr: -5\`, \`nr: -(-3)\` evaluates to \`nr: 3\`
+- Logical negation: \`nr: not a\`
+  - Flips True/False: \`nr: not True\` evaluates to \`nr: False\`, \`nr: not False\` evaluates to \`nr: True\`
+
+\`\`\`python
+# title: Unary operators
+# description: Apply operators that take a single input.
++5
+---
+-5
+---
+-(-3)
+---
+not True
+---
+not (2 < 3)
+\`\`\`
+
+## Precedence and grouping
 
 - Parentheses \`nr: ( )\` change evaluation order.
+  - Forces operations inside to happen first: \`nr: (1 + 2) * 3\` evaluates to \`nr: 9\` instead of \`nr: 7\`
 - Precedence (high → low): \`nr: **\`, \`nr: * / // %\`, \`nr: + -\`, comparisons, \`nr: not\`, \`nr: and\`, \`nr: or\`.
+  - Higher precedence operations happen first: \`nr: 1 + 2 * 3\` means \`nr: 1 + (2 * 3)\` which evaluates to \`nr: 7\`
 
 \`\`\`python
 # title: Precedence and grouping
-# description: See how operator precedence and parentheses affect evaluation.
+# description: See how precedence and parentheses affect evaluation.
 1 + 2 * 3
 ---
 (1 + 2) * 3
 \`\`\`
 
-You now know the basic operators; next you will use them with variables and assignments.
+## Python-specific extra operators
+
+These are very useful in Python but are not universal across all languages:
+
+- Membership: \`nr: in\`, \`nr: not in\`
+  - Tests if something is inside: \`nr: "py" in "python"\` evaluates to \`nr: True\`, \`nr: 3 in [1, 2, 3]\` evaluates to \`nr: True\`
+- Identity: \`nr: is\`, \`nr: is not\`
+  - Tests if two variables point to the exact same object: \`nr: a is b\` (stricter than \`nr: ==\`)
+- Bitwise (integers): \`nr: &\`, \`nr: |\`, \`nr: ^\`, \`nr: <<\`, \`nr: >>\`, and unary \`nr: ~\`
+  - Works with binary representation: \`nr: 5 & 3\` evaluates to \`nr: 1\`, \`nr: 8 >> 2\` evaluates to \`nr: 2\`
+- Floor division: \`nr: //\`
+  - Division that rounds down: \`nr: 10 // 3\` evaluates to \`nr: 3\` (not \`nr: 3.33...\`)
+- Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start:stop:step]\`
+  - Gets parts of sequences: \`nr: "hello"[1]\` evaluates to \`nr: "e"\`, \`nr: [1,2,3,4][1:3]\` evaluates to \`nr: [2, 3]\`
+- Chained comparisons: \`nr: 1 < x < 5\`
+  - Multiple comparisons at once: \`nr: 1 < 3 < 5\` evaluates to \`nr: True\` (means \`nr: 1 < 3 and 3 < 5\`)
+
+\`\`\`python
+# title: Python extras — membership, identity, bitwise, floor division, slicing
+# description: Explore Python-specific operators and forms.
+a = [1, 2]
+b = a
+c = list(a)
+---
+"py" in "python"
+---
+3 in [1, 2, 3]
+---
+"x" not in "python"
+---
+a is b
+---
+a is c
+---
+a == c
+---
+5 & 3
+---
+5 | 2
+---
+5 ^ 1
+---
+5 << 1
+---
+5 >> 1
+---
+~5
+---
+9 // 2
+---
+[1,2,3,4][1:3]
+---
+"python"[::-1]
+---
+x = 3
+---
+1 < x < 5
+---
+5 < x < 7
+\`\`\`
+
+You now know the common operators (binary and unary) and where Python adds extras; next you will use them with variables and assignments.
 `,
     previousSection: 'values',
     nextSection: 'variables',
@@ -322,7 +416,7 @@ We name a variable with letters, numbers, and the underscore character, for exam
 
 We can't use spaces in variable names.
 
-In Python, you can create a new variable simply by assigning a value to it—no declaration is needed. Some languages like JavaScript and TypeScript require variables to be declared (with keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\`) before or during their first assignment, but Python and Ruby allow you to create new variables directly through assignment.
+In Python, you can create a new variable simply by assigning a value to it—no declaration is needed. This is different from languages like JavaScript and TypeScript, which require variables to be declared (with keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\`) before or during their first assignment.
 
 A variable can only point at one value at a time; however, we can change the value that a variable points at.
 
@@ -348,25 +442,39 @@ When we use the assignment operator, \`nr: =\` , to make a variable point at a v
 
 These are all assignment expressions:
 
-* \`my_age = 10\`
-* \`my_first_word = "cookie"\`
-* \`number_of_cookies_i_want_to_eat = 100\`
+* \`nr: my_age = 10\`
+* \`nr: my_first_word = "cookie"\`
+* \`nr: number_of_cookies_i_want_to_eat = 100\`
 
 When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
 
-For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
+For example, this is a variable assignment:
 
 \`\`\`python
-my_age = 10
-my_age_next_year = my_age + 1
-my_age_next_year
+# title: Variable assignment
+age = 25
+---
+name = "Alice"
+\`\`\`
+
+For example, we can assign our age to the \`nr: current_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: current_age\` variable:
+
+\`\`\`python
+# title: Working with variables step by step
+current_age = 10
+---
+age_next_year = current_age + 1
+---
+age_next_year
 \`\`\`
 
 Finally, we can change the value that a variable points at by assigning a new value to the variable:
 
 \`\`\`python
+# title: Variable reassignment example
 my_age = 10
 print(f"my_age -> {my_age}")   # this prints 10
+---
 my_age = 11
 print(f"my_age -> {my_age}")   # this prints 11
 \`\`\`

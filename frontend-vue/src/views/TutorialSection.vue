@@ -218,6 +218,7 @@ const loadSection = async () => {
 
     // Prefer language from route params, fallback to currentLanguage prop, then default
     const currentLanguage = props.language || props.currentLanguage || 'python'
+    console.log('[DEBUG] loadSection called with:', { sectionId: props.sectionId, currentLanguage })
     const sectionData = await localContentService.getSection(props.sectionId, currentLanguage)
     if (sectionData) {
       section.value = sectionData
@@ -246,9 +247,9 @@ const runCodeExample = (code: string) => {
 
 // Helpers for compact single-snippet rendering
 const oneLinePreview = (code: string) => {
-  const oneLine = code.replace(/\s+/g, ' ').trim()
-  const max = 90
-  return oneLine.length > max ? oneLine.slice(0, max) + '…' : oneLine
+  const trimmed = code.trim()
+  const max = 200
+  return trimmed.length > max ? trimmed.slice(0, max) + '…' : trimmed
 }
 
 const commentPrefixFor = (lang?: string) => {
@@ -420,6 +421,7 @@ const renderMarkdown = (content: string): string => {
 // Process Ace code block placeholders after markdown rendering by mounting
 // an AceCodeBlock inline at each placeholder location
 const clearMountedAceBlocks = () => {
+  console.log('[DEBUG] clearMountedAceBlocks called, stack trace:', new Error().stack)
   mountedAceBlocks.value.forEach(({ unmount, el }) => {
     try {
       unmount()
@@ -432,6 +434,7 @@ const clearMountedAceBlocks = () => {
 }
 
 const clearMountedInlineGroups = () => {
+  console.log('[DEBUG] clearMountedInlineGroups called, stack trace:', new Error().stack)
   mountedInlineGroups.value.forEach(({ unmount, el }) => {
     try {
       unmount()
@@ -444,6 +447,7 @@ const clearMountedInlineGroups = () => {
 }
 
 const clearMountedInlineSnippets = () => {
+  console.log('[DEBUG] clearMountedInlineSnippets called, stack trace:', new Error().stack)
   mountedInlineSnippets.value.forEach(({ unmount, el }) => {
     try {
       unmount()
@@ -636,7 +640,6 @@ const mountInlineSnippets = () => {
           | CodeSnippet
           | undefined
       }
-
     }
 
     const mountEl = document.createElement('div')
@@ -691,7 +694,7 @@ const mountInlineSnippets = () => {
     codeEl.className = 'snippet-code-preview'
     codeEl.title = composeTitle(snippet)
     // For single snippets, just show the code without the title comment since it's already in the header
-    codeEl.textContent = oneLinePreview(snippet.code)
+    codeEl.textContent = snippet.code
 
     const btn = document.createElement('button')
     btn.className = 'run-button run-micro'
@@ -1086,11 +1089,13 @@ onMounted(() => {
 
 // Watch for content changes to process Ace code blocks
 let processTimeout: ReturnType<typeof setTimeout> | null = null
+let lastProcessedContent: string | null = null
+
 watch(
   () => section.value?.content,
   (newContent, oldContent) => {
-    // Only process if content actually changed
-    if (newContent === oldContent) return
+    // Only process if content actually changed and is different from last processed
+    if (!newContent || newContent === oldContent || newContent === lastProcessedContent) return
 
     // Clear any pending timeout
     if (processTimeout) {
@@ -1099,6 +1104,9 @@ watch(
 
     // Debounce the processing to avoid multiple rapid calls
     processTimeout = setTimeout(() => {
+      // Store the content we're about to process
+      lastProcessedContent = newContent
+
       // Unmount any existing Ace editors before replacing HTML to avoid leaks
       clearMountedAceBlocks()
       // Also unmount any inline snippet groups mounted into the previous content
@@ -1151,9 +1159,29 @@ onUnmounted(() => {
 // Watch for route and language changes to reload section content
 watch(
   () => [props.sectionId, props.language, props.currentLanguage],
-  ([newSectionId]) => {
-    if (newSectionId) {
+  (
+    [newSectionId, newLanguage, newCurrentLanguage],
+    [oldSectionId, oldLanguage, oldCurrentLanguage],
+  ) => {
+    console.log('[DEBUG] Route watcher triggered:', {
+      newSectionId,
+      newLanguage,
+      newCurrentLanguage,
+      oldSectionId,
+      oldLanguage,
+      oldCurrentLanguage,
+    })
+
+    // Only reload if section ID actually changed or language changed meaningfully
+    const sectionChanged = newSectionId !== oldSectionId
+    const languageChanged =
+      (newLanguage || newCurrentLanguage) !== (oldLanguage || oldCurrentLanguage)
+
+    if (newSectionId && (sectionChanged || languageChanged)) {
+      console.log('[DEBUG] Reloading section due to meaningful change')
       loadSection()
+    } else {
+      console.log('[DEBUG] Skipping section reload - no meaningful change')
     }
   },
 )
@@ -1503,7 +1531,7 @@ const handleCodeBlockClick = (event: Event) => {
   font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 1rem;
   color: #111827;
-  white-space: nowrap;
+  white-space: pre-wrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1 1 auto;

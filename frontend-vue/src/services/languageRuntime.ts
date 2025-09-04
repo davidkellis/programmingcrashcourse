@@ -341,11 +341,11 @@ import datetime
               // Combine captured print output with return value
               if (capturedOutput.length > 0) {
                 output = capturedOutput.join('\n')
-                if (result) {
+                if (result !== undefined && result !== null) {
                   output += '\n' + String(result)
                 }
               } else {
-                output = result ? String(result) : ''
+                output = (result !== undefined && result !== null) ? String(result) : ''
               }
 
               // If the last non-empty line is a simple assignment (e.g., x = <expr>),

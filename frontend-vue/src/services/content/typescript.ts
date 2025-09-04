@@ -26,7 +26,7 @@ x + 1
 \`\`\`
 
 \`\`\`typescript
-// title: A single snippet alongside a group
+// title: A one-line summation expression
 [1, 2, 3].reduce((a, b) => a + b, 0)
 \`\`\`
 
@@ -178,18 +178,31 @@ You will use these values inside expressions, assignments, function calls, and c
     order: 4,
     content: `Operators combine or transform values to produce new values. You will use them constantly with numbers, strings, arrays, and booleans.
 
-### Arithmetic operators (numbers)
+There are two primary shapes of operator:
+
+- Binary operators: take two inputs — \`nr: A <operator> B\`
+- Unary operators: take one input — \`nr: <operator> A\`
+
+## Binary operators
+
+### Arithmetic (numbers)
 
 - Addition: \`nr: +\`
+  - Adds two numbers: \`nr: 3 + 5\` evaluates to \`nr: 8\`
 - Subtraction: \`nr: -\`
+  - Subtracts one number from another: \`nr: 10 - 3\` evaluates to \`nr: 7\`
 - Multiplication: \`nr: *\`
+  - Repeats addition: \`nr: 4 * 3\` means \`nr: 4 + 4 + 4\` which evaluates to \`nr: 12\`
 - Division: \`nr: /\`
+  - Splits into equal parts: \`nr: 10 / 2\` evaluates to \`nr: 5\` (always a decimal in TypeScript)
 - Remainder (modulo): \`nr: %\`
+  - What's left after division: \`nr: 10 % 3\` evaluates to \`nr: 1\` (10 ÷ 3 = 3 remainder 1)
 - Exponent: \`nr: **\`
+  - Repeated multiplication: \`nr: 2 ** 3\` means \`nr: 2 * 2 * 2\` which evaluates to \`nr: 8\`
 
 \`\`\`typescript
-// title: Arithmetic operators
-// description: Practice arithmetic operations with numbers.
+// title: Arithmetic (binary)
+// description: Practice common arithmetic operations.
 1 + 2
 ---
 7 - 3
@@ -203,16 +216,20 @@ You will use these values inside expressions, assignments, function calls, and c
 2 ** 3
 \`\`\`
 
-### Comparison operators (booleans)
+### Comparison (booleans)
 
 - Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+  - Checks if values are the same (with type conversion): \`nr: 5 == '5'\` evaluates to \`nr: true\`
 - Strict equal: \`nr: ===\`  |  Strict not equal: \`nr: !==\`
+  - Checks if values and types are exactly the same: \`nr: 5 === 5\` evaluates to \`nr: true\`, but \`nr: 5 === '5'\` evaluates to \`nr: false\`
 - Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+  - Compares size: \`nr: 3 < 5\` evaluates to \`nr: true\`, \`nr: 5 <= 5\` evaluates to \`nr: true\`
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
+  - Compares size the other way: \`nr: 7 > 3\` evaluates to \`nr: true\`, \`nr: 4 >= 4\` evaluates to \`nr: true\`
 
 \`\`\`typescript
-// title: Comparison operators
-// description: Compare values
+// title: Comparison (binary)
+// description: Compare values to get boolean results.
 3 == 3
 ---
 3 === 3
@@ -228,30 +245,34 @@ You will use these values inside expressions, assignments, function calls, and c
 7 >= 10
 \`\`\`
 
-### Boolean operators
+### Logical (booleans)
 
-- And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
-- Short‑circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
+- And: \`nr: &&\`
+  - Both must be true: \`nr: true && false\` evaluates to \`nr: false\`, \`nr: true && true\` evaluates to \`nr: true\`
+- Or: \`nr: ||\`
+  - At least one must be true: \`nr: true || false\` evaluates to \`nr: true\`, \`nr: false || false\` evaluates to \`nr: false\`
+- Short-circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
 
 \`\`\`typescript
-// title: Boolean operators
-// description: Combine boolean values with logical operators.
+// title: Logical (binary)
+// description: Combine boolean values with and/or.
 true && false
 ---
 true || false
----
-!(2 < 3)
 \`\`\`
 
-### Sequence operators (strings and arrays)
+### Sequence operations (strings and arrays)
 
-- Strings: concatenation with \`nr: +\`, repetition with \`nr: "ha".repeat(3)\`.
-- Arrays: concatenate with \`nr: arr1.concat(arr2)\` or spread \`nr: [...arr1, ...arr2]\`.
-- Membership: \`nr: "py".includes("p")\`, \`nr: [1,2,3].includes(2)\`.
+- Concatenation: \`nr: +\` (strings), \`nr: .concat()\` (arrays)
+  - Joins things together: \`nr: "Hi" + "there"\` evaluates to \`nr: "Hithere"\`, \`nr: [1, 2].concat([3])\` evaluates to \`nr: [1, 2, 3]\`
+- Repetition: \`nr: 'str'.repeat(n)\`
+  - Makes copies: \`nr: "ha".repeat(3)\` evaluates to \`nr: "hahaha"\`
+- Spread: \`nr: [...arr1, ...arr2]\`
+  - Expands arrays: \`nr: [...[1, 2], ...[3, 4]]\` evaluates to \`nr: [1, 2, 3, 4]\`
 
 \`\`\`typescript
-// title: Sequence operators
-// description: Work with strings and arrays using various operators and methods.
+// title: Sequence operations (binary)
+// description: Concatenate and repeat strings/arrays.
 "Hi, " + "there"
 ---
 "ha".repeat(3)
@@ -260,26 +281,92 @@ true || false
 ---
 [...["a", "b"], ...["c"]]
 ---
-"python".includes("py")
----
-[1,2,3].includes(2)
+Array(4).fill(0)
 \`\`\`
 
-### Precedence and grouping
+## Unary operators
+
+- Numeric sign: \`nr: +a\` (unary plus), \`nr: -a\` (negation)
+  - Changes the sign: \`nr: +5\` evaluates to \`nr: 5\`, \`nr: -5\` evaluates to \`nr: -5\`, \`nr: -(-3)\` evaluates to \`nr: 3\`
+- Logical negation: \`nr: !a\`
+  - Flips true/false: \`nr: !true\` evaluates to \`nr: false\`, \`nr: !false\` evaluates to \`nr: true\`
+- Type inquiry: \`nr: typeof a\`
+  - Tells you what type something is: \`nr: typeof 42\` evaluates to \`nr: "number"\`, \`nr: typeof "hello"\` evaluates to \`nr: "string"\`
+
+\`\`\`typescript
+// title: Unary operators
+// description: Apply operators that take a single input.
++5
+---
+-5
+---
+-(-3)
+---
+!true
+---
+!(2 < 3)
+---
+typeof 42
+---
+typeof "hello"
+\`\`\`
+
+## Precedence and grouping
 
 - Parentheses \`nr: ( )\` change evaluation order.
+  - Like math class: \`nr: (1 + 2) * 3\` evaluates to \`nr: 9\` (do the parentheses first)
 - Precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
+  - Without parentheses: \`nr: 1 + 2 * 3\` evaluates to \`nr: 7\` (multiplication happens first)
 
 \`\`\`typescript
 // title: Precedence and grouping
-// description: See how operator precedence and parentheses affect evaluation.
+// description: See how precedence and parentheses affect evaluation.
 1 + 2 * 3
 ---
 (1 + 2) * 3
 \`\`\`
 
-You now know the basic operators; next you will use them with variables and assignments.
-`,
+## TypeScript-specific extra operators
+
+These are very useful in TypeScript but are not universal across all languages:
+
+- Indexing: \`nr: seq[index]\`
+  - Gets an item by position: \`nr: [1, 2, 3][1]\` evaluates to \`nr: 2\` (arrays start at 0)
+- Optional chaining: \`nr: ?.\`
+  - Safely accesses properties: \`nr: obj?.someMethod\` evaluates to \`nr: undefined\` if \`nr: obj\` is null (instead of crashing)
+- Nullish coalescing: \`nr: ??\`
+  - Provides backup values: \`nr: null ?? "default"\` evaluates to \`nr: "default"\`
+- Non-null assertion: \`nr: !\` (postfix)
+  - Tells TypeScript you're sure something isn't null: \`nr: value!\` (use carefully!)
+- Type assertion: \`nr: as Type\`
+  - Tells TypeScript to treat something as a specific type: \`nr: (value as string).toUpperCase()\`
+
+\`\`\`typescript
+// title: TypeScript extras — membership, indexing, templates, optional chaining, type assertions
+// description: Explore TypeScript-specific operators and forms.
+const arr: number[] = [1, 2, 3]
+const str: string = "typescript"
+---
+arr[1]
+---
+str[1]
+---
+const name: string = "Sam"
+---
+const obj: any = null
+---
+obj?.someMethod
+---
+const value: string | null = null
+---
+value ?? "default"
+---
+const maybeString: unknown = "hello"
+---
+(maybeString as string).toUpperCase()
+\`\`\`
+
+You now know the common operators (binary and unary) and where TypeScript adds extras; next you will use them with variables and assignments.`,
     previousSection: 'values',
     nextSection: 'variables',
   },
@@ -526,28 +613,29 @@ In TypeScript, variables must be declared using keywords like \`nr: let\`, \`nr:
 For example, this is a variable declaration:
 
 \`\`\`typescript
-// snippet: Variable declaration with let and const
-let my_age: number = 25
-const my_name: string = "Alice"
+// title: Variable declaration with let and const
+let age: number = 25
+---
+const name: string = "Alice"
 \`\`\`
 
 When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
 
-For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
+For example, we can assign our age to the \`nr: current_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: current_age\` variable:
 
 \`\`\`typescript
-// snippet: Working with variables step by step
-let my_age: number = 10
+// title: Working with variables step by step
+let current_age: number = 10
 ---
-let my_age_next_year: number = my_age + 1
+let age_next_year: number = current_age + 1
 ---
-my_age_next_year
+age_next_year
 \`\`\`
 
 Finally, we can change the value that a variable points at by assigning a new value to the variable:
 
 \`\`\`typescript
-// snippet: Variable reassignment example
+// title: Variable reassignment example
 let my_age: number = 10
 console.log(\`my_age -> \${my_age}\`)   // this prints 10
 ---

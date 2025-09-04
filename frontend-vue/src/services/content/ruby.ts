@@ -26,7 +26,7 @@ x + 1
 \`\`\`
 
 \`\`\`ruby
-# title: A single snippet alongside a group
+# title: A one-line summation expression
 [1, 2, 3].sum
 \`\`\`
 
@@ -181,21 +181,33 @@ You will use these values inside expressions, assignments, method calls, and con
     id: 'operators',
     title: 'Operators',
     order: 4,
-    content: `Operators combine or transform values to produce new values. You'll use them with numbers, strings, arrays, and booleans.
+    content: `Operators combine or transform values to produce new values. You will use them constantly with numbers, strings, arrays, and booleans.
 
-### Arithmetic operators (numbers)
+There are two primary shapes of operator:
+
+- Binary operators: take two inputs — \`nr: A <operator> B\`
+- Unary operators: take one input — \`nr: <operator> A\`
+
+## Binary operators
+
+### Arithmetic (numbers)
 
 - Addition: \`nr: +\`
+  - Adds two numbers: \`nr: 3 + 5\` evaluates to \`nr: 8\`
 - Subtraction: \`nr: -\`
+  - Subtracts one number from another: \`nr: 10 - 3\` evaluates to \`nr: 7\`
 - Multiplication: \`nr: *\`
+  - Repeats addition: \`nr: 4 * 3\` means \`nr: 4 + 4 + 4\` which evaluates to \`nr: 12\`
 - Division: \`nr: /\` (integer division when both operands are integers)
-- Integer division method: \`nr: div\`
+  - Splits into equal parts: \`nr: 9 / 2\` evaluates to \`nr: 4\` (integers), \`nr: 9.0 / 2\` evaluates to \`nr: 4.5\` (decimals)
 - Remainder (modulo): \`nr: %\`
+  - What's left after division: \`nr: 10 % 3\` evaluates to \`nr: 1\` (10 ÷ 3 = 3 remainder 1)
 - Exponent: \`nr: **\`
+  - Repeated multiplication: \`nr: 2 ** 3\` means \`nr: 2 * 2 * 2\` which evaluates to \`nr: 8\`
 
 \`\`\`ruby
-# title: Arithmetic operators
-# description: Practice arithmetic operations with numbers.
+# title: Arithmetic (binary)
+# description: Practice common arithmetic operations.
 1 + 2
 ---
 7 - 3
@@ -206,21 +218,22 @@ You will use these values inside expressions, assignments, method calls, and con
 ---
 9.0 / 2    #=> 4.5
 ---
-9.div(2)   #=> 4
----
 9 % 2
 ---
 2 ** 3
 \`\`\`
 
-### Comparison operators (booleans)
+### Comparison (booleans)
 
 - Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+  - Checks if values are the same: \`nr: 5 == 5\` evaluates to \`nr: true\`, \`nr: 3 != 4\` evaluates to \`nr: true\`
 - Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+  - Compares size: \`nr: 3 < 5\` evaluates to \`nr: true\`, \`nr: 5 <= 5\` evaluates to \`nr: true\`
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
+  - Compares size the other way: \`nr: 7 > 3\` evaluates to \`nr: true\`, \`nr: 4 >= 4\` evaluates to \`nr: true\`
 
 \`\`\`ruby
-# title: Comparison operators
+# title: Comparison (binary)
 # description: Compare values to get boolean results.
 3 == 3
 ---
@@ -235,58 +248,140 @@ You will use these values inside expressions, assignments, method calls, and con
 7 >= 10
 \`\`\`
 
-### Boolean operators
+### Logical (booleans)
 
-- And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
-- Short‑circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
+- And: \`nr: &&\`
+  - Both must be true: \`nr: true && false\` evaluates to \`nr: false\`, \`nr: true && true\` evaluates to \`nr: true\`
+- Or: \`nr: ||\`
+  - At least one must be true: \`nr: true || false\` evaluates to \`nr: true\`, \`nr: false || false\` evaluates to \`nr: false\`
+- Short-circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
 
 \`\`\`ruby
-# title: Boolean operators
-# description: Combine boolean values with logical operators.
+# title: Logical (binary)
+# description: Combine boolean values with and/or.
 true && false
 ---
 true || false
----
-!(2 < 3)
 \`\`\`
 
-### Sequence operators (strings and arrays)
+### Sequence operations (strings and arrays)
 
 - Concatenation: \`nr: +\`
+  - Joins things together: \`nr: "Hi" + "there"\` evaluates to \`nr: "Hithere"\`, \`nr: [1, 2] + [3]\` evaluates to \`nr: [1, 2, 3]\`
 - Repetition: \`nr: *\`
-- Membership: \`nr: include?\` (method on strings and arrays)
-- Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start..stop]\`, \`nr: seq[start...stop]\`
+  - Makes copies: \`nr: "ha" * 3\` evaluates to \`nr: "hahaha"\`, \`nr: [0] * 4\` evaluates to \`nr: [0, 0, 0, 0]\`
 
 \`\`\`ruby
-# title: Sequence operators
-# description: Work with strings and arrays using various operators.
+# title: Sequence operations (binary)
+# description: Concatenate and repeat strings/arrays.
 "Hi, " + "there"
 ---
 "ha" * 3
 ---
-"ruby".include?("by")
----
 [1, 2] + [3]
 ---
 [0] * 4
----
-[1,2,3,4][1..2]
 \`\`\`
 
-### Precedence and grouping
+## Unary operators
+
+- Numeric sign: \`nr: +a\` (unary plus), \`nr: -a\` (negation)
+  - Changes the sign: \`nr: +5\` evaluates to \`nr: 5\`, \`nr: -5\` evaluates to \`nr: -5\`, \`nr: -(-3)\` evaluates to \`nr: 3\`
+- Logical negation: \`nr: !a\`
+  - Flips true/false: \`nr: !true\` evaluates to \`nr: false\`, \`nr: !false\` evaluates to \`nr: true\`
+
+\`\`\`ruby
+# title: Unary operators
+# description: Apply operators that take a single input.
++5
+---
+-5
+---
+-(-3)
+---
+!true
+---
+!(2 < 3)
+\`\`\`
+
+## Precedence and grouping
 
 - Parentheses \`nr: ( )\` change evaluation order.
-- Rough precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
+  - Like math class: \`nr: (1 + 2) * 3\` evaluates to \`nr: 9\` (do the parentheses first)
+- Precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
+  - Without parentheses: \`nr: 1 + 2 * 3\` evaluates to \`nr: 7\` (multiplication happens first)
 
 \`\`\`ruby
 # title: Precedence and grouping
-# description: See how operator precedence and parentheses affect evaluation.
+# description: See how precedence and parentheses affect evaluation.
 1 + 2 * 3
 ---
 (1 + 2) * 3
 \`\`\`
 
-You now know the basic operators; next you will use them with variables and assignments.`,
+## Ruby-specific extra operators
+
+These are very useful in Ruby but are not universal across all languages:
+
+- Membership: \`nr: include?\` (method on strings and arrays)
+  - Checks if something contains something else: \`nr: "ruby".include?("by")\` evaluates to \`nr: true\`
+- Case equality: \`nr: ===\` (used in case statements)
+  - Special matching for ranges and classes: \`nr: (1..5) === 3\` evaluates to \`nr: true\` (3 is in range 1-5)
+- Spaceship: \`nr: <=>\` (comparison returning -1, 0, or 1)
+  - Three-way comparison: \`nr: 1 <=> 2\` evaluates to \`nr: -1\` (less), \`nr: 2 <=> 2\` evaluates to \`nr: 0\` (equal), \`nr: 3 <=> 2\` evaluates to \`nr: 1\` (greater)
+- Range operators: \`nr: ..\` (inclusive), \`nr: ...\` (exclusive)
+  - Creates sequences: \`nr: (1..5).to_a\` evaluates to \`nr: [1, 2, 3, 4, 5]\`, \`nr: (1...5).to_a\` evaluates to \`nr: [1, 2, 3, 4]\`
+- Indexing and slicing: \`nr: seq[index]\`, \`nr: seq[start..stop]\`, \`nr: seq[start...stop]\`
+  - Gets items by position: \`nr: [1, 2, 3][1]\` evaluates to \`nr: 2\`, \`nr: "ruby"[1..2]\` evaluates to \`nr: "ub"\`
+- String interpolation: \`nr: "#{expression}"\`
+  - Embeds code in strings: \`nr: "Hello #{name}"\` puts the value of \`nr: name\` into the string
+- Safe navigation: \`nr: &.\`
+  - Safely calls methods: \`nr: obj&.method\` evaluates to \`nr: nil\` if \`nr: obj\` is nil (instead of crashing)
+
+\`\`\`ruby
+# title: Ruby extras — membership, case equality, spaceship, ranges, slicing
+# description: Explore Ruby-specific operators and forms.
+arr = [1, 2, 3]
+str = "ruby"
+---
+"ruby".include?("by")
+---
+arr.include?(2)
+---
+5 === 5
+---
+(1..5) === 3
+---
+1 <=> 2
+---
+2 <=> 2
+---
+3 <=> 2
+---
+range1 = 1..5
+---
+range2 = 1...5
+---
+range1.to_a
+---
+range2.to_a
+---
+arr[1..2]
+---
+str[1..2]
+---
+arr[1...3]
+---
+name = "Sam"
+---
+"Hello, #{name}!"
+---
+obj = nil
+---
+obj&.some_method
+\`\`\`
+
+You now know the common operators (binary and unary) and where Ruby adds extras; next you will use them with variables and assignments.`,
     codeItems: [],
     previousSection: 'values',
     nextSection: 'variables',
@@ -440,7 +535,7 @@ We name a variable with letters, numbers, and the underscore character, for exam
 
 We can't use spaces in variable names.
 
-In Ruby, you can create a new variable simply by assigning a value to it—no declaration is needed. Some languages like JavaScript and TypeScript require variables to be declared (with keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\`) before or during their first assignment, but Ruby and Python allow you to create new variables directly through assignment.
+In Ruby, you can create a new variable simply by assigning a value to it—no declaration is needed. This is different from languages like JavaScript and TypeScript, which require variables to be declared (with keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\`) before or during their first assignment.
 
 A variable can only point at one value at a time; however, we can change the value that a variable points at.
 
@@ -466,25 +561,39 @@ When we use the assignment operator, \`nr: =\` , to make a variable point at a v
 
 These are all assignment expressions:
 
-* \`my_age = 10\`
-* \`my_first_word = "cookie"\`
-* \`number_of_cookies_i_want_to_eat = 100\`
+* \`nr: my_age = 10\`
+* \`nr: my_first_word = "cookie"\`
+* \`nr: number_of_cookies_i_want_to_eat = 100\`
 
 When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
 
-For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
+For example, this is a variable assignment:
 
 \`\`\`ruby
-my_age = 10
-my_age_next_year = my_age + 1
-my_age_next_year
+# title: Variable assignment
+age = 25
+---
+name = "Alice"
+\`\`\`
+
+For example, we can assign our age to the \`nr: current_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: current_age\` variable:
+
+\`\`\`ruby
+# title: Working with variables step by step
+current_age = 10
+---
+age_next_year = current_age + 1
+---
+age_next_year
 \`\`\`
 
 Finally, we can change the value that a variable points at by assigning a new value to the variable:
 
 \`\`\`ruby
+# title: Variable reassignment example
 my_age = 10
 puts "my_age -> #{my_age}"   # this prints 10
+---
 my_age = 11
 puts "my_age -> #{my_age}"   # this prints 11
 \`\`\`

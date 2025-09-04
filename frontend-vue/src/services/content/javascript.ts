@@ -26,7 +26,7 @@ x + 1
 \`\`\`
 
 \`\`\`javascript
-// title: A single snippet alongside a group
+// title: A one-line summation expression
 [1, 2, 3].reduce((a, b) => a + b, 0)
 \`\`\`
 
@@ -168,20 +168,33 @@ You will use these values inside expressions, assignments, function calls, and c
     id: 'operators',
     title: 'Operators',
     order: 4,
-    content: `Operators combine or transform values to produce new values. You'll use them constantly with numbers, strings, arrays, and booleans.
+    content: `Operators combine or transform values to produce new values. You will use them constantly with numbers, strings, arrays, and booleans.
 
-### Arithmetic operators (numbers)
+There are two primary shapes of operator:
+
+- Binary operators: take two inputs — \`nr: A <operator> B\`
+- Unary operators: take one input — \`nr: <operator> A\`
+
+## Binary operators
+
+### Arithmetic (numbers)
 
 - Addition: \`nr: +\`
+  - Adds two numbers: \`nr: 3 + 5\` evaluates to \`nr: 8\`
 - Subtraction: \`nr: -\`
+  - Subtracts one number from another: \`nr: 10 - 3\` evaluates to \`nr: 7\`
 - Multiplication: \`nr: *\`
+  - Repeats addition: \`nr: 4 * 3\` means \`nr: 4 + 4 + 4\` which evaluates to \`nr: 12\`
 - Division: \`nr: /\`
+  - Splits into equal parts: \`nr: 10 / 2\` evaluates to \`nr: 5\` (always a decimal in JavaScript)
 - Remainder (modulo): \`nr: %\`
+  - What's left after division: \`nr: 10 % 3\` evaluates to \`nr: 1\` (10 ÷ 3 = 3 remainder 1)
 - Exponent: \`nr: **\`
+  - Repeated multiplication: \`nr: 2 ** 3\` means \`nr: 2 * 2 * 2\` which evaluates to \`nr: 8\`
 
 \`\`\`javascript
-// title: Arithmetic operators
-// description: Practice arithmetic operations with numbers.
+// title: Arithmetic (binary)
+// description: Practice common arithmetic operations.
 1 + 2
 ---
 7 - 3
@@ -195,15 +208,19 @@ You will use these values inside expressions, assignments, function calls, and c
 2 ** 3
 \`\`\`
 
-### Comparison operators (booleans)
+### Comparison (booleans)
 
 - Equal: \`nr: ==\`  |  Not equal: \`nr: !=\`
+  - Checks if values are the same (with type conversion): \`nr: 5 == '5'\` evaluates to \`nr: true\`
 - Strict equal: \`nr: ===\`  |  Strict not equal: \`nr: !==\`
+  - Checks if values and types are exactly the same: \`nr: 5 === 5\` evaluates to \`nr: true\`, but \`nr: 5 === '5'\` evaluates to \`nr: false\`
 - Less than / less than or equal: \`nr: <\`, \`nr: <=\`
+  - Compares size: \`nr: 3 < 5\` evaluates to \`nr: true\`, \`nr: 5 <= 5\` evaluates to \`nr: true\`
 - Greater than / greater than or equal: \`nr: >\`, \`nr: >=\`
+  - Compares size the other way: \`nr: 7 > 3\` evaluates to \`nr: true\`, \`nr: 4 >= 4\` evaluates to \`nr: true\`
 
 \`\`\`javascript
-// title: Comparison operators
+// title: Comparison (binary)
 // description: Compare values to get boolean results.
 3 == '3'
 ---
@@ -220,60 +237,116 @@ You will use these values inside expressions, assignments, function calls, and c
 7 >= 10
 \`\`\`
 
-### Boolean operators
+### Logical (booleans)
 
-- And: \`nr: &&\`  |  Or: \`nr: ||\`  |  Not: \`nr: !\`
-- Short‑circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
+- And: \`nr: &&\`
+  - Both must be true: \`nr: true && false\` evaluates to \`nr: false\`, \`nr: true && true\` evaluates to \`nr: true\`
+- Or: \`nr: ||\`
+  - At least one must be true: \`nr: true || false\` evaluates to \`nr: true\`, \`nr: false || false\` evaluates to \`nr: false\`
+- Short-circuit: \`nr: A && B\` skips \`nr: B\` if \`nr: A\` is false; \`nr: A || B\` skips \`nr: B\` if \`nr: A\` is true.
 
 \`\`\`javascript
-// title: Boolean operators
-// description: Combine boolean values with logical operators.
+// title: Logical (binary)
+// description: Combine boolean values with and/or.
 true && false
 ---
 true || false
----
-!(2 < 3)
 \`\`\`
 
-### Working with strings and arrays
+### Sequence operations (strings and arrays)
 
-- Concatenation (strings): \`nr: +\`
-- Repetition (strings): \`nr: 'ha'.repeat(3)\`
-- Membership: \`nr: 'javascript'.includes('script')\`, \`nr: [1,2,3].includes(2)\`
-- Indexing: \`nr: str[i]\`, \`nr: arr[i]\`
-- Slicing: \`nr: str.slice(start, end)\`, \`nr: arr.slice(start, end)\`
+- Concatenation: \`nr: +\` (strings), \`nr: .concat()\` (arrays)
+  - Joins things together: \`nr: "Hi" + "there"\` evaluates to \`nr: "Hithere"\`, \`nr: [1, 2].concat([3])\` evaluates to \`nr: [1, 2, 3]\`
+- Repetition: \`nr: 'str'.repeat(n)\`
+  - Makes copies: \`nr: "ha".repeat(3)\` evaluates to \`nr: "hahaha"\`
 
 \`\`\`javascript
-// title: Working with strings and arrays
-// description: Use operators and methods to work with strings and arrays.
+// title: Sequence operations (binary)
+// description: Concatenate and repeat strings/arrays.
 "Hi, " + "there"
 ---
 "ha".repeat(3)
 ---
-"javascript".includes("script")
----
 [1, 2].concat([3])
 ---
-[0, 0, 0, 0]
----
-[1,2,3,4].slice(1,3)
+Array(4).fill(0)
 \`\`\`
 
-### Precedence and grouping
+## Unary operators
+
+- Numeric sign: \`nr: +a\` (unary plus), \`nr: -a\` (negation)
+  - Changes the sign: \`nr: +5\` evaluates to \`nr: 5\`, \`nr: -5\` evaluates to \`nr: -5\`, \`nr: -(-3)\` evaluates to \`nr: 3\`
+- Logical negation: \`nr: !a\`
+  - Flips true/false: \`nr: !true\` evaluates to \`nr: false\`, \`nr: !false\` evaluates to \`nr: true\`
+- Type inquiry: \`nr: typeof a\`
+  - Tells you what type something is: \`nr: typeof 42\` evaluates to \`nr: "number"\`, \`nr: typeof "hello"\` evaluates to \`nr: "string"\`
+
+\`\`\`javascript
+// title: Unary operators
+// description: Apply operators that take a single input.
++5
+---
+-5
+---
+-(-3)
+---
+!true
+---
+!(2 < 3)
+---
+typeof 42
+---
+typeof "hello"
+\`\`\`
+
+## Precedence and grouping
 
 - Parentheses \`nr: ( )\` change evaluation order.
-- JavaScript precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
+  - Like math class: \`nr: (1 + 2) * 3\` evaluates to \`nr: 9\` (do the parentheses first)
+- Precedence (high → low): \`nr: **\`, \`nr: * / %\`, \`nr: + -\`, comparisons, \`nr: !\`, \`nr: &&\`, \`nr: ||\`.
+  - Without parentheses: \`nr: 1 + 2 * 3\` evaluates to \`nr: 7\` (multiplication happens first)
 
 \`\`\`javascript
 // title: Precedence and grouping
-// description: See how operator precedence and parentheses affect evaluation.
+// description: See how precedence and parentheses affect evaluation.
 1 + 2 * 3
 ---
 (1 + 2) * 3
 \`\`\`
 
-You now know the basic operators; next you'll use them with variables and assignments.
-`,
+## JavaScript-specific extra operators
+
+These are very useful in JavaScript but are not universal across all languages:
+
+- Indexing: \`nr: seq[index]\`
+  - Gets an item by position: \`nr: [1, 2, 3][1]\` evaluates to \`nr: 2\` (arrays start at 0)
+- Optional chaining: \`nr: ?.\`
+  - Safely accesses properties: \`nr: obj?.someMethod\` evaluates to \`nr: undefined\` if \`nr: obj\` is null (instead of crashing)
+- Nullish coalescing: \`nr: ??\`
+  - Provides backup values: \`nr: null ?? "default"\` evaluates to \`nr: "default"\`
+
+\`\`\`javascript
+// title: JavaScript extras — indexing, templates, optional chaining
+// description: Explore JavaScript-specific operators and forms.
+const arr = [1, 2, 3]
+const str = "javascript"
+---
+arr[1]
+---
+str[1]
+---
+const name = "Sam"
+---
+const obj = null
+---
+obj?.someMethod
+---
+const value = null
+---
+value ?? "default"
+\`\`\`
+
+You now know the common operators (binary and unary) and where JavaScript adds extras; next you will use them with variables and assignments.`,
     previousSection: 'values',
     nextSection: 'variables',
   },
@@ -281,8 +354,7 @@ You now know the basic operators; next you'll use them with variables and assign
     id: 'variables',
     title: 'Variables and Assignment',
     order: 6,
-    content:
-      `A variable is a name that points at a particular value. For example:
+    content: `A variable is a name that points at a particular value. For example:
 
 <div>
     <svg width="510" height="90" viewBox="0 0 510 90" xmlns="http://www.w3.org/2000/svg">
@@ -313,8 +385,6 @@ We name a variable with letters, numbers, and the underscore character, for exam
 
 We can't use spaces in variable names.
 
-In JavaScript, variables must be declared using keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\` before or during their first assignment. This is different from languages like Python and Ruby, where you can create variables directly through assignment without any declaration keywords.
-
 A variable can only point at one value at a time; however, we can change the value that a variable points at.
 
 <div>
@@ -329,7 +399,7 @@ When we make a variable point at a value, we say that we are assigning a value t
 
 ## Assignment
 
-We use the equal sign, \`nr: =\` , to make a variable point at a value, like this: \`my_age_last_year = 25\`
+We use the equal sign, \`nr: =\` , to make a variable point at a value, like this: \`nr: my_age_last_year = 25\`
 
 This makes the \`nr: my_age_last_year\` variable point to the value \`nr: 25\`.
 
@@ -339,31 +409,43 @@ When we use the assignment operator, \`nr: =\` , to make a variable point at a v
 
 These are all assignment expressions:
 
-* \`my_age = 10\`
-* \`my_first_word = "cookie"\`
-* \`number_of_cookies_i_want_to_eat = 100\`
+* \`nr: my_age = 10\`
+* \`nr: my_first_word = "cookie"\`
+* \`nr: number_of_cookies_i_want_to_eat = 100\`
+
+In JavaScript, variables must be declared using keywords like \`nr: let\`, \`nr: const\`, or \`nr: var\` before or during their first assignment. This is different from languages like Python and Ruby, where you can create variables directly through assignment without any declaration keywords.
+
+For example, this is a variable declaration:
+
+\`\`\`javascript
+// title: Variable declaration with let and const
+let age = 25
+---
+const name = "Alice"
+\`\`\`
 
 When we use the name of a variable by itself, without the assignment operator, we are reading the value that the variable points at and doing something with that value.
 
-For example, we can assign our age to the \`nr: my_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: my_age\` variable:
+For example, we can assign our age to the \`nr: current_age\` variable, and then calculate our age next year by adding 1 to the value stored in the \`nr: current_age\` variable:
 
 \`\`\`javascript
-let my_age = 10
-let my_age_next_year = my_age + 1
-my_age_next_year
+// title: Working with variables step by step
+let current_age = 10
+---
+let age_next_year = current_age + 1
+---
+age_next_year
 \`\`\`
 
 Finally, we can change the value that a variable points at by assigning a new value to the variable:
 
 \`\`\`javascript
+// title: Variable reassignment example
 let my_age = 10
-console.log(` +
-      '`my_age -> ${my_age}`' +
-      `)   // this prints 10
+console.log(\`my_age -> \${my_age}\`)   // this prints 10
+---
 my_age = 11
-console.log(` +
-      '`my_age -> ${my_age}`' +
-      `)   // this prints 11
+console.log(\`my_age -> \${my_age}\`)   // this prints 11
 \`\`\`
 
 `,

@@ -52,11 +52,21 @@ const runGroup = () => {
   })
 }
 
-// One-line, trimmed preview for scanning
+// Preview that preserves line breaks for multi-line content
 const preview = (code: string) => {
-  const oneLine = code.replace(/\s+/g, ' ').trim()
-  const max = 90
-  return oneLine.length > max ? oneLine.slice(0, max) + '…' : oneLine
+  const trimmed = code.trim()
+  const lines = trimmed.split('\n')
+  
+  // If single line, collapse whitespace as before
+  if (lines.length === 1) {
+    const oneLine = trimmed.replace(/\s+/g, ' ')
+    const max = 90
+    return oneLine.length > max ? oneLine.slice(0, max) + '…' : oneLine
+  }
+  
+  // For multi-line, preserve line breaks but limit total length
+  const max = 200
+  return trimmed.length > max ? trimmed.slice(0, max) + '…' : trimmed
 }
 
 const commentPrefixFor = (lang: string | undefined) => {
@@ -185,9 +195,9 @@ const composeTitle = (snippet: Snippet) => {
 }
 .snippet-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
-  padding: 0.2rem 0.8rem;
+  padding: 0.4rem 0.8rem;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -207,11 +217,12 @@ const composeTitle = (snippet: Snippet) => {
   background: transparent;
   color: #111827;
   border-radius: 6px;
-  white-space: nowrap;
+  white-space: pre-wrap !important;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1 1 auto;
   min-width: 0;
+  word-break: break-word;
 }
 
 .code-example {
