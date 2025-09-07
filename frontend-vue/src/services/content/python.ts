@@ -487,157 +487,222 @@ print(f"my_age -> {my_age}")   # this prints 11
     id: 'expressions',
     title: 'Expressions',
     order: 7,
-    content: `So far, we have seen several different kinds of expression:
+    content: `In Python, an expression is anything you can evaluate to get a value. This section surveys the major expression shapes you'll use every day.
 
-* value literal expressions
-   * \`123\` - integer literal expressions
-   * \`3.14159\` - floating point literal expressions
-   * \`True\` - boolean literal expressions
-   * \`"Max"\` - string literal expressions
-   * \`[1, 2, 3, 1, 2, 3]\` - list literal expressions
-   * \`{1: "one", 2: "two"}\` - dictionary literal expressions
-* assignment expressions
-   * \`my_age = 25\`
-   * \`what_i_ate_for_breakfast = "cereal"\`
-* variable evaluation expressions
-   * \`my_age\`
-   * \`what_i_ate_for_breakfast\`
-* math expressions
-   * \`1 + 2\`
-   * \`3 * 4\`
-   * \`10 / 2\`
-   * \`5 - 3\`
+The big categories we'll cover are:
 
-An expression is anything that can be evaluated to produce a value.
+- value literal expressions
+- variable evaluation and variable assignment
+- binary and unary operator expressions
+- sequencing of expressions
+- function definitions and function invocations
+- conditional branching expressions
+- looping expressions
 
-For example, each of these expressions produces a value:
-* \`1 + 2\` -> \`nr: 3\`
-* \`3 * 4\` -> \`nr: 12\`
-* \`10 / 2\` -> \`nr: 5\`
-* \`5 - 3\` -> \`nr: 2\`
+### 1) Value literal expressions
 
-When we evaluate an expression, we compute the value that the expression represents, and then we use that computed value instead of the complex expression that produced it.
-
-For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`, because math expressions evaluate to the number that the math produces.
-
-When we evaluate the expression \`my_age\`, we look up whatever value is currently stored in the variable named \`my_age\`, because variable evaluation expressions evaluate to the value that the variable currently points at.
-
-When we evaluate the expression \`5\`, we know that evaluates to the number \`5\`, because literal expressions evaluate to themselves.
-
-Different programming languages support different kinds of expressions, and each kind of expression has a different way of being evaluated.
-
-Learning a programming language is all about learning and remembering how each different kind of expression is interpreted and evaluated.
-
-The common expression types across every popular programming language are:
-
-* value literal expressions
-* assignment expressions
-* variable evaluation expressions
-* function definition expressions
-* function invocation expressions
-* conditional expressions
-* loop expressions
-
-These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in python, then you know what it looks like in most every language.
-
-### Comparison expressions
-
-Comparison expressions evaluate to a boolean (\`nr: True\` or \`nr: False\`).
-
-Try these:
+- A literal writes the value directly in your code.
+- Examples: numbers, strings, booleans, and collection literals like lists, dictionaries, and tuples.
 
 \`\`\`python
-1 == 1
-1 != 2
+# title: Value literals — numbers, strings, booleans
+# description: Literals evaluate to themselves.
+42
+---
+3.14159
+---
+"Max"
+---
+True
+---
+False
+\`\`\`
+
+\`\`\`python
+# title: Value literals — collections
+# description: Literals for list, dict, and tuple.
+[1, 2, 3]
+---
+{"a": 1, "b": 2}
+---
+(1, 2, 3)
+\`\`\`
+
+### 2) Variable evaluation and assignment
+
+- Evaluating a variable name (like \`nr: x\`) yields the value it currently points to.
+- Assignment uses \`nr: =\` to make a name point at a value; reassigning updates what the name points at.
+
+\`\`\`python
+# title: Variables — evaluation vs assignment
+# description: Read a name to get its value; use = to change it.
+pet = "dog"
+---
+pet
+---
+pet = "cat"
+---
+pet
+\`\`\`
+
+### 3) Binary and unary operator expressions
+
+- Binary operators take two inputs: \`nr: A <op> B\`.
+- Unary operators take a single input.
+- Useful families include arithmetic, comparison, logical, and sequence ops.
+
+\`\`\`python
+# title: Binary operators — arithmetic and comparison
+# description: Combine two values to produce a new one.
+1 + 2
+---
+9 // 4
+---
+9 % 4
+---
+2 ** 5
+---
 3 < 5
-5 <= 5
-7 > 2
-2 >= 9
-# chained comparisons (Python feature):
-1 < 3 < 5
-5 < 3 < 7
+---
+3 == 3
 \`\`\`
 
-### Boolean logic expressions
-
-Use \`nr: and\`, \`nr: or\`, and \`nr: not\` to combine or negate boolean values.
-
 \`\`\`python
-True and True
-True and False
-True or False
-False or False
-not True
-not (1 < 2)
-\`\`\`
-
-Short-circuiting: in \`nr: A and B\`, if \`nr: A\` is False, Python does not evaluate \`nr: B\`. In \`nr: A or B\`, if \`nr: A\` is True, Python does not evaluate \`nr: B\`.
-
-### Grouping and operator precedence
-
-Parentheses \`nr: ( )\` change evaluation order. Arithmetic has the usual precedence (\`nr: * / // %\` before \`nr: + -\`), then comparisons, then \`nr: not\`, then \`nr: and\`, then \`nr: or\`.
-
-\`\`\`python
-1 + 2 * 3
-(1 + 2) * 3
-10 - 4 - 1
-10 - (4 - 1)
-(2 < 3) and (3 < 5)
-\`\`\`
-
-### String expressions
-
-\`nr: +\` concatenates strings; \`nr: *\` repeats them.
-
-\`\`\`python
-"Hello, " + "world!"
+# title: Binary operators — sequence and membership
+# description: Concatenate, repeat, or test for inclusion.
+"Hi, " + "there"
+---
 "ha" * 3
-name = "Sam"
-"Hello, " + name
-f"Hello, {name}!"  # f-strings interpolate values
-\`\`\`
-
-### List expressions
-
-Lists also support concatenation and repetition.
-
-\`\`\`python
-[1, 2] + [3, 4]
-[0] * 5
-len([1, 2, 3])
-\`\`\`
-
-### Indexing and slicing
-
-Use square brackets to get elements or slices from strings and lists.
-
-\`\`\`python
-letters = ["a", "b", "c", "d", "e"]
-letters[0]
-letters[-1]
-letters[1:4]
-letters[:3]
-letters[::2]
-
-text = "python"
-text[0]
-text[-1]
-text[1:4]
-text[::-1]
-\`\`\`
-
-### Membership
-
-Use \`nr: in\` and \`nr: not in\` to test membership.
-
-\`\`\`python
-3 in [1, 2, 3]
+---
+[1, 2] + [3]
+---
 "py" in "python"
-9 not in [1, 2, 3]
-"x" not in "python"
+---
+3 in [1, 2, 3]
 \`\`\`
 
-These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.
+\`\`\`python
+# title: Unary operators — sign and logical negation
+# description: Operate on a single value.
+-5
+---
++5
+---
+not True
+---
+not (2 < 1)
+\`\`\`
+
+### 4) Sequencing of expressions
+
+- Lines run top-to-bottom; later expressions see the effects of earlier ones.
+
+\`\`\`python
+# title: Sequencing — executed top to bottom
+# description: Each line runs after the previous one; names keep their values.
+x = 1
+---
+x = x + 2
+---
+x
+---
+y = x * 3
+---
+y
+\`\`\`
+
+### 5) Function definitions
+
+- \`nr: def\` creates (binds) a new function object to a name.
+- \`nr: lambda\` is a compact way to create a function value inline.
+
+\`\`\`python
+# title: Function definitions — def and lambda
+# description: Creating functions produces function values.
+def square(n):
+  return n * n
+---
+square  # look at the function object
+---
+double = lambda x: x * 2
+---
+double
+\`\`\`
+
+### 6) Function invocations
+
+- Use parentheses \`nr: ( )\` to call a function; arguments go inside.
+- A call expression evaluates to the function's return value.
+
+\`\`\`python
+# title: Function invocations — calling functions
+# description: Parentheses perform a call; the result is the return value.
+def square(n):
+  return n * n
+---
+square(6)
+---
+len([1, 2, 3])
+---
+abs(-7)
+\`\`\`
+
+### 7) Conditional branching expressions
+
+- \`nr: if\` / \`nr: elif\` / \`nr: else\` chooses which block to run based on a condition.
+- The conditional expression \`nr: A if cond else B\` picks one of two values.
+
+\`\`\`python
+# title: Conditional branching — if/elif/else
+# description: Only the first matching block runs.
+age = 8
+---
+if age < 5:
+  print("toddler")
+elif age < 10:
+  print("kid")
+else:
+  print("older")
+\`\`\`
+
+\`\`\`python
+# title: Conditional expression — a if cond else b
+# description: Picks one of two values.
+age = 8
+---
+"kid" if age < 10 else "teen"
+---
+"even" if (6 % 2 == 0) else "odd"
+\`\`\`
+
+### 8) Looping expressions
+
+- \`nr: for\` loops over a sequence; \`nr: while\` repeats while a condition is true.
+- Comprehensions are expressions that loop to build new values.
+
+\`\`\`python
+# title: Looping — for and while
+# description: Repeat work while a condition holds or over a sequence.
+for i in range(3):
+  print(i)
+---
+n = 3
+while n > 0:
+  print(n)
+  n -= 1
+\`\`\`
+
+\`\`\`python
+# title: Looping — comprehension expressions
+# description: Loop to build new values.
+[x * x for x in range(6)]
+---
+[x for x in range(10) if x % 2 == 0]
+---
+{k: k * k for k in range(4)}
+\`\`\`
+
+You will combine these forms constantly: define names, compute with operators, branch and loop, and call functions. As you continue, try running the groups above with the Run buttons to see how the REPL preserves state across snippets within and across groups.
 `,
     previousSection: 'variables',
     nextSection: 'functions',

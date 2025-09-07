@@ -246,11 +246,6 @@ const runCodeExample = (code: string) => {
 }
 
 // Helpers for compact single-snippet rendering
-const oneLinePreview = (code: string) => {
-  const trimmed = code.trim()
-  const max = 200
-  return trimmed.length > max ? trimmed.slice(0, max) + '…' : trimmed
-}
 
 const commentPrefixFor = (lang?: string) => {
   const l = (lang || '').toLowerCase()
@@ -914,13 +909,13 @@ const buildHeadings = () => {
     const hRect = h.getBoundingClientRect()
     const top = hRect.top - containerRect.top + sc.scrollTop
     list.push({ id: h.id, text: raw, level, top })
-    console.log('[ToC] Found heading with ID:', { id: h.id, text: raw, element: h })
+    // console.log('[ToC] Found heading with ID:', { id: h.id, text: raw, element: h })
   })
   headings.value = list
-  console.log(
-    '[ToC] Built headings:',
-    headings.value.map((h) => h.id),
-  )
+  // console.log(
+  //   '[ToC] Built headings:',
+  //   headings.value.map((h) => h.id),
+  // )
   // Ensure listeners are bound to the correct scroll container once content exists
   attachScrollHandlers()
   updateActiveHeading()
@@ -951,12 +946,12 @@ const updateActiveHeading = () => {
   let current: HeadingItem = first
 
   if (import.meta.env.DEV) {
-    console.log(
-      '[ToC] updateActiveHeading - scrollY:',
-      scrollY,
-      'headings:',
-      headings.value.map((h) => ({ id: h.id, text: h.text, top: h.top })),
-    )
+    // console.log(
+    //   '[ToC] updateActiveHeading - scrollY:',
+    //   scrollY,
+    //   'headings:',
+    //   headings.value.map((h) => ({ id: h.id, text: h.text, top: h.top })),
+    // )
   }
 
   // Find the closest heading by checking which section boundary we're in
@@ -974,16 +969,16 @@ const updateActiveHeading = () => {
     const sectionEnd = nextH ? nextH.top - anchorGap : Infinity
 
     if (import.meta.env.DEV) {
-      console.log(
-        `[ToC] Section "${h.text}": ${sectionStart} to ${sectionEnd} (scrollY: ${scrollY})`,
-      )
+      // console.log(
+      //   `[ToC] Section "${h.text}": ${sectionStart} to ${sectionEnd} (scrollY: ${scrollY})`,
+      // )
     }
 
     // Check if we're within this section's boundaries
     if (scrollY + 0 >= sectionStart - epsilon && scrollY < sectionEnd - epsilon) {
       bestMatch = h
       if (import.meta.env.DEV) {
-        console.log(`[ToC] In section: "${h.text}"`)
+        // console.log(`[ToC] In section: "${h.text}"`)
       }
       break
     }
@@ -1002,7 +997,7 @@ const updateActiveHeading = () => {
   // Only update if it's actually changed to avoid unnecessary re-renders
   if (activeHeadingId.value !== selected.id) {
     activeHeadingId.value = selected.id
-    console.log('[ToC] Active heading changed to:', selected.id, 'at scroll position:', scrollY)
+    // console.log('[ToC] Active heading changed to:', selected.id, 'at scroll position:', scrollY)
   }
 }
 
@@ -1030,19 +1025,19 @@ const attachScrollHandlers = () => {
 }
 
 const scrollToHeading = (id: string) => {
-  console.log('[ToC] scrollToHeading called with id:', id)
+  // console.log('[ToC] scrollToHeading called with id:', id)
   const el = document.getElementById(id)
   if (!el) {
-    console.log('[ToC] Element not found:', id)
+    // console.log('[ToC] Element not found:', id)
     return
   }
   scrollContainer = getScrollContainer()
   if (!scrollContainer) {
-    console.log('[ToC] No scroll container found')
+    // console.log('[ToC] No scroll container found')
     return
   }
   const sc = scrollContainer as HTMLElement
-  console.log('[ToC] Scroll container:', sc, sc.tagName, sc.className)
+  // console.log('[ToC] Scroll container:', sc, sc.tagName, sc.className)
   const offset = getHeaderOffset()
 
   // Use the same position calculation as buildHeadings for consistency
@@ -1055,21 +1050,19 @@ const scrollToHeading = (id: string) => {
 
   // Clamp to valid range
   target = Math.max(0, Math.min(target, sc.scrollHeight - sc.clientHeight))
-  console.log('[ToC] Scroll details:', {
-    id,
-    offset,
-    headingTop,
-    target,
-    current: sc.scrollTop,
-    scrollHeight: sc.scrollHeight,
-  })
+  // console.log('[ToC] Scroll details:', {
+  //   id,
+  //   offset,
+  //   headingTop,
+  //   target,
+  //   current: sc.scrollTop,
+  //   scrollHeight: sc.scrollHeight,
+  // })
 
-  const before = sc.scrollTop
   sc.scrollTop = target
   // Recompute heading positions right after programmatic scroll to account for
   // any lazy layout shifts so our section detection uses fresh coordinates.
   recomputeHeadingPositions()
-  console.log('[ToC] After setting scrollTop:', target, 'was:', before)
 
   // Hide the panel so the handle reappears
   tocHover.value = false

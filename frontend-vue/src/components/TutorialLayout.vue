@@ -81,6 +81,7 @@
             :history="replState.history"
             :variables="replState.variables"
             :is-executing="replState.isExecuting"
+            :last-executed-code="replState.lastExecutedCode"
             :as-pane="true"
             @execute="handleCodeExecution"
             @toggle-visibility="toggleREPLVisibility"
@@ -109,7 +110,7 @@ import LanguageSelector from './LanguageSelector.vue'
 import DockableREPL from './DockableREPL.vue'
 
 const uiState = ref<UIState>({ selectedLanguage: null, currentSection: null, isREPLVisible: true, isLoading: false, error: null })
-const replState = ref<REPLState>({ sessionId: null, isExecuting: false, history: [], currentInput: '', variables: {} })
+const replState = ref<REPLState & { lastExecutedCode?: string }>({ sessionId: null, isExecuting: false, history: [], currentInput: '', variables: {}, lastExecutedCode: undefined })
 const router = useRouter()
 const route = useRoute()
 
@@ -211,6 +212,11 @@ const handleCodeExecution = async (code: string) => {
     const executionRecord = { id: `exec_${Date.now()}`, timestamp: new Date(), input: code, inputLines: parseInputLines(code), output: result.output || '', error: result.error, executionTime: result.executionTime }
     replState.value.history.push(executionRecord)
     replState.value.currentInput = ''
+    
+    // Store the last executed code for up arrow functionality
+    replState.value.lastExecutedCode = code
+    console.log('Stored last executed code for up arrow:', code)
+    
     if (result.variables) replState.value.variables = { ...replState.value.variables, ...result.variables }
     return result
   } catch (error) {
@@ -260,7 +266,13 @@ const handleRunCodeSequence = async (payload: RunCodeSequencePayload) => {
     }
   }
 }
-const parseInputLines = (code: string): Array<{ prompt: string; text: string }> => code.split('\n').map((line, index) => ({ prompt: index === 0 ? '>>> ' : '... ', text: line }))
+const parseInputLines = (code: string): Array<{ prompt: string; text: string }> => {
+  const lines = code.split('\n')
+  return lines.map((line, index) => ({ 
+    prompt: index === 0 ? '>>> ' : '... ', 
+    text: line // Preserve original whitespace including leading/trailing spaces
+  }))
+}
 
 onMounted(async () => {
   const routeLang = route.params.language as string | undefined
