@@ -844,20 +844,20 @@ function greet_user(name) {
   return \`Hello, \${name}!\`;
 }
 ---
-function multiply(x, y) {
+function multiply_two_numbers(x, y) {
   return x * y;
 }
 ---
 // Call with parentheses (required in JavaScript)
 greet_user("Alice")
 ---
-multiply(7, 8)
+multiply_two_numbers(7, 8)
 ---
 // Store result in variable
 const greeting = greet_user("Bob");
 greeting
 ---
-const product = multiply(3, 4);
+const product = multiply_two_numbers(3, 4);
 product
 \`\`\`
 

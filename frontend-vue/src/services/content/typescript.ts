@@ -1040,20 +1040,20 @@ function greet_user(name: string): string {
   return \`Hello, \${name}!\`;
 }
 ---
-function multiply(x: number, y: number): number {
+function multiply_two_numbers(x: number, y: number): number {
   return x * y;
 }
 ---
 // Call with parentheses (required in TypeScript)
 greet_user("Alice")
 ---
-multiply(7, 8)
+multiply_two_numbers(7, 8)
 ---
 // Store result in variable
 const greeting: string = greet_user("Bob");
 greeting
 ---
-const product: number = multiply(3, 4);
+const product: number = multiply_two_numbers(3, 4);
 product
 \`\`\`
 
