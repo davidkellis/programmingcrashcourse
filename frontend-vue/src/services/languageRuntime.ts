@@ -42,6 +42,14 @@ class LanguageRuntimeService {
   private tsCompilerLoaded = false;
   private tsToJsSession: Map<string, string> = new Map()
 
+  // Format values to match Python's textual representation for common types.
+  // Specifically ensure booleans appear as 'True'/'False' instead of JS 'true'/'false'.
+  private formatPythonValue(value: unknown): string {
+    if (value === true) return 'True'
+    if (value === false) return 'False'
+    return String(value)
+  }
+
   /**
    * Initialize the language runtime service
    */
@@ -330,7 +338,7 @@ import datetime
 
               // Create a custom print function that captures output
               this.pyodide.globals.print = (...args: unknown[]) => {
-                const outputStr = args.map((arg) => String(arg)).join(' ')
+                const outputStr = args.map((arg) => this.formatPythonValue(arg)).join(' ')
                 capturedOutput.push(outputStr)
                 // Also log to console for debugging
                 console.log('Python print:', ...args)
@@ -342,10 +350,10 @@ import datetime
               if (capturedOutput.length > 0) {
                 output = capturedOutput.join('\n')
                 if (result !== undefined && result !== null) {
-                  output += '\n' + String(result)
+                  output += '\n' + this.formatPythonValue(result)
                 }
               } else {
-                output = (result !== undefined && result !== null) ? String(result) : ''
+                output = (result !== undefined && result !== null) ? this.formatPythonValue(result) : ''
               }
 
               // If the last non-empty line is a simple assignment (e.g., x = <expr>),
@@ -362,7 +370,7 @@ import datetime
                 if (m && m[1]) {
                   const varName = m[1]
                   const assignedVal = await this.pyodide.runPythonAsync(varName)
-                  const assignedStr = String(assignedVal)
+                  const assignedStr = this.formatPythonValue(assignedVal)
                   if (assignedStr !== undefined) {
                     if (output) {
                       output += (output.endsWith('\n') ? '' : '\n') + assignedStr

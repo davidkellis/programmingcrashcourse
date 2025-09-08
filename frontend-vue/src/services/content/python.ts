@@ -971,29 +971,117 @@ Like having a toolbox full of specialized tools, functions let you build reusabl
     id: 'conditionals',
     title: 'Conditional Expressions',
     order: 9,
-    content: `The primary conditional or branching expression is the \`if\` / \`elif\` / \`else\` expression.
+    content: `Conditional expressions (also called branching expressions) let you make decisions in your program.
 
-There are three variations:
+For example, here is a conditional expression written in english:
 
-* \`if\`
-   * The \`if\` keyword is always followed by a boolean expression - an expression that evaluates to \`True\` or \`False\`
-   * When the boolean expression evaluates to \`True\`, the body of the \`if\` expression is evaluated; otherwise the body is skipped.
-   * if i_am_hungry:
-       print("I'm starving!")
-* \`if\` / \`else\`
-   * if i_am_hungry:
-       print("I'm starving!")
-     else:
-       print("I am full.")
-* \`if\` / \`elif\` / \`else\`
-   * if age < 5:
-       print("You are younger than five years old.")
-     elif age < 10:
-       print("You are five to nine years old.")
-     else:
-       print("You are ten or older")
+> If the temperature outside is colder than 50 degrees:
+> &nbsp;&nbsp; Wear a coat.
+> Otherwise:
+> &nbsp;&nbsp; Wear shorts and flip-flops.
 
-In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
+Here is an illustration that helps to understand the decision we are making:
+
+<div>
+  <img src="/temperature_condition.png" alt="Temperature Condition: if temperature_outside < 50: Wear a coat. else: Wear shorts and flip-flops." />
+</div>
+
+A conditional expression is how we tell the program to consider a situation and then make different decisions based on the situation.
+
+In Python, we can write this as:
+
+\`\`\`python
+temperature_outside = read_the_thermometer_outside()
+if temperature_outside < 50:
+  print("Wear a coat.")
+else:
+  print("Wear shorts and flip-flops.")
+\`\`\`
+
+## Three primary variations of conditional expression:
+
+- \`nr: if\` — run a block of code when the condition is \`nr: True\`.
+- \`nr: if / else\` — run the first block of code when the condition is \`nr: True\`, run the second block of code when the condition is \`nr: False\`.
+- \`nr: if / elif / else\` — this variation lets us make decisions based on multiple conditions.
+
+### Special rules in Python
+
+Python has special rules about how we must write \`nr: if\`, \`nr: elif\`, and \`nr: else\` expressions (conditional expressions):
+
+- The line with \`nr: if\`, \`nr: elif\`, or \`nr: else\` must end with a colon \`nr: :\`.
+- The block of code that should run when one condition is true must be indented underneath the \`nr: if\`, \`nr: elif\`, or \`nr: else\` line (that indented part is called the “block” or “body”).
+- Each condition must be a boolean expression (something that evaluates to \`nr: True\` or \`nr: False\`).
+  - Remember from the Operators section that boolean expressions like \`4 == 4\` or \`1 < 5\` or \`1 == 2\` evaluate to \`nr: True\` or \`nr: False\`.
+
+### 1) \`nr: if\` expression
+
+This keeps your original example, cleaned up and runnable:
+
+\`\`\`python
+# title: if — run only when the condition is True
+# description: The body executes when the test is True; otherwise it is skipped.
+i_am_hungry = True
+---
+if i_am_hungry:
+  print("I'm starving!")
+\`\`\`
+
+### 2) \`nr: if\` / \`nr: else\` expression
+
+Choose between two paths — also your original example, tidied:
+
+\`\`\`python
+# title: if/else — choose one of two blocks
+# description: Exactly one branch runs.
+i_am_hungry = False
+---
+if i_am_hungry:
+  print("I'm starving!")
+else:
+  print("I am full.")
+\`\`\`
+
+### 3) \`nr: if\` / \`nr: elif\` / \`nr: else\` expression
+
+Pick the first matching case — your age example, clarified:
+
+\`\`\`python
+# title: if/elif/else — first match wins
+# description: Conditions are checked top-to-bottom; only one block runs.
+age = 8
+---
+if age < 5:
+  print("You are younger than five years old.")
+elif age < 10:
+  print("You are five to nine years old.")
+else:
+  print("You are ten or older.")
+\`\`\`
+
+## One-line conditional expression
+
+Sometimes you want to choose a value, not run two whole blocks. Python has a compact form:
+
+- Shape: \`nr: A if condition else B\`
+- It evaluates to \`nr: A\` when the condition is \`nr: True\`, otherwise to \`nr: B\`.
+
+\`\`\`python
+# title: Conditional expression — A if cond else B
+# description: Pick one value based on a condition.
+age = 8
+---
+"kid" if age < 10 else "teen"
+---
+snack = "cookies" if True else "carrots"
+snack
+\`\`\`
+
+## Watch out for common mistakes
+
+- Use \`nr: ==\` (double equals) to compare values, not \`nr: =\`.
+  - The \`nr: =\` is what we use to assign values to variables.
+  - So, we want to write \`if x == 5:\` to compare \`nr: x\` to \`nr: 5\`, not \`if x = 5\`.
+`,
     previousSection: 'functions',
     nextSection: 'types',
   },
