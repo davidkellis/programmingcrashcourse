@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Simple Robocode</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+      #arena {
+        border: 2px solid #000;
+        background-color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="arena" width="800" height="600"></canvas>
+    <script>
+      // Constants
+      const ARENA_WIDTH = 800
+      const ARENA_HEIGHT = 600
+      const TANK_SIZE = 20
+      const TANK_RADIUS = TANK_SIZE / 2
+      const MAX_SPEED = 5
+      const MAX_TURN_RATE = 10 // degrees per tick
+      const BULLET_SPEED = 10
+      const MAX_POWER = 3
+      const FIRE_COOLDOWN = 20 // ticks
+      const RAD_TO_DEG = 180 / Math.PI
+      const DEG_TO_RAD = Math.PI / 180
+
+      // Utility functions
+      function normalizeAngle(angle) {
+        while (angle > 180) angle -= 360
+        while (angle < -180) angle += 360
+        return angle
+      }
+
+      function distance(x1, y1, x2, y2) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+      }
+
+      // Bullet class
+      class Bullet {
+        constructor(x, y, angle, power, owner) {
+          this.x = x
+          this.y = y
+          this.angle = angle
+          this.power = power
+          this.owner = owner
+          this.active = true
+        }
+
+        update() {
+          this.x += BULLET_SPEED * Math.cos(this.angle * DEG_TO_RAD)
+          this.y += BULLET_SPEED * Math.sin(this.angle * DEG_TO_RAD)
+          if (this.x < 0 || this.x > ARENA_WIDTH || this.y < 0 || this.y > ARENA_HEIGHT) {
+            this.active = false
+          }
+        }
+
+        draw(ctx) {
+          ctx.beginPath()
+          ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI)
+          ctx.fillStyle = '#f00'
+          ctx.fill()
+        }
+      }
+
+      // Base Tank class - extend this to create custom tanks
+      class Tank {
+        constructor(name, centerX, centerY, heading, color) {
+          this.name = name
+          this.centerX = centerX
+          this.centerY = centerY
+          this.heading = heading // degrees, 0 = right, 90 = up, etc.
+          this.energy = 100
+          this.speed = 0
+          this.turnRate = 0
+          this.color = color
+          this.fireCooldown = 0
+          this.alive = true
+        }
+
+        // Override this method in subclasses for tank behavior
+        run() {
+          // Default: do nothing
+        }
+
+        // Methods available to tanks
+        setSpeed(speed) {
+          this.speed = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, speed))
+        }
+
+        setTurnRate(turnRate) {
+          this.turnRate = Math.max(-MAX_TURN_RATE, Math.min(MAX_TURN_RATE, turnRate))
+        }
+
+        ahead(distance) {
+          this.setSpeed(distance > 0 ? MAX_SPEED : -MAX_SPEED)
+          // Note: Doesn't block; sets speed for ongoing movement
+        }
+
+        back(distance) {
+          this.ahead(-distance)
+        }
+
+        turnLeft(degrees) {
+          this.setTurnRate(-Math.abs(degrees))
+        }
+
+        turnRight(degrees) {
+          this.setTurnRate(Math.abs(degrees))
+        }
+
+        fire(power) {
+          if (this.fireCooldown <= 0 && this.alive) {
+            power = Math.min(MAX_POWER, Math.max(0.1, power))
+            const rad = this.heading * DEG_TO_RAD
+            const bulletX = this.centerX + (TANK_SIZE / 2) * Math.cos(rad)
+            const bulletY = this.centerY + (TANK_SIZE / 2) * Math.sin(rad)
+            bullets.push(new Bullet(bulletX, bulletY, this.heading, power, this))
+            this.fireCooldown = FIRE_COOLDOWN
+            this.energy -= power // Cost energy to fire
+            if (this.energy < 0) this.energy = 0
+          }
+        }
+
+        getScannedRobots() {
+          const scanned = []
+          for (let tank of tanks) {
+            if (tank !== this && tank.alive) {
+              const dx = tank.centerX - this.centerX
+              const dy = tank.centerY - this.centerY
+              const dist = distance(this.centerX, this.centerY, tank.centerX, tank.centerY)
+              let bearing = Math.atan2(dy, dx) * RAD_TO_DEG - this.heading
+              bearing = normalizeAngle(bearing)
+              scanned.push({
+                name: tank.name,
+                bearing: bearing,
+                distance: dist,
+                energy: tank.energy,
+              })
+            }
+          }
+          // Sort by distance ascending
+          scanned.sort((a, b) => a.distance - b.distance)
+          return scanned
+        }
+
+        getX() {
+          return this.centerX
+        }
+        getY() {
+          return this.centerY
+        }
+        getHeading() {
+          return this.heading
+        }
+        getEnergy() {
+          return this.energy
+        }
+
+        // Internal update
+        update() {
+          if (!this.alive) return
+
+          // Run user code
+          this.run()
+
+          // Apply movement
+          this.heading += this.turnRate
+          this.heading = (this.heading + 360) % 360
+          const rad = this.heading * DEG_TO_RAD
+          this.centerX += this.speed * Math.cos(rad)
+          this.centerY += this.speed * Math.sin(rad)
+
+          // Clamp to arena
+          this.centerX = Math.max(TANK_RADIUS, Math.min(ARENA_WIDTH - TANK_RADIUS, this.centerX))
+          this.centerY = Math.max(TANK_RADIUS, Math.min(ARENA_HEIGHT - TANK_RADIUS, this.centerY))
+
+          // Cooldown
+          if (this.fireCooldown > 0) this.fireCooldown--
+        }
+
+        // Draw
+        draw(ctx) {
+          if (!this.alive) return
+
+          ctx.save()
+          ctx.translate(this.centerX, this.centerY)
+          ctx.rotate(this.heading * DEG_TO_RAD)
+          ctx.fillStyle = this.color
+          ctx.fillRect(-TANK_SIZE / 2, -TANK_SIZE / 2, TANK_SIZE, TANK_SIZE)
+          // Gun barrel
+          ctx.strokeStyle = '#000'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(0, 0)
+          ctx.lineTo(TANK_SIZE / 2, 0)
+          ctx.stroke()
+          ctx.restore()
+
+          // Name and health
+          ctx.fillStyle = '#000'
+          ctx.font = '12px Arial'
+          ctx.fillText(this.name, this.centerX - 20, this.centerY - TANK_SIZE / 2 - 5)
+          ctx.fillRect(
+            this.centerX - TANK_SIZE / 2,
+            this.centerY - TANK_SIZE / 2 - 15,
+            TANK_SIZE * (this.energy / 100),
+            5,
+          )
+        }
+
+        // Check hit by bullet
+        hitBy(bullet) {
+          if (distance(this.centerX, this.centerY, bullet.x, bullet.y) < TANK_RADIUS) {
+            const damage = bullet.power * 4 // Simple damage calc
+            this.energy -= damage
+            if (this.energy <= 0) {
+              this.energy = 0
+              this.alive = false
+            }
+            bullet.active = false
+            // Give energy to shooter
+            if (bullet.owner) bullet.owner.energy += damage / 2
+          }
+        }
+      }
+
+      // Example Tank 1: Circles and fires at nearest
+      class CircleTank extends Tank {
+        run() {
+          this.setSpeed(2)
+          this.setTurnRate(1)
+          const enemies = this.getScannedRobots()
+          if (enemies.length > 0) {
+            const nearest = enemies[0]
+            this.turnRate = nearest.bearing / 2 // Aim towards
+            this.fire(2)
+          }
+        }
+      }
+
+      // Example Tank 2: Rams and fires
+      class RamTank extends Tank {
+        run() {
+          const enemies = this.getScannedRobots()
+          if (enemies.length > 0) {
+            const nearest = enemies[0]
+            this.turnRate = nearest.bearing / 2
+            this.setSpeed(MAX_SPEED)
+            if (nearest.distance < 100) {
+              this.fire(3)
+            }
+          } else {
+            this.setSpeed(0)
+            this.turnRate = 0
+          }
+        }
+      }
+
+      // Add more tank classes here, extending Tank and overriding run()
+      // class MyCustomTank extends Tank {
+      //     run() {
+      //         // Your logic here
+      //     }
+      // }
+
+      // Global variables
+      const canvas = document.getElementById('arena')
+      const ctx = canvas.getContext('2d')
+      let tanks = []
+      let bullets = []
+
+      // Initialize battle
+      function init() {
+        tanks = [
+          new CircleTank('CircleBot', 150, 150, 0, '#00f'),
+          new RamTank('RamBot', 650, 450, 180, '#f00'),
+          // Add more: new MyCustomTank('Custom', 400, 300, 90, '#0f0')
+        ]
+        bullets = []
+      }
+
+      // Resolve tank collisions
+      function resolveCollisions() {
+        for (let i = 0; i < tanks.length; i++) {
+          for (let j = i + 1; j < tanks.length; j++) {
+            const t1 = tanks[i]
+            const t2 = tanks[j]
+            if (!t1.alive || !t2.alive) continue
+            const dist = distance(t1.centerX, t1.centerY, t2.centerX, t2.centerY)
+            const minDist = TANK_SIZE
+            if (dist < minDist && dist > 0) {
+              // Avoid div by zero
+              const overlap = minDist - dist
+              const dx = t2.centerX - t1.centerX
+              const dy = t2.centerY - t1.centerY
+              const pushX = (dx / dist) * (overlap / 2)
+              const pushY = (dy / dist) * (overlap / 2)
+              t1.centerX -= pushX
+              t1.centerY -= pushY
+              t2.centerX += pushX
+              t2.centerY += pushY
+              // Clamp again
+              t1.centerX = Math.max(TANK_RADIUS, Math.min(ARENA_WIDTH - TANK_RADIUS, t1.centerX))
+              t1.centerY = Math.max(TANK_RADIUS, Math.min(ARENA_HEIGHT - TANK_RADIUS, t1.centerY))
+              t2.centerX = Math.max(TANK_RADIUS, Math.min(ARENA_WIDTH - TANK_RADIUS, t2.centerX))
+              t2.centerY = Math.max(TANK_RADIUS, Math.min(ARENA_HEIGHT - TANK_RADIUS, t2.centerY))
+            }
+          }
+        }
+      }
+
+      // Game loop
+      function gameLoop() {
+        // Update tanks
+        tanks.forEach((tank) => tank.update())
+
+        // Resolve collisions
+        resolveCollisions()
+
+        // Update bullets
+        bullets.forEach((bullet) => bullet.update())
+        bullets = bullets.filter((b) => b.active)
+
+        // Check collisions
+        bullets.forEach((bullet) => {
+          tanks.forEach((tank) => {
+            if (tank.alive && tank !== bullet.owner) {
+              tank.hitBy(bullet)
+            }
+          })
+        })
+
+        // Check if battle over
+        const aliveTanks = tanks.filter((t) => t.alive)
+        if (aliveTanks.length <= 1) {
+          console.log('Battle over! Winner: ' + (aliveTanks[0] ? aliveTanks[0].name : 'None'))
+          return // Stop loop
+        }
+
+        // Draw
+        ctx.clearRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT)
+        tanks.forEach((tank) => tank.draw(ctx))
+        bullets.forEach((bullet) => bullet.draw(ctx))
+
+        requestAnimationFrame(gameLoop)
+      }
+
+      // Start
+      init()
+      gameLoop()
+    </script>
+  </body>
+</html>

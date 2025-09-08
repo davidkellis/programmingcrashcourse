@@ -116,7 +116,7 @@
             @input="autoResize"
             @focus="() => console.log(`[${instanceId}] REPL input focused`)"
             @blur="() => console.log(`[${instanceId}] REPL input blurred`)"
-            placeholder="Enter Python code..."
+            placeholder="Enter an expression or statement..."
             class="repl-input"
             :disabled="isExecuting || !isSessionReady"
             rows="1"
@@ -243,7 +243,6 @@ const startResizeData = ref({ x: 0, y: 0, startSize: { width: 0, height: 0 } })
 
 const DEFAULT_PERCENT = 0.3
 const currentSizeRatio = ref(DEFAULT_PERCENT)
-
 
 const setDefaultSizeFromViewport = () => {
   if (position.value === 'right') {
@@ -387,7 +386,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
   if (event.key === 'ArrowUp') {
     const textarea = event.target as HTMLTextAreaElement
-    
+
     // Only navigate history if cursor is on the first line
     if (isCursorOnFirstLine(textarea)) {
       // Use global history directly for navigation
@@ -400,7 +399,10 @@ const handleKeydown = (event: KeyboardEvent) => {
 
       // Force sync the reactive ref with the imported global array
       globalCommandHistory.value = [...globalSharedHistoryArray]
-      console.log(`[${instanceId}] After sync - reactive global history:`, globalCommandHistory.value)
+      console.log(
+        `[${instanceId}] After sync - reactive global history:`,
+        globalCommandHistory.value,
+      )
 
       if (globalCommandHistory.value.length > 0) {
         // Navigate history when up arrow is pressed on first line
@@ -435,7 +437,7 @@ const handleKeydown = (event: KeyboardEvent) => {
     // If not on first line, let the default behavior handle cursor movement
   } else if (event.key === 'ArrowDown') {
     const textarea = event.target as HTMLTextAreaElement
-    
+
     // Only navigate history if cursor is on the last line
     if (isCursorOnLastLine(textarea)) {
       console.log(`[${instanceId}] Down arrow - global history:`, globalCommandHistory.value)

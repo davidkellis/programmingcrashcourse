@@ -34,7 +34,7 @@ You'll also see editable code blocks like this:
 
 \`\`\`python
 def say_hello(name):
-  print(f"Hello {name}")
+  print(f"Hello \{name}")
 
 say_hello("Joe")
 \`\`\`
@@ -473,10 +473,10 @@ Finally, we can change the value that a variable points at by assigning a new va
 \`\`\`python
 # title: Variable reassignment example
 my_age = 10
-print(f"my_age -> {my_age}")   # this prints 10
+print(f"my_age -> \{my_age}")   # this prints 10
 ---
 my_age = 11
-print(f"my_age -> {my_age}")   # this prints 11
+print(f"my_age -> \{my_age}")   # this prints 11
 \`\`\`
 
 `,
@@ -711,178 +711,266 @@ You will combine these forms constantly: define names, compute with operators, b
     id: 'functions',
     title: 'Functions',
     order: 8,
-    content: `A function is like a recipe. A recipe has a name and a list of instructions to follow.
+    content: `A function is a sequence of expressions that has a name. It can accept input values as arguments and can return a value.
 
-For example, here is a recipe for making a peanut butter sandwich:
+It's kind of like a recipe: it has a name, it has a list of instructions to follow in order, and you give it ingredients (i.e. input arguments) in order to use it.
 
-**Peanut Butter Sandwich**
+For example, a recipe for making a sandwich is:
 
-1. Get two pieces of bread
-2. Get a jar of peanut butter
-3. Get a knife
-4. Open the jar of peanut butter
-5. Use the knife to spread peanut butter on one side of one piece of bread
-6. Use the knife to spread peanut butter on one side of the other piece of bread
-7. Put the two pieces of toast together, with the peanut butter covered sides facing one another
-8. Put the knife in the sink
-9. Put the lid back on the peanut butter jar
-10. Place the peanut butter sandwich on a plate
+<div>
+  <img src="/make_a_sandwich_function.png" alt="Function for making a sandwich" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
 
-The recipe has a name: Peanut Butter Sandwich
+Then, to use the recipe to make a peanut butter sandwich, you would follow the instructions in order, using peanut butter to "fill in the blank":
 
-The recipe has a list of instructions to follow in order.
+> Make a <u><strong>peanut butter</strong></u> sandwich:
+>
+> 1. Get 2 pieces of bread.
+> 2. Open a jar of <u><strong>peanut butter</strong></u>.
+> 3. Use a knife to spread <u><strong>peanut butter</strong></u> onto the two pieces of bread.
+> 4. Put the two pieces of bread together.
+> 5. Congratulations! You built a <u><strong>peanut butter</strong></u> sandwich! Eat it!
 
-The list of instructions is just an expression sequence, so a function is just an expression sequence that has a name.
+To make a ham sandwich, you would use ham instead of peanut butter:
 
-There are 2 simple rules that you must follow when naming a function:
+> Make a <u><strong>ham</strong></u> sandwich:
+>
+> 1. Get 2 pieces of bread.
+> 2. Open a jar of <u><strong>ham</strong></u>.
+> 3. Use a knife to spread <u><strong>ham</strong></u> onto the two pieces of bread.
+> 4. Put the two pieces of bread together.
+> 5. Congratulations! You built a <u><strong>ham</strong></u> sandwich! Eat it!
 
-1. The name can't have any spaces or hyphens (dashes) in it. Just replace spaces and hyphens with underscores.
-   * Peanut Butter Sandwich → Peanut_Butter_Sandwich
-   * Peanut-Butter-Sandwich → Peanut_Butter_Sandwich
-2. The name can't begin with a number. It must begin with a letter or an underscore.
-   * These are bad names; they won't work, because they start with a number:
-      * 1dog
-      * 2_apples
-   * These are good names; these will work, because they do not start with a number:
-      * one_dog
-      * two_apples
-      * _20_people
-      * book_x5
 
-In Python, we create a function by using the special keyword \`nr: def\`, followed by the name of the function, followed by parenthesis at the end of the function name, followed by a colon (a colon is this character: \`nr: :\` ), like this:
+In Python, we would write down our recipe as a function that looks like this:
+\`\`\`python
+def make_sandwich(filling):
+  print(f"1. Get 2 pieces of bread.")
+  print(f"2. Open a jar of \{filling}.")
+  print(f"3. Use a knife to spread \{filling} onto the two pieces of bread.")
+  print(f"4. Put the two pieces of bread together.")
+  print(f"5. Congratulations! You built a \{filling} sandwich! Eat it!")
+\`\`\`
 
-def make_peanut_butter_sandwich():
-  pass
+Then, we would use the function to make a peanut butter sandwich and a ham sandwich:
+\`\`\`python
+print("Make a peanut butter sandwich:")
+make_sandwich("peanut butter")
 
-A function also has a body, which is just the list of instructions we want the function to evaluate. The function body is an expression sequence. For example:
+print("Make a ham sandwich:")
+make_sandwich("ham")
+\`\`\`
 
-def make_peanut_butter_sandwich():
-  toast_the_bread()
-  spread_peanut_butter_onto_the_toast()
-  smash_the_pieces_of_toast_with_peanut_butter_together()
-  clean_up()
-  put_the_sandwich_on_a_plate()
 
-In addition to a name and a body, a function may have parameters. A function parameter is like a variable that gets set every time the function is called or invoked. A function parameter is just a variable that the function expects to be supplied when the function is called. Parameters are defined inside the parenthesis that follow the name of the function, and they are separated with a comma.
+## Function Definition
 
-The following example function has two parameters: \`kind_of_bread\` , and \`quantity\`
+Just as we did with the "Make a sandwich" recipe, we can write a function to do any kind of task.
 
-def make_peanut_butter_sandwich(kind_of_bread, quantity):
-  for i in range(quantity):
-    toast_the_bread(kind_of_bread)
-    spread_peanut_butter_onto_the_toast()
-    smash_the_pieces_of_toast_with_peanut_butter_together()
-    clean_up()
-    put_the_sandwich_on_a_plate()
+A function definition creates a new function that does whatever you tell it to do, named with whatever name you give it.
 
-This function has one parameter: \`age\`
+You define a function with the \`nr: def\` keyword, followed by the function name, an optional list of parameters, a colon, a sequence of expressions, like this:
 
-def print_my_age(age):
-  print("I am", age, "years old")
+\`\`\`python
+# title: Basic function definitions
+# description: Creating functions with def syntax.
+def function_name_goes_here(first_parameter, second_parameter):
+    # sequence of expressions
+    pass
+---
+# if you don't need any parameters, you can leave them off, like this:
+def a_function_without_parameters():
+    # sequence of expressions
+    pass
+---
+def say_hi():
+    print("Hello to you!")
+---
+def add_numbers(a, b):
+    result = a + b
+    print(f"\{a} + \{b} = \{result}")
+    return result
+---
+def calculate_area(width, height):
+    return width * height  # return statement sends value back
+\`\`\`
 
-This function has no parameters:
+### Parameters and Arguments
 
-def print_hello():
-  print("Hello")`,
+**Parameters** are like variables in the definition of a function that can be filled in with values when the function is used (i.e. called or invoked).
+
+**Arguments** are the actual values that you give to the function when you use it (i.e. call or invoke it):
+
+\`\`\`python
+# title: Functions with parameters
+# description: Parameters let functions work with different inputs.
+def make_sandwich(bread_type, filling):
+    print(f"Making a \${filling} sandwich on \${bread_type} bread")
+    return f"\${bread_type} \${filling} sandwich"
+---
+def calculate_tip(bill_amount, tip_percentage):
+    tip = bill_amount * (tip_percentage / 100.0)
+    print(f"Bill: \${bill_amount}, Tip: \${tip:.2f}")
+    return tip
+---
+make_sandwich("sourdough", "turkey")
+---
+calculate_tip(50, 18)
+\`\`\`
+
+### Function Names
+
+Function names are named like variable names:
+- Use letters, numbers, and underscores only
+- Start with a letter or underscore (not a number)
+- Use snake_case for multi-word names
+
+\`\`\`python
+# title: Function naming examples
+# description: Good function names are descriptive and follow conventions.
+def calculate_monthly_payment(principal, rate, months):
+    monthly_rate = rate / 12.0
+    payment = principal * monthly_rate / (1 - (1 + monthly_rate) ** -months)
+    return round(payment, 2)
+---
+def _helper_function():
+    return "This is a private helper"
+---
+def user_age_in_days(birth_year):
+    current_year = 2024
+    return (current_year - birth_year) * 365
+---
+calculate_monthly_payment(20000, 0.05, 60)
+---
+user_age_in_days(1990)
+\`\`\`
+
+## Function Invocation
+
+You use a function by **calling** it (also called **invoking** it).
+
+You call a function by using the function name like you would a variable name and then you add parentheses at the end of the name, like \`nr: function_name_goes_here()\`.
+
+Some functions expect arguments (input values) to be passed to them when they are called. You pass these arguments to the function inside the parentheses, separated by commas, like \`nr: function_name_goes_here(first_argument_value, second_argument_value, ...)\`.
+
+\`\`\`python
+# title: Calling functions
+# description: Execute functions by name with arguments.
+def greet_user(name):
+    return f"Hello, \{name}!"
+---
+def multiply(x, y):
+    return x * y
+---
+# Call with parentheses
+greet_user("Alice")
+---
+multiply(7, 8)
+---
+# Store result in variables
+greeting = greet_user("Bob")
+print(greeting)
+---
+result = multiply(3, 4)
+print(f"3 * 4 = \{result}")
+\`\`\`
+
+### Functions Without Parameters
+
+Some functions don't need input to do their work:
+
+\`\`\`python
+# title: Parameter-free functions
+# description: Functions that work without input.
+import time
+import random
+
+def current_time():
+    return time.strftime("%H:%M:%S")
+---
+def random_number():
+    return random.randint(1, 100)
+---
+def system_info():
+    import sys
+    return f"Python version: \{sys.version_info.major}.\{sys.version_info.minor}"
+---
+current_time()
+---
+lucky_number = random_number()
+print(f"Your lucky number: \{lucky_number}")
+---
+system_info()
+\`\`\`
+
+### Return Values
+
+Functions can return a value back to the code that called it by using the \`nr: return\` keyword, like this: \`nr: return some_value_goes_here\`.
+
+In Python, if you don't specify a return value, the function returns \`nr: None\`.
+
+\`\`\`python
+# title: Function return values
+# description: Functions can produce output values.
+def calculate_discount(price, discount_percent):
+    discount = price * (discount_percent / 100.0)
+    final_price = price - discount
+    return final_price  # explicit return
+---
+def format_currency(amount):
+    return f"\${amount:.2f}"  # return formatted string
+---
+def validate_password(password):
+    if len(password) >= 8 and any(c.isupper() for c in password) and any(c.isdigit() for c in password):
+        return "Strong password"
+    elif len(password) >= 6:
+        return "Medium strength"
+    else:
+        return "Weak password"
+---
+sale_price = calculate_discount(100, 20)
+print(format_currency(sale_price))
+---
+print(validate_password("MyPass123"))
+---
+print(validate_password("abc"))
+\`\`\`
+
+### Practical Examples
+
+Here are common function patterns you'll use:
+
+\`\`\`python
+# title: Practical function examples
+# description: Real-world functions for common tasks.
+def celsius_to_fahrenheit(celsius):
+    return (celsius * 9.0 / 5.0) + 32
+---
+def word_count(text):
+    return len(text.split())
+---
+def is_even(number):
+    return number % 2 == 0
+---
+def format_name(first, last):
+    return f"\{first.capitalize()} \{last.capitalize()}"
+---
+print(celsius_to_fahrenheit(25))
+---
+print(word_count("Python is a great programming language"))
+---
+print(is_even(42))
+---
+print(format_name("john", "DOE"))
+\`\`\`
+
+Like having a toolbox full of specialized tools, functions let you build reusable solutions once and use them throughout your program. Each function is like a reliable robot assistant that performs its specific task whenever called upon.`,
     previousSection: 'expressions',
-    nextSection: 'function-invocation',
-  },
-  {
-    id: 'function-invocation',
-    title: 'Function Invocation',
-    order: 9,
-    content: `You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
-
-A function may be called, or invoked, by typing the name of the function, followed by parenthesis. If the function was defined to accept parameters, then you must supply values for those parameters.
-
-For example, if we have the following function without any parameters:
-
-def print_hello():
-  print("Hello")
-
-we can call it, or invoke it, by typing its name, followed by an empty set of parenthesis, like this:
-
-print_hello()
-
-When we call this function in an interactive interpreter session, here is what happens:
-
-❯ python
-Python 3.13.2 (main, Feb 12 2025, 14:51:17) [Clang 19.1.6 ] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> def print_hello():
-...   print("Hello")
-...
->>> print_hello()
-Hello
-
-If we have the following function with one parameter:
-
-def print_my_age(age):
-  print("I am", age, "years old")
-
-we can call it by typing its name, followed by an open paren, followed by an age, followed by a close paren, like this:
-
-print_my_age(8)
-
-When we call this function in an interactive interpreter session, here is what happens:
-
-❯ python
-Python 3.13.2 (main, Feb 12 2025, 14:51:17) [Clang 19.1.6 ] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> def print_my_age(age):
-...   print("I am", age, "years old")
-...
->>> print_my_age(8)
-I am 8 years old
-
-If we have the following function with two parameters:
-
-def print_introduction(name, age):
-  print("Hello, my name is", name, "and I am", age, "years old")
-
-we can call it by typing its name, followed by an open paren, followed by a name, followed by an age, followed by a close paren, like this:
-
-print_introduction("Jim", 9)
-
-When we call this function in an interactive interpreter session, here is what happens:
-
-❯ python
-Python 3.13.2 (main, Feb 12 2025, 14:51:17) [Clang 19.1.6 ] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> def print_introduction(name, age):
-...   print("Hello, my name is", name, "and I am", age, "years old")
-...
->>> print_introduction("Jim", 9)
-Hello, my name is Jim and I am 9 years old
-
-In addition to accepting input parameters, functions can also return a value to the caller of the function.
-
-For example, if we have a function like:
-
-def add_five(value):
-  return value + 5
-
-and we call it like this:
-
-three_plus_five = add_five(3)
-
-then the value returned by the function call \`add_five(3)\` is assigned to the variable named \`three_plus_five\` , which means that after the assignment expression has been evaluated, the variable \`three_plus_five\` contains the value \`8\`.
-
-We can see that in the following interactive interpreter session:
-
->>> def add_five(value):
-...   return value + 5
-...
->>> three_plus_five = add_five(3)
->>> three_plus_five
-8`,
-    previousSection: 'functions',
     nextSection: 'conditionals',
   },
   {
     id: 'conditionals',
     title: 'Conditional Expressions',
-    order: 10,
+    order: 9,
     content: `The primary conditional or branching expression is the \`if\` / \`elif\` / \`else\` expression.
 
 There are three variations:
@@ -906,13 +994,13 @@ There are three variations:
        print("You are ten or older")
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    previousSection: 'function-invocation',
+    previousSection: 'functions',
     nextSection: 'types',
   },
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 11,
+    order: 10,
     content: `## Sets
 A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 

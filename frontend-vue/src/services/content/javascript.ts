@@ -148,7 +148,7 @@ new Map([["Jack", "Cookies"], ["Jill", "Ice Cream"], ["Phil", "Asparagus"]])
 
 ### Objects (instances of classes)
 
-- Real‑world entities with properties and methods.
+- Real-world entities with properties and methods.
 
 \`\`\`javascript
 // title: Objects — class instances
@@ -456,128 +456,228 @@ console.log(\`my_age -> \${my_age}\`)   // this prints 11
     id: 'expressions',
     title: 'Expressions',
     order: 7,
-    content: `So far, we have seen several different kinds of expression:
+    content: `In JavaScript, an expression is anything you can evaluate to get a value. This section surveys the major expression shapes you'll use every day.
 
-* value literal expressions
-  * \`123\` - number literals
-  * \`true\` - boolean literals
-  * \`"Max"\` - string literals
-  * \`[1, 2, 3]\` - array literals
-  * \`new Map([[1, "one"], [2, "two"]])\` - map construction expressions (Map)
-* assignment expressions
-  * \`my_age = 25\`
-  * \`what_i_ate_for_breakfast = "cereal"\`
-* variable evaluation expressions
-  * \`my_age\`
-* function definition expressions
-* function invocation expressions
-* conditional expressions
-* loop expressions
+The big categories we'll cover are:
 
-These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in JavaScript, then you know what it looks like in most every language.
+- value literal expressions
+- variable evaluation and variable assignment
+- binary and unary operator expressions
+- sequencing of expressions
+- function definitions and function invocations
+- conditional branching expressions
+- looping expressions
 
-### Comparison expressions
+### 1) Value literal expressions
 
-Comparison expressions evaluate to a boolean (\`nr: true\` or \`nr: false\`).
-
-Try these:
+- A literal writes the value directly in your code.
+- Examples: numbers, strings, booleans, and collection literals like arrays, objects, and Maps.
 
 \`\`\`javascript
-1 == 1
-1 != 2
+// title: Value literals — numbers, strings, booleans
+// description: Literals evaluate to themselves.
+42
+---
+3.14159
+---
+"Max"
+---
+true
+---
+false
+\`\`\`
+
+\`\`\`javascript
+// title: Value literals — collections
+// description: Literals for array, object, and Map.
+[1, 2, 3]
+---
+{"a": 1, "b": 2}
+---
+new Map([["x", 1], ["y", 2]])
+\`\`\`
+
+### 2) Variable evaluation and assignment
+
+- Evaluating a variable name (like \`nr: x\`) yields the value it currently points to.
+- Assignment uses \`nr: =\` to make a name point at a value; reassigning updates what the name points at.
+
+\`\`\`javascript
+// title: Variables — evaluation vs assignment
+// description: Read a name to get its value; use = to change it.
+let pet = "dog"
+---
+pet
+---
+pet = "cat"
+---
+pet
+\`\`\`
+
+### 3) Binary and unary operator expressions
+
+- Binary operators take two inputs: \`nr: A <op> B\`.
+- Unary operators take a single input.
+- Useful families include arithmetic, comparison, logical, and sequence ops.
+
+\`\`\`javascript
+// title: Binary operators — arithmetic and comparison
+// description: Combine two values to produce a new one.
+1 + 2
+---
+Math.floor(9 / 4)
+---
+9 % 4
+---
+2 ** 5
+---
 3 < 5
-5 <= 5
-7 > 2
-2 >= 9
+---
+3 === 3
 \`\`\`
 
-Note: JavaScript also has strict equality operators \`===\` and \`!==\` which do not perform type coercion.
-
 \`\`\`javascript
-3 == "3"   // true (loose equality with coercion)
-3 === 3    // true (strict equality)
-3 === "3"  // false (no coercion)
-\`\`\`
-
-### Boolean logic expressions
-
-Use \`nr: &&\`, \`nr: ||\`, and \`nr: !\` to combine or negate boolean values.
-
-\`\`\`javascript
-true && true
-true && false
-true || false
-false || false
-!true
-!(1 < 2)
-\`\`\`
-
-Short-circuiting: in \`nr: A && B\`, if \`nr: A\` is false, JavaScript does not evaluate \`nr: B\`. In \`nr: A || B\`, if \`nr: A\` is true, JavaScript does not evaluate \`nr: B\`.
-
-### Grouping and operator precedence
-
-Parentheses \`nr: ( )\` change evaluation order. Arithmetic has the usual precedence (\`nr: * / %\` before \`nr: + -\`), then comparisons, then \`nr: !\`, then \`nr: &&\`, then \`nr: ||\`.
-
-\`\`\`javascript
-1 + 2 * 3
-(1 + 2) * 3
-10 - 4 - 1
-10 - (4 - 1)
-(2 < 3) && (3 < 5)
-\`\`\`
-
-### String expressions
-
-\`nr: +\` concatenates strings; \`nr: 'ha'.repeat(3)\` repeats them.
-
-\`\`\`javascript
-"Hello, " + "world!"
+// title: Binary operators — sequence and membership
+// description: Concatenate, repeat, or test for inclusion.
+"Hi, " + "there"
+---
 "ha".repeat(3)
-const name = "Sam"
-"Hello, " + name
-\`\`\`
-
-### Array expressions
-
-Arrays support concatenation and size queries.
-
-\`\`\`javascript
-[1, 2].concat([3, 4])
-Array(5).fill(0)
-[1, 2, 3].length
-\`\`\`
-
-### Indexing and slicing
-
-Use square brackets to get elements, and \`slice(start, end)\` to get subarrays or substrings.
-
-\`\`\`javascript
-const letters = ["a", "b", "c", "d", "e"]
-letters[0]
-letters[letters.length - 1]
-letters.slice(1, 4)
-letters.slice(0, 3)
-letters.filter((_, i) => i % 2 === 0)  // every other element
-
-const text = "javascript"
-text[0]
-text[text.length - 1]
-text.slice(1, 4)
-text.split("").reverse().join("")
-\`\`\`
-
-### Membership
-
-Use \`nr: includes\` to test membership in arrays and substrings in strings.
-
-\`\`\`javascript
+---
+[1, 2].concat([3])
+---
+"javascript".includes("script")
+---
 [1, 2, 3].includes(3)
-"python".includes("py")
-![1, 2, 3].includes(9)
-!"python".includes("x")
 \`\`\`
 
-These forms are the building blocks you will combine inside conditionals, loops, and function calls in the next sections.`,
+\`\`\`javascript
+// title: Unary operators — sign and logical negation
+// description: Operate on a single value.
+-5
+---
++5
+---
+!true
+---
+!(2 < 1)
+\`\`\`
+
+### 4) Sequencing of expressions
+
+- Lines run top-to-bottom; later expressions see the effects of earlier ones.
+
+\`\`\`javascript
+// title: Sequencing — executed top to bottom
+// description: Each line runs after the previous one; names keep their values.
+let x = 1
+---
+x = x + 2
+---
+x
+---
+let y = x * 3
+---
+y
+\`\`\`
+
+### 5) Function definitions
+
+- \`nr: function\` creates a new function object and binds it to a name.
+- Arrow functions \`nr: =>\` provide a compact way to create function values inline.
+
+\`\`\`javascript
+// title: Function definitions — function and arrow syntax
+// description: Creating functions produces function values.
+function square(n) {
+  return n * n
+}
+---
+square  // look at the function object
+---
+const double = x => x * 2
+---
+double
+\`\`\`
+
+### 6) Function invocations
+
+- Use parentheses \`nr: ( )\` to call a function; arguments go inside.
+- A call expression evaluates to the function's return value.
+
+\`\`\`javascript
+// title: Function invocations — calling functions
+// description: Parentheses perform a call; the result is the return value.
+function square(n) {
+  return n * n
+}
+---
+square(6)
+---
+[1, 2, 3].length
+---
+Math.abs(-7)
+\`\`\`
+
+### 7) Conditional branching expressions
+
+- \`nr: if\` / \`nr: else if\` / \`nr: else\` chooses which block to run based on a condition.
+- The ternary operator \`nr: A ? B : C\` picks one of two values.
+
+\`\`\`javascript
+// title: Conditional branching — if/else if/else
+// description: Only the first matching block runs.
+let age = 8
+---
+if (age < 5) {
+  console.log("toddler")
+} else if (age < 10) {
+  console.log("kid")
+} else {
+  console.log("older")
+}
+\`\`\`
+
+\`\`\`javascript
+// title: Conditional expression — a ? b : c
+// description: Picks one of two values.
+let age = 8
+---
+age < 10 ? "kid" : "teen"
+---
+(6 % 2 === 0) ? "even" : "odd"
+\`\`\`
+
+### 8) Looping expressions
+
+- \`nr: for\` loops over a sequence; \`nr: while\` repeats while a condition is true.
+- Array methods like \`nr: map\`, \`nr: filter\`, and \`nr: reduce\` are functional ways to loop and transform data.
+
+\`\`\`javascript
+// title: Looping — for and while
+// description: Repeat work while a condition holds or over a sequence.
+for (let i = 0; i < 3; i++) {
+  console.log(i)
+}
+---
+let n = 3
+while (n > 0) {
+  console.log(n)
+  n--
+}
+\`\`\`
+
+\`\`\`javascript
+// title: Looping — array methods for transformation
+// description: Functional approaches to loop and build new values.
+[0, 1, 2, 3, 4, 5].map(x => x * x)
+---
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(x => x % 2 === 0)
+---
+[0, 1, 2, 3].reduce((acc, x) => acc + x, 0)
+\`\`\`
+
+You will combine these forms constantly: define names, compute with operators, branch and loop, and call functions. As you continue, try running the groups above with the Run buttons to see how the REPL preserves state across snippets within and across groups.
+`,
     previousSection: 'variables',
     nextSection: 'functions',
   },
@@ -585,103 +685,290 @@ These forms are the building blocks you will combine inside conditionals, loops,
     id: 'functions',
     title: 'Functions',
     order: 8,
-    content: `A function is like a recipe. A recipe has a name and a list of instructions to follow.
+    content: `A function is a sequence of expressions that has a name. It can accept input values as arguments and can return a value.
 
-For example, here is a recipe for making a peanut butter sandwich:
+It's kind of like a recipe: it has a name, it has a list of instructions to follow in order, and you give it ingredients (i.e. input arguments) in order to use it.
 
-**Make Peanut Butter Sandwich:**
-1. Get two slices of bread
-2. Get jar of peanut butter
-3. Get a knife
-4. Open the jar of peanut butter
-5. Use the knife to scoop peanut butter from the jar
-6. Spread the peanut butter on one slice of bread
-7. Put the two slices of bread together
-8. Clean the knife
-9. Put away the jar of peanut butter
+For example, a recipe for making a sandwich is:
 
-A function in JavaScript is similar. Here is a function for printing a message:
+<div>
+  <img src="/make_a_sandwich_function.png" alt="Function for making a sandwich" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
 
+Then, to use the recipe to make a peanut butter sandwich, you would follow the instructions in order, using peanut butter to "fill in the blank":
+
+> Make a <u><strong>peanut butter</strong></u> sandwich:
+>
+> 1. Get 2 pieces of bread.
+> 2. Open a jar of <u><strong>peanut butter</strong></u>.
+> 3. Use a knife to spread <u><strong>peanut butter</strong></u> onto the two pieces of bread.
+> 4. Put the two pieces of bread together.
+> 5. Congratulations! You built a <u><strong>peanut butter</strong></u> sandwich! Eat it!
+
+To make a ham sandwich, you would use ham instead of peanut butter:
+
+> Make a <u><strong>ham</strong></u> sandwich:
+>
+> 1. Get 2 pieces of bread.
+> 2. Open a jar of <u><strong>ham</strong></u>.
+> 3. Use a knife to spread <u><strong>ham</strong></u> onto the two pieces of bread.
+> 4. Put the two pieces of bread together.
+> 5. Congratulations! You built a <u><strong>ham</strong></u> sandwich! Eat it!
+
+
+In JavaScript, we would write down our recipe as a function that looks like this:
 \`\`\`javascript
-function print_hello() {
-  console.log("Hello");
+function make_sandwich(filling) {
+  console.log("1. Get 2 pieces of bread.");
+  console.log(\`2. Open a jar of \${filling}.\`);
+  console.log(\`3. Use a knife to spread \${filling} onto the two pieces of bread.\`);
+  console.log("4. Put the two pieces of bread together.");
+  console.log(\`5. Congratulations! You built a \${filling} sandwich! Eat it!\`);
 }
 \`\`\`
 
-This function has a name (\`print_hello\`) and a list of instructions to follow (print "Hello").
+Then, we would use the function to make a peanut butter sandwich and a ham sandwich:
+\`\`\`javascript
+console.log("Make a peanut butter sandwich:");
+make_sandwich("peanut butter");
 
-Functions can also accept parameters (inputs). Here is a function that accepts one parameter:
+console.log("Make a ham sandwich:");
+make_sandwich("ham");
+\`\`\`
+
+
+## Function Definition
+
+Just as we did with the "Make a sandwich" recipe, we can write a function to do any kind of task.
+
+A function definition creates a new function that does whatever you tell it to do, named with whatever name you give it.
+
+You define a function with the \`nr: function\` keyword, followed by the function name, an optional list of parameters, a sequence of expressions, and then end the function definition with a closing brace, like this:
 
 \`\`\`javascript
-function print_my_age(age) {
-  console.log("I am", age, "years old");
+// title: Basic function definitions
+// description: Creating functions with function keyword syntax.
+function function_name_goes_here(first_parameter, second_parameter) {
+  // sequence of expressions
+}
+---
+// if you don't need any parameters, you can leave them off, like this:
+function a_function_without_parameters() {
+  // sequence of expressions
+}
+---
+function say_hi() {
+  console.log("Hello to you!");
+}
+---
+function add_numbers(a, b) {
+  const result = a + b;
+  console.log(\`\${a} + \${b} = \${result}\`);
+  return result;
+}
+---
+function calculate_area(width, height) {
+  return width * height;  // explicit return required in JavaScript
 }
 \`\`\`
 
-This function has no parameters:
+### Parameters and Arguments
+
+**Parameters** are like variables in the definition of a function that can be filled in with values when the function is used (i.e. called or invoked).
+
+**Arguments** are the actual values that you give to the function when you use it (i.e. call or invoke it):
 
 \`\`\`javascript
-function print_hello() {
-  console.log("Hello");
+// title: Functions with parameters
+// description: Parameters let functions work with different inputs.
+function make_fancy_sandwich(bread_type, filling) {
+  console.log(\`Making a \${filling} sandwich on \${bread_type} bread\`);
+  return \`\${bread_type} \${filling} sandwich\`;
 }
-\`\`\``,
+---
+function calculate_tip(bill_amount, tip_percentage) {
+  const tip = bill_amount * (tip_percentage / 100.0);
+  console.log(\`Bill: $\${bill_amount}, Tip: $\${tip.toFixed(2)}\`);
+  return tip;
+}
+---
+make_fancy_sandwich("sourdough", "turkey")
+---
+calculate_tip(50, 18)
+\`\`\`
+
+### Function Names
+
+Function names are named like variable names:
+- Use letters, numbers, and underscores only
+- Start with a letter or underscore (not a number)
+- Use snake_case for multi-word names
+
+\`\`\`javascript
+// title: Function naming examples
+// description: Good function names are descriptive and follow conventions.
+function calculate_monthly_payment(principal, rate, months) {
+  const monthly_rate = rate / 12.0;
+  const payment = principal * monthly_rate / (1 - Math.pow(1 + monthly_rate, -months));
+  return Math.round(payment * 100) / 100;
+}
+---
+function _helper_function() {
+  return "This is a private helper";
+}
+---
+function user_age_in_days(birth_year) {
+  const current_year = 2024;
+  return (current_year - birth_year) * 365;
+}
+---
+calculate_monthly_payment(20000, 0.05, 60)
+---
+user_age_in_days(1990)
+\`\`\`
+
+## Function Invocation
+
+You use a function by **calling** it (also called **invoking** it).
+
+You call a function by using the function name like you would a variable name and then you add parentheses at the end of the name, like \`nr: function_name_goes_here()\`.
+
+Some functions expect arguments (input values) to be passed to them when they are called. You pass these arguments to the function inside the parentheses, separated by commas, like \`nr: function_name_goes_here(first_argument_value, second_argument_value, ...)\`.
+
+In JavaScript, the parentheses are required when calling functions.
+
+\`\`\`javascript
+// title: Calling functions
+// description: Execute functions by name with arguments.
+function greet_user(name) {
+  return \`Hello, \${name}!\`;
+}
+---
+function multiply(x, y) {
+  return x * y;
+}
+---
+// Call with parentheses (required in JavaScript)
+greet_user("Alice")
+---
+multiply(7, 8)
+---
+// Store result in variable
+const greeting = greet_user("Bob");
+greeting
+---
+const product = multiply(3, 4);
+product
+\`\`\`
+
+### Functions Without Parameters
+
+Some functions don't need input to do their work:
+
+\`\`\`javascript
+// title: Parameter-free functions
+// description: Functions that work without input.
+function current_time() {
+  return new Date().toLocaleTimeString();
+}
+---
+function random_number() {
+  return Math.floor(Math.random() * 100) + 1;
+}
+---
+function system_info() {
+  return \`JavaScript version: ES2023\`;
+}
+---
+current_time()
+---
+const lucky_number = random_number();
+console.log(\`Your lucky number: \${lucky_number}\`);
+---
+system_info()
+\`\`\`
+
+### Return Values
+
+Functions can return a value back to the code that called it by using the \`nr: return\` keyword, like this: \`nr: return some_value_goes_here\`.
+
+In JavaScript, if you don't specify a return value, the function returns \`nr: undefined\`.
+
+\`\`\`javascript
+// title: Function return values
+// description: Functions can produce output values.
+function calculate_discount(price, discount_percent) {
+  const discount = price * (discount_percent / 100.0);
+  const final_price = price - discount;
+  return final_price;  // explicit return
+}
+---
+function format_currency(amount) {
+  return \`$\${amount.toFixed(2)}\`;  // explicit return
+}
+---
+function validate_password(password) {
+  if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+    return "Strong password";
+  } else if (password.length >= 6) {
+    return "Medium strength";
+  } else {
+    return "Weak password";
+  }
+}
+---
+const sale_price = calculate_discount(100, 20);
+sale_price
+---
+format_currency(sale_price)
+---
+validate_password("MyPass123")
+---
+validate_password("weak")
+\`\`\`
+
+### Practical Examples
+
+Here are some common function patterns you'll use frequently:
+
+\`\`\`javascript
+// title: Common function patterns
+// description: Real-world function examples you'll use often.
+// Helper function for calculations
+function celsius_to_fahrenheit(celsius) {
+  return (celsius * 9/5) + 32;
+}
+---
+// Function that processes data
+function format_name(first, last) {
+  return \`\${last.toUpperCase()}, \${first}\`;
+}
+---
+// Function with validation
+function safe_divide(a, b) {
+  if (b === 0) {
+    return "Cannot divide by zero";
+  }
+  return a / b;
+}
+---
+celsius_to_fahrenheit(25)
+---
+format_name("john", "DOE")
+---
+safe_divide(10, 2)
+---
+safe_divide(10, 0)
+\`\`\`
+
+Like having a toolbox full of specialized tools, functions let you build reusable solutions once and use them throughout your program. Each function is like a reliable robot assistant that performs its specific task whenever called upon.`,
     previousSection: 'expressions',
-    nextSection: 'function-invocation',
-  },
-  {
-    id: 'function-invocation',
-    title: 'Function Invocation',
-    order: 9,
-    content: `You can use a function by calling it, or invoking it. Calling a function is the same thing as invoking it.
-
-A function may be called, or invoked, by typing the name of the function, followed by parenthesis. If the function was defined to accept parameters, then you must supply values for those parameters.
-
-For example, to call the \`print_hello\` function:
-
-\`print_hello()\`
-
-To call the \`print_my_age\` function, we must supply a value for the \`age\` parameter:
-
-\`print_my_age(8)\`
-
-Here is what this looks like in the JavaScript REPL:
-
-\`\`\`
-> function print_hello() {
-...   console.log("Hello");
-... }
-undefined
-> print_hello()
-Hello
-undefined
-> function print_my_age(age) {
-...   console.log("I am", age, "years old");
-... }
-undefined
-> print_my_age(8)
-I am 8 years old
-undefined
-\`\`\`
-
-Functions can also return values. Here is a function that returns a value:
-
-\`\`\`
-> function add_five(value) {
-...   return value + 5;
-... }
-undefined
-> let three_plus_five = add_five(3);
-undefined
-> three_plus_five
-8
-\`\`\``,
-    previousSection: 'functions',
     nextSection: 'conditionals',
   },
   {
     id: 'conditionals',
     title: 'Conditional Expressions',
-    order: 10,
+    order: 9,
     content: `The primary conditional or branching expression is the \`if\` / \`else if\` / \`else\` expression.
 
 There are three variations:
@@ -694,13 +981,13 @@ There are three variations:
    * \`if (age < 5) { console.log("You are younger than five years old."); } else if (age < 10) { console.log("You are five to nine years old."); } else { console.log("You are ten or older"); }\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    previousSection: 'function-invocation',
+    previousSection: 'functions',
     nextSection: 'types',
   },
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 11,
+    order: 10,
     content: `## Sets
 A set is a collection of unique values. Think of it as a bag where each distinct element appears at most once.
 ### This is a set of three numbers:
@@ -876,7 +1163,7 @@ JavaScript has a bunch of built-in types and core objects:
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 12,
+    order: 11,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice

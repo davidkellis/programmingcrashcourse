@@ -54,12 +54,48 @@ type AceEditor = {
     addCommand: (cmd: { name: string; bindKey: Record<string, string>; exec: () => void }) => void
   }
   setKeyboardHandler?: (handler: string) => void
+  renderer: {
+    setScrollMargin: (top: number, bottom: number, left: number, right: number) => void
+    setOption: (name: string, value: unknown) => void
+  }
 }
 
 let editor: AceEditor | null = null
 let keydownHandlerRef: ((e: KeyboardEvent) => void) | null = null
 let resizeObserver: ResizeObserver | null = null
 let intersectionObserver: IntersectionObserver | null = null
+
+// Dynamic height constants
+const LINE_HEIGHT = 25.6 // 16px font * 1.6 line-height
+const MIN_LINES = 4
+const MAX_LINES = 100
+const MIN_HEIGHT = Math.ceil(MIN_LINES * LINE_HEIGHT)
+const MAX_HEIGHT = Math.ceil(MAX_LINES * LINE_HEIGHT)
+
+// Calculate dynamic height based on content
+const calculateEditorHeight = (code: string): number => {
+  const lines = code.split('\n').length
+  const clampedLines = Math.max(MIN_LINES, Math.min(MAX_LINES, lines))
+  return Math.ceil(clampedLines * LINE_HEIGHT)
+}
+
+// Update editor height based on content
+const updateEditorHeight = (code: string) => {
+  if (!containerRef.value || !editorRef.value) return
+  
+  const dynamicHeight = calculateEditorHeight(code)
+  const heightPx = `${dynamicHeight}px`
+  
+  const parent = containerRef.value as HTMLElement
+  const container = editorRef.value as HTMLElement
+  
+  parent.style.height = heightPx
+  container.style.height = heightPx
+  
+  if (editor) {
+    editor.resize()
+  }
+}
 
 // Language mode mapping
 const languageModeMap: Record<string, string> = {
@@ -86,15 +122,21 @@ const initEditor = async () => {
   const container = editorRef.value as HTMLElement
   const parentContainer = containerRef.value as HTMLElement
 
+  // Calculate dynamic height based on content
+  const dynamicHeight = calculateEditorHeight(props.code)
+  const heightPx = `${dynamicHeight}px`
+
   // Force dimensions on both containers
   parentContainer.style.width = '100%'
-  parentContainer.style.height = '200px'
-  parentContainer.style.minHeight = '200px'
+  parentContainer.style.height = heightPx
+  parentContainer.style.minHeight = `${MIN_HEIGHT}px`
+  parentContainer.style.maxHeight = `${MAX_HEIGHT}px`
   parentContainer.style.display = 'block'
 
   container.style.width = '100%'
-  container.style.height = '200px'
-  container.style.minHeight = '200px'
+  container.style.height = heightPx
+  container.style.minHeight = `${MIN_HEIGHT}px`
+  container.style.maxHeight = `${MAX_HEIGHT}px`
   container.style.display = 'block'
 
   if (import.meta.env.DEV) {
@@ -165,34 +207,16 @@ const initEditor = async () => {
       enableSnippets: true,
       useSoftTabs: true,
       tabSize: 2,
-      wrap: true,
-      maxLines: Infinity,
-      minLines: 5,
+      wrap: false,
+      scrollPastEnd: 0,
     })
 
-    // Force resize after initialization with multiple attempts
+    // Single resize after initialization
     setTimeout(() => {
       if (editor) {
         editor.resize()
-        if (import.meta.env.DEV) {
-          console.log('[AceCodeBlock] Editor resized after timeout')
-          console.log('[AceCodeBlock] Post-resize dimensions:', {
-            width: editorRef.value?.offsetWidth,
-            height: editorRef.value?.offsetHeight,
-          })
-        }
       }
     }, 100)
-
-    // Additional resize attempt after longer delay
-    setTimeout(() => {
-      if (editor) {
-        editor.resize()
-        if (import.meta.env.DEV) {
-          console.log('[AceCodeBlock] Second resize attempt')
-        }
-      }
-    }, 300)
 
     // Bypass all CSS and force absolute positioning
     const forceEditorVisibility = () => {
@@ -204,9 +228,11 @@ const initEditor = async () => {
         // (Do not strip classes; they hold important styles)
         // Keep dimensions stable
         if (!parent.style.width) parent.style.width = '100%'
-        if (!parent.style.height) parent.style.height = '200px'
-        if (!parent.style.minHeight) parent.style.minHeight = '200px'
+        if (!parent.style.height) parent.style.height = heightPx
+        if (!parent.style.minHeight) parent.style.minHeight = `${MIN_HEIGHT}px`
+        if (!parent.style.maxHeight) parent.style.maxHeight = `${MAX_HEIGHT}px`
         parent.style.display = 'block'
+        parent.style.position = 'relative'
 
         if (import.meta.env.DEV) {
           console.log(
@@ -221,10 +247,12 @@ const initEditor = async () => {
       if (editorContainer) {
         // Ensure explicit dimensions without touching Ace's classes
         if (!editorContainer.style.width) editorContainer.style.width = '100%'
-        if (!editorContainer.style.height) editorContainer.style.height = '200px'
-        if (!editorContainer.style.minHeight) editorContainer.style.minHeight = '200px'
+        if (!editorContainer.style.height) editorContainer.style.height = heightPx
+        if (!editorContainer.style.minHeight) editorContainer.style.minHeight = `${MIN_HEIGHT}px`
+        if (!editorContainer.style.maxHeight) editorContainer.style.maxHeight = `${MAX_HEIGHT}px`
         editorContainer.style.position = 'relative'
         editorContainer.style.display = 'block'
+        editorContainer.style.overflow = 'visible'
 
         if (import.meta.env.DEV) {
           console.log(
@@ -241,29 +269,23 @@ const initEditor = async () => {
       }
     }
 
-    // Set up ResizeObserver to detect size changes (throttled)
+    // Set up ResizeObserver with debouncing to prevent jitter
     if (containerRef.value) {
-      let roScheduled = false
+      let resizeTimeout: number | null = null
       resizeObserver = new ResizeObserver(() => {
-        if (roScheduled) return
-        roScheduled = true
-        requestAnimationFrame(() => {
-          roScheduled = false
-          forceEditorVisibility()
-        })
+        if (resizeTimeout) clearTimeout(resizeTimeout)
+        resizeTimeout = setTimeout(() => {
+          if (editor) {
+            editor.resize()
+          }
+        }, 150) as unknown as number
       })
 
       resizeObserver.observe(containerRef.value)
-      if (editorRef.value) {
-        resizeObserver.observe(editorRef.value)
-      }
     }
 
-    // Force visibility immediately and repeatedly
+    // Single visibility check
     forceEditorVisibility()
-    setTimeout(forceEditorVisibility, 100)
-    setTimeout(forceEditorVisibility, 300)
-    setTimeout(forceEditorVisibility, 500)
 
     // Add Ctrl+Enter key binding
     editor!.commands.addCommand({
@@ -301,6 +323,14 @@ const initEditor = async () => {
 
     editor!.on('blur', () => {
       containerRef.value?.classList.remove('focused')
+    })
+
+    // Listen for content changes to dynamically resize
+    editor!.on('change', () => {
+      if (editor) {
+        const currentCode = editor.getValue()
+        updateEditorHeight(currentCode)
+      }
     })
   } catch (error) {
     console.error('Failed to initialize Ace Editor:', error)
@@ -403,6 +433,7 @@ watch(
   (newCode) => {
     if (editor && newCode !== editor.getValue()) {
       editor.setValue(newCode, -1)
+      updateEditorHeight(newCode)
     }
   },
 )
@@ -417,11 +448,12 @@ onMounted(async () => {
   if (containerRef.value && editorRef.value) {
     const parent = containerRef.value as HTMLElement
     const editorEl = editorRef.value as HTMLElement
+    const dynamicHeight = calculateEditorHeight(props.code)
 
     parent.style.cssText =
-      'width: 100% !important; height: 200px !important; display: block !important; position: relative !important; box-sizing: border-box !important;'
+      `width: 100% !important; height: ${dynamicHeight}px !important; min-height: ${MIN_HEIGHT}px !important; max-height: ${MAX_HEIGHT}px !important; display: block !important; position: relative !important; box-sizing: border-box !important;`
     editorEl.style.cssText =
-      'width: 100% !important; height: 200px !important; display: block !important; position: relative !important; box-sizing: border-box !important;'
+      `width: 100% !important; height: ${dynamicHeight}px !important; min-height: ${MIN_HEIGHT}px !important; max-height: ${MAX_HEIGHT}px !important; display: block !important; position: relative !important; box-sizing: border-box !important;`
   }
 
   await nextTick()
@@ -503,15 +535,11 @@ onUnmounted(() => {
   background: transparent;
   border-radius: 0.5rem;
   margin: 1rem 0 1.5rem 0;
-  overflow: hidden;
-  width: 100% !important;
-  height: 200px !important;
-  min-height: 200px !important;
-  display: block !important;
-  /* Paint stability hints */
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  width: 100%;
+  min-height: 103px; /* ~4 lines */
+  max-height: 2560px; /* ~100 lines */
+  display: block;
+  overflow: visible;
 }
 
 .ace-code-block.focused {
@@ -522,7 +550,7 @@ onUnmounted(() => {
   position: absolute;
   top: 0.6rem;
   right: 0.75rem;
-  z-index: 10;
+  z-index: 1000;
   background: #10b981;
   color: white;
   border: none;
@@ -539,19 +567,17 @@ onUnmounted(() => {
 }
 
 .ace-run-button:active {
+  background: #047857;
 }
 
 .ace-editor-container {
-  width: 100% !important;
-  height: 200px !important;
-  min-height: 200px !important;
+  width: 100%;
+  min-height: 103px; /* ~4 lines */
+  max-height: 2560px; /* ~100 lines */
   font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  display: block !important;
-  position: relative !important;
-  /* Paint stability hints */
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  position: relative;
+  display: block;
+  overflow: visible;
 }
 
 /* Ace Editor custom styles */
@@ -584,5 +610,46 @@ onUnmounted(() => {
 
 :deep(.ace_active-line) {
   background: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* Remove scrollbar overrides - let Ace handle scrolling internally */
+
+/* Style the scrollbar track and thumb */
+:deep(.ace_scrollbar-v::-webkit-scrollbar) {
+  width: 14px;
+}
+
+:deep(.ace_scrollbar-v::-webkit-scrollbar-track) {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+:deep(.ace_scrollbar-v::-webkit-scrollbar-thumb) {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: 2px solid #f1f5f9;
+}
+
+:deep(.ace_scrollbar-v::-webkit-scrollbar-thumb:hover) {
+  background: #94a3b8;
+}
+
+:deep(.ace_scrollbar-h::-webkit-scrollbar) {
+  height: 14px;
+}
+
+:deep(.ace_scrollbar-h::-webkit-scrollbar-track) {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+:deep(.ace_scrollbar-h::-webkit-scrollbar-thumb) {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: 2px solid #f1f5f9;
+}
+
+:deep(.ace_scrollbar-h::-webkit-scrollbar-thumb:hover) {
+  background: #94a3b8;
 }
 </style>

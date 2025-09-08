@@ -389,7 +389,7 @@ You now know the common operators (binary and unary) and where Ruby adds extras;
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 11,
+    order: 10,
     content: `A type is a set of values that we give a name to.
 
 We can name a type anything we want. For example:
@@ -606,153 +606,232 @@ puts "my_age -> #{my_age}"   # this prints 11
     id: 'expressions',
     title: 'Expressions',
     order: 7,
-    content: `So far, we have seen several different kinds of expression:
+    content: `In Ruby, an expression is anything you can evaluate to get a value. This section surveys the major expression shapes you'll use every day.
 
-* value literal expressions
-  * \`123\` - integer literal expressions
-  * \`3.14159\` - floating point literal expressions
-  * \`true\` - boolean literal expressions
-  * \`"Max"\` - string literal expressions
-  * \`[1, 2, 3, 1, 2, 3]\` - array literal expressions
-  * \`{1 => "one", 2 => "two"}\` - hash literal expressions
-* assignment expressions
-  * \`my_age = 25\`
-  * \`what_i_ate_for_breakfast = "cereal"\`
-* variable evaluation expressions
-  * \`my_age\`
-  * \`what_i_ate_for_breakfast\`
-* math expressions
-  * \`1 + 2\`
-  * \`3 * 4\`
-  * \`10 / 2\`
-  * \`5 - 3\`
+The big categories we'll cover are:
 
-An expression is anything that can be evaluated to produce a value.
+- value literal expressions
+- variable evaluation and variable assignment
+- binary and unary operator expressions
+- sequencing of expressions
+- method definitions and method invocations
+- conditional branching expressions
+- looping expressions
 
-For example, each of these expressions produces a value:
-* \`1 + 2\` -> \`nr: 3\`
-* \`3 * 4\` -> \`nr: 12\`
-* \`10 / 2\` -> \`nr: 5\`
-* \`5 - 3\` -> \`nr: 2\`
+### 1) Value literal expressions
 
-When we evaluate an expression, we compute the value that the expression represents, and then we use that computed value instead of the complex expression that produced it.
-
-For example, when we evaluate the expression \`1 + 2\`, we compute the value \`3\`, because math expressions evaluate to the number that the math produces.
-
-When we evaluate the expression \`my_age\`, we look up whatever value is currently stored in the variable named \`my_age\`, because variable evaluation expressions evaluate to the value that the variable currently points at.
-
-When we evaluate the expression \`5\`, we know that evaluates to the number \`5\`, because literal expressions evaluate to themselves.
-
-Different programming languages support different kinds of expressions, and each kind of expression has a different way of being evaluated.
-
-Learning a programming language is all about learning and remembering how each different kind of expression is interpreted and evaluated.
-
-The common expression types across every popular programming language are:
-
-* value literal expressions
-* assignment expressions
-* variable evaluation expressions
-* function definition expressions
-* function invocation expressions
-* conditional expressions
-* loop expressions
-
-These common kinds of expression are what we are focusing on in this tutorial, because every language has them, so if you know what an assignment expression looks like in Ruby, then you know what it looks like in most every language.
-
-### Comparison expressions
-
-Comparison expressions evaluate to a boolean (\`nr: true\` or \`nr: false\`).
-
-Try these:
+- A literal writes the value directly in your code.
+- Examples: numbers, strings, booleans, and collection literals like arrays, hashes, and ranges.
 
 \`\`\`ruby
-1 == 1
-1 != 2
+# title: Value literals — numbers, strings, booleans
+# description: Literals evaluate to themselves.
+42
+---
+3.14159
+---
+"Max"
+---
+true
+---
+false
+\`\`\`
+
+\`\`\`ruby
+# title: Value literals — collections
+# description: Literals for array, hash, and range.
+[1, 2, 3]
+---
+{"a" => 1, "b" => 2}
+---
+1..5
+\`\`\`
+
+### 2) Variable evaluation and assignment
+
+- Evaluating a variable name (like \`nr: x\`) yields the value it currently points to.
+- Assignment uses \`nr: =\` to make a name point at a value; reassigning updates what the name points at.
+
+\`\`\`ruby
+# title: Variables — evaluation vs assignment
+# description: Read a name to get its value; use = to change it.
+pet = "dog"
+---
+pet
+---
+pet = "cat"
+---
+pet
+\`\`\`
+
+### 3) Binary and unary operator expressions
+
+- Binary operators take two inputs: \`nr: A <op> B\`.
+- Unary operators take a single input.
+- Useful families include arithmetic, comparison, logical, and sequence ops.
+
+\`\`\`ruby
+# title: Binary operators — arithmetic and comparison
+# description: Combine two values to produce a new one.
+1 + 2
+---
+9 / 4
+---
+9 % 4
+---
+2 ** 5
+---
 3 < 5
-5 <= 5
-7 > 2
-2 >= 9
+---
+3 == 3
 \`\`\`
 
-### Boolean logic expressions
-
-Use \`nr: &&\`, \`nr: ||\`, and \`nr: !\` to combine or negate boolean values.
-
 \`\`\`ruby
-true && true
-true && false
-true || false
-false || false
-!true
-!(1 < 2)
-\`\`\`
-
-Short-circuiting: in \`nr: A && B\`, if \`nr: A\` is false, Ruby does not evaluate \`nr: B\`. In \`nr: A || B\`, if \`nr: A\` is true, Ruby does not evaluate \`nr: B\`.
-
-### Grouping and operator precedence
-
-Parentheses \`nr: ( )\` change evaluation order. Arithmetic has the usual precedence (\`nr: * / %\` before \`nr: + -\`), then comparisons, then \`nr: !\`, then \`nr: &&\`, then \`nr: ||\`.
-
-\`\`\`ruby
-1 + 2 * 3
-(1 + 2) * 3
-10 - 4 - 1
-10 - (4 - 1)
-(2 < 3) && (3 < 5)
-\`\`\`
-
-### String expressions
-
-\`nr: +\` concatenates strings; \`nr: *\` repeats them; interpolation uses \`nr: #{...}\`.
-
-\`\`\`ruby
-"Hello, " + "world!"
+# title: Binary operators — sequence and membership
+# description: Concatenate, repeat, or test for inclusion.
+"Hi, " + "there"
+---
 "ha" * 3
-name = "Sam"
-"Hello, " + name
-"Hello, #{name}!"  # string interpolation
-\`\`\`
-
-### Array expressions
-
-Arrays also support concatenation and repetition.
-
-\`\`\`ruby
-[1, 2] + [3, 4]
-[0] * 5
-[1, 2, 3].length
-\`\`\`
-
-### Indexing and slicing
-
-Use square brackets to get elements or ranges from arrays and strings.
-
-\`\`\`ruby
-letters = ["a", "b", "c", "d", "e"]
-letters[0]
-letters[-1]
-letters[1..3]
-letters[0...3]
-
-text = "ruby"
-text[0]
-text[-1]
-text[1..3]
-text[0...2]
-\`\`\`
-
-### Membership
-
-Use \`nr: include?\` to test membership on arrays and strings.
-
-\`\`\`ruby
+---
+[1, 2] + [3]
+---
+"ruby".include?("by")
+---
 [1, 2, 3].include?(3)
-"ruby".include?("ru")
-![1, 2, 3].include?(9)
-!"ruby".include?("x")
 \`\`\`
 
-These forms are the building blocks you will combine inside conditionals, loops, and method calls in the next sections.`,
+\`\`\`ruby
+# title: Unary operators — sign and logical negation
+# description: Operate on a single value.
+-5
+---
++5
+---
+!true
+---
+!(2 < 1)
+\`\`\`
+
+### 4) Sequencing of expressions
+
+- Lines run top-to-bottom; later expressions see the effects of earlier ones.
+
+\`\`\`ruby
+# title: Sequencing — executed top to bottom
+# description: Each line runs after the previous one; names keep their values.
+x = 1
+---
+x = x + 2
+---
+x
+---
+y = x * 3
+---
+y
+\`\`\`
+
+### 5) Method definitions
+
+- \`nr: def\` creates a new method and binds it to a name.
+- Methods can take parameters and return values.
+- Ruby methods return the last evaluated expression automatically.
+
+\`\`\`ruby
+# title: Method definitions — def syntax
+# description: Creating methods produces method objects.
+def square(n)
+  n * n
+end
+---
+method(:square)  # look at the method object
+---
+def double(x)
+  x * 2
+end
+---
+method(:double)
+\`\`\`
+
+### 6) Method invocations
+
+- Use parentheses \`nr: ( )\` to call a method; arguments go inside.
+- Ruby allows omitting parentheses in many cases.
+- A call expression evaluates to the method's return value.
+
+\`\`\`ruby
+# title: Method invocations — calling methods
+# description: Parentheses perform a call; the result is the return value.
+def square(n)
+  n * n
+end
+---
+square(6)
+---
+[1, 2, 3].length
+---
+-7.abs
+\`\`\`
+
+### 7) Conditional branching expressions
+
+- \`nr: if\` / \`nr: elsif\` / \`nr: else\` chooses which block to run based on a condition.
+- The ternary operator \`nr: A ? B : C\` picks one of two values.
+
+\`\`\`ruby
+# title: Conditional branching — if/elsif/else
+# description: Only the first matching block runs.
+age = 8
+---
+if age < 5
+  puts "toddler"
+elsif age < 10
+  puts "kid"
+else
+  puts "older"
+end
+\`\`\`
+
+\`\`\`ruby
+# title: Conditional expression — a ? b : c
+# description: Picks one of two values.
+age = 8
+---
+age < 10 ? "kid" : "teen"
+---
+6 % 2 == 0 ? "even" : "odd"
+\`\`\`
+
+### 8) Looping expressions
+
+- \`nr: for\` loops over a sequence; \`nr: while\` repeats while a condition is true.
+- Ruby's enumerable methods like \`nr: each\`, \`nr: map\`, and \`nr: select\` are idiomatic ways to loop and transform data.
+
+\`\`\`ruby
+# title: Looping — for and while
+# description: Repeat work while a condition holds or over a sequence.
+for i in 0..2
+  puts i
+end
+---
+n = 3
+while n > 0
+  puts n
+  n -= 1
+end
+\`\`\`
+
+\`\`\`ruby
+# title: Looping — enumerable methods for transformation
+# description: Ruby's idiomatic approaches to loop and build new values.
+[0, 1, 2, 3, 4, 5].map { |x| x * x }
+---
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].select { |x| x % 2 == 0 }
+---
+[0, 1, 2, 3].reduce(0) { |acc, x| acc + x }
+\`\`\`
+
+You will combine these forms constantly: define names, compute with operators, branch and loop, and call methods. As you continue, try running the groups above with the Run buttons to see how the REPL preserves state across snippets within and across groups.
+`,
     previousSection: 'variables',
     nextSection: 'functions',
   },
@@ -760,161 +839,284 @@ These forms are the building blocks you will combine inside conditionals, loops,
     id: 'functions',
     title: 'Functions',
     order: 8,
-    content: `A function is like a recipe. A recipe has a name and a list of instructions to follow.
+    content: `A function is a sequence of expressions that has a name. It can accept input values as arguments and can return a value.
 
-For example, here is a recipe for making a peanut butter sandwich:
+It's kind of like a recipe: it has a name, it has a list of instructions to follow in order, and you give it ingredients (i.e. input arguments) in order to use it.
 
-**Peanut Butter Sandwich**
+For example, a recipe for making a sandwich is:
 
-1. Get two pieces of bread
-2. Get a jar of peanut butter
-3. Get a knife
-4. Open the jar of peanut butter
-5. Use the knife to spread peanut butter on one side of one piece of bread
-6. Use the knife to spread peanut butter on one side of the other piece of bread
-7. Put the two pieces of toast together, with the peanut butter covered sides facing one another
-8. Put the knife in the sink
-9. Put the lid back on the peanut butter jar
-10. Place the peanut butter sandwich on a plate
+<div>
+  <img src="/make_a_sandwich_function.png" alt="Function for making a sandwich" style="max-width: 100%; height: auto; margin: 10px 0;" />
+</div>
 
-The recipe has a name: Peanut Butter Sandwich
+Then, to use the recipe to make a peanut butter sandwich, you would follow the instructions in order, using peanut butter to "fill in the blank":
 
-The recipe has a list of instructions to follow in order.
+> Make a <u><strong>peanut butter</strong></u> sandwich:
+>
+> 1. Get 2 pieces of bread.
+> 2. Open a jar of <u><strong>peanut butter</strong></u>.
+> 3. Use a knife to spread <u><strong>peanut butter</strong></u> onto the two pieces of bread.
+> 4. Put the two pieces of bread together.
+> 5. Congratulations! You built a <u><strong>peanut butter</strong></u> sandwich! Eat it!
 
-The list of instructions is just an expression sequence, so a function is just an expression sequence that has a name.
+To make a ham sandwich, you would use ham instead of peanut butter:
 
-There are 2 simple rules that you must follow when naming a method in Ruby:
+> Make a <u><strong>ham</strong></u> sandwich:
+>
+> 1. Get 2 pieces of bread.
+> 2. Open a jar of <u><strong>ham</strong></u>.
+> 3. Use a knife to spread <u><strong>ham</strong></u> onto the two pieces of bread.
+> 4. Put the two pieces of bread together.
+> 5. Congratulations! You built a <u><strong>ham</strong></u> sandwich! Eat it!
 
-1. The name can't have any spaces or hyphens (dashes) in it. Replace spaces and hyphens with underscores.
-   * Peanut Butter Sandwich → Peanut_Butter_Sandwich
-   * Peanut-Butter-Sandwich → Peanut_Butter_Sandwich
-2. The name can't begin with a number. It must begin with a letter or an underscore.
-   * Bad names (won't work): \`nr: 1dog\`, \`nr: 2_apples\`
-   * Good names (will work): \`nr: one_dog\`, \`nr: two_apples\`, \`nr: _20_people\`, \`nr: book_x5\`
 
-In Ruby, we create a method by using the keyword \`nr: def\`, followed by the name of the method, optionally followed by parameters, and ending with \`nr: end\`, like this:
-
+In Ruby, we would write down our recipe as a function that looks like this:
 \`\`\`ruby
-def make_peanut_butter_sandwich
-  # method body goes here
+def make_sandwich(filling)
+  puts("1. Get 2 pieces of bread.")
+  puts("2. Open a jar of #{filling}.")
+  puts("3. Use a knife to spread #{filling} onto the two pieces of bread.")
+  puts("4. Put the two pieces of bread together.")
+  puts("5. Congratulations! You built a #{filling} sandwich! Eat it!")
 end
 \`\`\`
 
-A method also has a body, which is just the list of instructions we want the method to evaluate. The method body is an expression sequence. For example:
+Then, we would use the function to make a peanut butter sandwich and a ham sandwich:
+\`\`\`ruby
+puts "Make a peanut butter sandwich:"
+make_sandwich("peanut butter")
+
+puts "Make a ham sandwich:"
+make_sandwich("ham")
+\`\`\`
+
+
+## Function Definition
+
+Just as we did with the "Make a sandwich" recipe, we can write a function to do any kind of task.
+
+A function definition creates a new function that does whatever you tell it to do, named with whatever name you give it.
+
+You define a function with the \`nr: def\` keyword, followed by the function name, an optional list of parameters, a sequence of expressoins, and then end the function definition with the \`nr: end\` keyword, like this:
 
 \`\`\`ruby
-def make_peanut_butter_sandwich(kind_of_bread, quantity)
-  quantity.times do
-    # toast_the_bread(kind_of_bread)
-    # spread_peanut_butter_onto_the_toast()
-    # smash_the_pieces_of_toast_with_peanut_butter_together()
-    # clean_up()
-    # put_the_sandwich_on_a_plate()
+# title: Basic function definitions
+# description: Creating functions with def...end syntax.
+def function_name_goes_here(first_parameter, second_parameter)
+  # sequence of expressions
+end
+---
+# if you don't need any parameters, you can leave them off, like this:
+def a_function_without_parameters
+  # sequence of expressions
+end
+---
+def say_hi
+  puts "Hello to you!"
+end
+---
+def add_numbers(a, b)
+  result = a + b
+  puts "#{a} + #{b} = #{result}"
+  result
+end
+---
+def calculate_area(width, height)
+  width * height  # last expression is returned automatically
+end
+\`\`\`
+
+### Parameters and Arguments
+
+**Parameters** are like variables in the definition of a function that can be filled in with values when the function is used (i.e. called or invoked).
+
+**Arguments** are the actual values that you give to the function when you use it (i.e. call or invoke it):
+
+\`\`\`ruby
+# title: Functions with parameters
+# description: Parameters let functions work with different inputs.
+def make_sandwich(bread_type, filling)
+  puts "Making a #{filling} sandwich on #{bread_type} bread"
+  "#{bread_type} #{filling} sandwich"
+end
+---
+def calculate_tip(bill_amount, tip_percentage)
+  tip = bill_amount * (tip_percentage / 100.0)
+  puts "Bill: $#{bill_amount}, Tip: $#{tip.round(2)}"
+  tip
+end
+---
+make_sandwich("sourdough", "turkey")
+---
+calculate_tip(50, 18)
+\`\`\`
+
+### Function Names
+
+Function names are named like variable names:
+- Use letters, numbers, and underscores only
+- Start with a letter or underscore (not a number)
+- Use snake_case for multi-word names
+
+\`\`\`ruby
+# title: Function naming examples
+# description: Good function names are descriptive and follow conventions.
+def calculate_monthly_payment(principal, rate, months)
+  monthly_rate = rate / 12.0
+  payment = principal * monthly_rate / (1 - (1 + monthly_rate) ** -months)
+  payment.round(2)
+end
+---
+def _helper_function
+  "This is a private helper"
+end
+---
+def user_age_in_days(birth_year)
+  current_year = 2024
+  (current_year - birth_year) * 365
+end
+---
+calculate_monthly_payment(20000, 0.05, 60)
+---
+user_age_in_days(1990)
+\`\`\`
+
+## Function Invocation
+
+You use a function by **calling** it (also called **invoking** it).
+
+You call a function by using the function name like you would a variable name and then you add parentheses at the end of the name, like \`nr: function_name_goes_here()\`.
+
+Some functions expect arguments (input values) to be passed to them when they are called. You pass these arguments to the function inside the parentheses, separated by commas, like \`nr: function_name_goes_here(first_argument_value, second_argument_value, ...)\`.
+
+In Ruby, the parentheses are optional. You can call a function without parentheses, like \`nr: function_name_goes_here first_argument_value, second_argument_value, ...\`.
+
+\`\`\`ruby
+# title: Calling functions
+# description: Execute functions by name with arguments.
+def greet_user(name)
+  "Hello, #{name}!"
+end
+---
+def multiply(x, y)
+  x * y
+end
+---
+# Call with parentheses (recommended)
+greet_user("Alice")
+---
+multiply(7, 8)
+---
+# Call without parentheses (Ruby style)
+greet_user "Bob"
+---
+multiply 3, 4
+\`\`\`
+
+### Functions Without Parameters
+
+Some functions don't need input to do their work:
+
+\`\`\`ruby
+# title: Parameter-free functions
+# description: Functions that work without input.
+def current_time
+  Time.now.strftime("%H:%M:%S")
+end
+---
+def random_number
+  rand(1..100)
+end
+---
+def system_info
+  "Ruby version: #{RUBY_VERSION}"
+end
+---
+current_time
+---
+lucky_number = random_number
+puts "Your lucky number: #{lucky_number}"
+---
+system_info
+\`\`\`
+
+### Return Values
+
+Functions can return a value back to the code that called it by using the \`nr: return\` keyword, like this: \`nr: return some_value_goes_here\`.
+
+In Ruby, functions automatically return the value of the last expression in the body of the function.
+
+\`\`\`ruby
+# title: Function return values
+# description: Functions can produce output values.
+def calculate_discount(price, discount_percent)
+  discount = price * (discount_percent / 100.0)
+  final_price = price - discount
+  return final_price  # explicit return
+end
+---
+def format_currency(amount)
+  "$#{amount.round(2)}"  # implicit return (last expression)
+end
+---
+def validate_password(password)
+  if password.length >= 8 && password.match(/[A-Z]/) && password.match(/[0-9]/)
+    "Strong password"
+  elsif password.length >= 6
+    "Medium strength"
+  else
+    "Weak password"
   end
 end
+---
+sale_price = calculate_discount(100, 20)
+puts format_currency(sale_price)
+---
+puts validate_password("MyPass123")
+---
+puts validate_password("abc")
 \`\`\`
 
-This method has one parameter: \`age\`
+### Practical Examples
+
+Here are common function patterns you'll use:
 
 \`\`\`ruby
-def print_my_age(age)
-  puts "I am #{age} years old"
+# title: Practical function examples
+# description: Real-world functions for common tasks.
+def celsius_to_fahrenheit(celsius)
+  (celsius * 9.0 / 5.0) + 32
 end
+---
+def word_count(text)
+  text.split.length
+end
+---
+def is_even(number)
+  number % 2 == 0
+end
+---
+def format_name(first, last)
+  "#{first.capitalize} #{last.capitalize}"
+end
+---
+puts celsius_to_fahrenheit(25)
+---
+puts word_count("Ruby is a great programming language")
+---
+puts is_even(42)
+---
+puts format_name("john", "DOE")
 \`\`\`
 
-This method has no parameters:
-
-\`\`\`ruby
-def print_hello
-  puts "Hello"
-end
-\`\`\``,
+Like having a toolbox full of specialized tools, functions let you build reusable solutions once and use them throughout your program. Each function is like a reliable robot assistant that performs its specific task whenever called upon.`,
     previousSection: 'expressions',
-    nextSection: 'function-invocation',
-  },
-  {
-    id: 'function-invocation',
-    title: 'Function Invocation',
-    order: 9,
-    content: `You can use a method by calling it, or invoking it. Calling a method is the same thing as invoking it.
-
-A method may be called, or invoked, by typing the name of the method, optionally followed by parentheses. If the method was defined to accept parameters, then you must supply values for those parameters.
-
-For example, if we define a method without any parameters:
-
-\`\`\`ruby
-def print_hello
-  puts "Hello"
-end
-\`\`\`
-
-we can call it by typing its name, with or without parentheses:
-
-\`\`\`ruby
-print_hello
-print_hello()
-\`\`\`
-
-When we call this method in an interactive interpreter session (IRB), here is what happens:
-
-\`\`\`
-irb(main):001:0> def print_hello
-irb(main):002:1>   puts "Hello"
-irb(main):003:1> end
-=> :print_hello
-irb(main):004:0> print_hello
-Hello
-=> nil
-\`\`\`
-
-If we have the following method with one parameter:
-
-\`\`\`ruby
-def print_my_age(age)
-  puts "I am #{age} years old"
-end
-\`\`\`
-
-we can call it by supplying the argument:
-
-\`\`\`ruby
-print_my_age(8)
-print_my_age 8
-\`\`\`
-
-If we have the following method with two parameters:
-
-\`\`\`ruby
-def print_introduction(name, age)
-  puts "Hello, my name is #{name} and I am #{age} years old"
-end
-\`\`\`
-
-we can call it like this:
-
-\`\`\`ruby
-print_introduction("Jim", 9)
-\`\`\`
-
-Methods can also return values. Here is a method that returns a value:
-
-\`\`\`
-irb(main):001:0> def add_five(value)
-irb(main):002:1>   return value + 5
-irb(main):003:1> end
-=> :add_five
-irb(main):004:0> three_plus_five = add_five(3)
-=> 8
-irb(main):005:0> three_plus_five
-=> 8
-\`\`\``,
-    previousSection: 'functions',
     nextSection: 'conditionals',
   },
   {
     id: 'conditionals',
     title: 'Conditional Expressions',
-    order: 10,
+    order: 9,
     content: `The primary conditional or branching expression is the \`if\` / \`elsif\` / \`else\` expression.
 
 There are three variations:
@@ -952,13 +1154,13 @@ end
 \`\`\`
 
 In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
-    previousSection: 'function-invocation',
+    previousSection: 'functions',
     nextSection: 'types',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 12,
+    order: 11,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice

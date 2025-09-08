@@ -353,7 +353,7 @@ watch(
 .repl-pane { display: flex; height: 100%; width: 100%; min-width: 0; }
 
 /* Header and misc styles */
-.tutorial-header { background: white; border-bottom: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 1; position: sticky; top: 0; }
+.tutorial-header { background: white; border-bottom: 1px solid #e9ecef; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); z-index: 1100; position: sticky; top: 0; }
 .header-content { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; width: 100%; box-sizing: border-box; }
 .three-col { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .header-left { justify-self: start; }

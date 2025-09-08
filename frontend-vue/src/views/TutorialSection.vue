@@ -819,7 +819,7 @@ const processAceCodeBlocks = () => {
     if (codeId && code != null) {
       const mountEl = document.createElement('div')
       mountEl.style.cssText =
-        'width: 100% !important; height: 200px !important; min-height: 200px !important; display: block !important; position: relative !important; margin: 1rem 0 !important; visibility: visible !important; box-sizing: border-box !important;'
+        'width: 100% !important; display: block !important; position: relative !important; margin: 1rem 0 !important; visibility: visible !important; box-sizing: border-box !important;'
       mountEl.className = 'ace-mount-container'
 
       try {
@@ -1455,6 +1455,31 @@ const handleCodeBlockClick = (event: Event) => {
 .content-text :deep(p) {
   margin: 0.35rem 0 0.9rem;
 }
+
+/* Blockquotes - Notion-style */
+.content-text :deep(blockquote) {
+  background: #f8fafc;
+  border-left: 4px solid #3b82f6;
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0 6px 6px 0;
+  font-style: normal;
+  position: relative;
+}
+.content-text :deep(blockquote p) {
+  margin: 0.5rem 0;
+  color: #374151;
+}
+.content-text :deep(blockquote p:first-child) {
+  margin-top: 0;
+}
+.content-text :deep(blockquote p:last-child) {
+  margin-bottom: 0;
+}
+.content-text :deep(blockquote strong) {
+  color: #1f2937;
+  font-weight: 600;
+}
 .content-text :deep(ul) {
   list-style: disc;
   padding-left: 1.6rem;
@@ -1465,14 +1490,30 @@ const handleCodeBlockClick = (event: Event) => {
   padding-left: 1.25rem;
   margin-top: 0.25rem;
 }
+.content-text :deep(ol) {
+  list-style: decimal;
+  padding-left: 1.8rem;
+  margin: 0.25rem 0 0.9rem;
+}
+.content-text :deep(ol ol) {
+  list-style: lower-alpha;
+  padding-left: 1.5rem;
+  margin-top: 0.25rem;
+}
 .content-text :deep(li) {
   margin: 0.2rem 0;
+  padding-left: 0.3rem;
 }
 .content-text :deep(li::marker) {
   color: #2563eb;
+  font-weight: 600;
 }
 .content-text :deep(ul ul li::marker) {
   color: #60a5fa;
+}
+.content-text :deep(ol li::marker) {
+  color: #2563eb;
+  font-weight: 600;
 }
 
 /* Inline code (not code blocks) */
@@ -1525,8 +1566,7 @@ const handleCodeBlockClick = (event: Event) => {
   font-size: 1rem;
   color: #111827;
   white-space: pre-wrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   flex: 1 1 auto;
 }
 
@@ -1647,16 +1687,12 @@ const handleCodeBlockClick = (event: Event) => {
   display: block !important;
   visibility: visible !important;
   width: 100% !important;
-  height: 200px !important;
-  min-height: 200px !important;
 }
 
 /* Force dimensions on dynamically mounted containers */
 .content-text :deep(.ace-mount-container) {
   display: block !important;
   width: 100% !important;
-  height: 200px !important;
-  min-height: 200px !important;
   position: relative !important;
   visibility: visible !important;
   box-sizing: border-box !important;

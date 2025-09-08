@@ -59,14 +59,11 @@ const preview = (code: string) => {
   
   // If single line, collapse whitespace as before
   if (lines.length === 1) {
-    const oneLine = trimmed.replace(/\s+/g, ' ')
-    const max = 90
-    return oneLine.length > max ? oneLine.slice(0, max) + '…' : oneLine
+    return trimmed.replace(/\s+/g, ' ')
   }
   
-  // For multi-line, preserve line breaks but limit total length
-  const max = 200
-  return trimmed.length > max ? trimmed.slice(0, max) + '…' : trimmed
+  // For multi-line, preserve line breaks and show full content
+  return trimmed
 }
 
 const commentPrefixFor = (lang: string | undefined) => {

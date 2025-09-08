@@ -330,7 +330,11 @@ class MathJSREPLService {
           .map((key) => `${key}: ${key}`)
           .join(',\n')
 
-        const returnMappingsDeclared = varDeclarations.map((varName: string) => `${varName}: ${varName}`).join(',\n')
+        // Guard access to potentially non-top-level declarations using typeof checks
+        // (typeof on an undeclared identifier is safe and returns 'undefined')
+        const returnMappingsDeclared = varDeclarations
+          .map((varName: string) => `${varName}: (typeof ${varName} !== 'undefined' ? ${varName} : undefined)`) 
+          .join(',\n')
 
         const parts: string[] = []
         parts.push('(function() {\n')
@@ -349,12 +353,14 @@ class MathJSREPLService {
 
         const executionContext = parts.join('')
 
-        // Execute the code in the context
-        const result = eval(executionContext)
+        // Execute the code in an isolated scope to avoid lexical collisions
+        // with local variables in this TypeScript function (e.g., 'result').
+        const execFn = new Function('runtime', 'return ' + executionContext) as (runtime: MathJSRuntimeState) => Record<string, unknown>
+        const execResult = execFn(runtime)
 
         // Update the runtime variables with any new/modified variables (excluding __result__)
-        if (result && typeof result === 'object') {
-          const temp = result as Record<string, unknown>
+        if (execResult && typeof execResult === 'object') {
+          const temp = execResult as Record<string, unknown>
           // Access to indicate usage
           // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           temp.__result__
@@ -369,8 +375,8 @@ class MathJSREPLService {
         }
 
         // Always display the expression result when available
-        if (result && typeof result === 'object' && Object.prototype.hasOwnProperty.call(result, '__result__')) {
-           const value = (result as Record<string, unknown>).__result__
+        if (execResult && typeof execResult === 'object' && Object.prototype.hasOwnProperty.call(execResult, '__result__')) {
+           const value = (execResult as Record<string, unknown>).__result__
           if (value !== undefined) {
             const format = (v: unknown): string => {
               try {
