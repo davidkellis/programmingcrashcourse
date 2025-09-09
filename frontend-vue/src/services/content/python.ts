@@ -991,11 +991,80 @@ A conditional expression is how we tell the program to consider a situation and 
 In Python, we can write this as:
 
 \`\`\`python
-temperature_outside = read_the_thermometer_outside()
+temperature_outside = random.randint(30, 100)
+print("Temperature outside: ", temperature_outside)
+
 if temperature_outside < 50:
   print("Wear a coat.")
 else:
   print("Wear shorts and flip-flops.")
+\`\`\`
+
+## Example: Hubcap of Havoc
+
+Here is another example that demonstrates the conditions we use to play a game:
+
+<div>
+  <img src="/hubcap_of_havoc.png" alt="Hubcap of Havoc" />
+</div>
+
+To illustrate this logic with a flowchart, we might write it as:
+
+In this game, a lucky contestant spins the Hubcap of Havoc and does whatever the arrow points to.
+
+To play the Hubcap of Havoc game, we follow these steps:
+
+> Spin the wheel.
+> If the arrow points to 0:
+> &nbsp;&nbsp; We milk a bear.
+> If the arrow points to 1:
+> &nbsp;&nbsp; We adopt a wolverine.
+> If the arrow points to 2:
+> &nbsp;&nbsp; We eat a basketball.
+> If the arrow points to 3:
+> &nbsp;&nbsp; We tickle an electric eel.
+> If the arrow points to 4:
+> &nbsp;&nbsp; We sleep on an ant bed.
+> If the arrow points to 5:
+> &nbsp;&nbsp; We kiss a shark.
+> If the arrow points to 6:
+> &nbsp;&nbsp; We give a lion a bath.
+> If the arrow points to 7:
+> &nbsp;&nbsp; We shave a gorilla.
+
+In Python, we can write this as:
+
+\`\`\`python
+def spin_the_wheel():
+  return random.randint(0, 7)
+
+def play_hubcap_of_havoc():
+  spin_result = spin_the_wheel()
+  if spin_result == 0:
+    print("Milk a bear.")
+  elif spin_result == 1:
+    print("Adopt a wolverine.")
+  elif spin_result == 2:
+    print("Eat a basketball.")
+  elif spin_result == 3:
+    print("Tickle an electric eel.")
+  elif spin_result == 4:
+    print("Sleep on an ant bed.")
+  elif spin_result == 5:
+    print("Kiss a shark.")
+  elif spin_result == 6:
+    print("Give a lion a bath.")
+  elif spin_result == 7:
+    print("Shave a gorilla.")
+
+print("Lucky contestant #1:")
+play_hubcap_of_havoc()
+
+print("Lucky contestant #2:")
+play_hubcap_of_havoc()
+
+print("Lucky contestant #3:")
+play_hubcap_of_havoc()
 \`\`\`
 
 ## Three primary variations of conditional expression:
@@ -1060,10 +1129,9 @@ else:
 
 ## One-line conditional expression
 
-Sometimes you want to choose a value, not run two whole blocks. Python has a compact form:
+Sometimes you want to choose between two values depending on a simple condition, and you want to do it in one line of code to make it easier to understand.
 
-- Shape: \`nr: A if condition else B\`
-- It evaluates to \`nr: A\` when the condition is \`nr: True\`, otherwise to \`nr: B\`.
+Python has a compact form of if/else expression for this case: \`nr: <A> if <condition> else <B>\`. It evaluates to \`nr: <A>\` when the condition is \`nr: True\`, and evaluates to \`nr: <B>\` when the condition is \`nr: False\`.
 
 \`\`\`python
 # title: Conditional expression — A if cond else B
@@ -1080,7 +1148,7 @@ snack
 
 - Use \`nr: ==\` (double equals) to compare values, not \`nr: =\`.
   - The \`nr: =\` is what we use to assign values to variables.
-  - So, we want to write \`if x == 5:\` to compare \`nr: x\` to \`nr: 5\`, not \`if x = 5\`.
+  - So, we want to write \`nr: if x == 5:\` to compare \`nr: x\` to \`nr: 5\`, not \`nr: if x = 5:\`.
 `,
     previousSection: 'functions',
     nextSection: 'types',
