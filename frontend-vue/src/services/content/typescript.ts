@@ -1165,20 +1165,489 @@ Like having a toolbox full of specialized tools, functions let you build reusabl
     id: 'conditionals',
     title: 'Conditional Expressions',
     order: 9,
-    content: `The primary conditional or branching expression is the \`if\` / \`else if\` / \`else\` expression.
+    content: `Conditional expressions (also called branching expressions) let you make decisions in your program.
+
+For example, here is a conditional expression written in english:
+
+> If the temperature outside is colder than 50 degrees:
+> &nbsp;&nbsp; Wear a coat.
+> Otherwise:
+> &nbsp;&nbsp; Wear shorts and flip-flops.
+
+Here is an illustration that helps to understand the decision we are making:
+
+<div>
+  <img src="/temperature_condition.png" alt="Temperature Condition: if temperature_outside < 50: Wear a coat. else: Wear shorts and flip-flops." />
+</div>
+
+A conditional expression is how we tell the program to consider a situation and then make different decisions based on the situation.
+
+In TypeScript, we can write this as:
+
+\`\`\`typescript
+const temperature_outside: number = Math.floor(Math.random() * 71) + 30; // 30 to 100
+console.log("Temperature outside:", temperature_outside)
+
+if (temperature_outside < 50) {
+  console.log("Wear a coat.")
+} else {
+  console.log("Wear shorts and flip-flops.")
+}
+\`\`\`
+
+## \`nr: if\` / \`nr: else if\` / \`nr: else\` Expressions
+
+The way we can make decisions in our TypeScript programs is to use \`nr: if\` / \`nr: else if\` / \`nr: else\` expressions.
 
 There are three variations:
 
-* \`if\`
-   * \`if (i_am_hungry) { console.log("I'm starving!"); }\`
-* \`if\` / \`else\`
-   * \`if (i_am_hungry) { console.log("I'm starving!"); } else { console.log("I am full."); }\`
-* \`if\` / \`else if\` / \`else\`
-   * \`if (age < 5) { console.log("You are younger than five years old."); } else if (age < 10) { console.log("You are five to nine years old."); } else { console.log("You are ten or older"); }\`
+### \`nr: if\` expressions
 
-In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
+Simple \`nr: if\` expressions look like this:
+
+\`\`\`typescript
+nr:
+if (<condition>) {
+  <block of code>
+}
+\`\`\`
+
+For example:
+
+\`\`\`typescript
+const isNight: boolean = true
+if (isNight) {
+  console.log("Turn on the night light.")
+}
+\`\`\`
+
+An \`nr: if\` expression runs a block of code when the condition is \`nr: true\`. If the condition is \`nr: false\`, the block of code is skipped.
+
+### \`nr: if / else\` expressions
+
+An \`nr: if / else\` expression looks like this:
+
+\`\`\`typescript
+nr:
+if (<condition>) {
+  <block of code>
+} else {
+  <block of code>
+}
+\`\`\`
+
+For example:
+
+\`\`\`typescript
+const isNight: boolean = true
+if (isNight) {
+  console.log("Turn on the night light.")
+} else {
+  console.log("Turn off the night light.")
+}
+\`\`\`
+
+An \`nr: if / else\` expression runs the first block of code when the condition is \`nr: true\`. If the condition is \`nr: false\`, the second block of code is run.
+
+Only one of the blocks of code will run, and then the if/else expression is finished.
+
+Whatever code comes after the if/else expression is run next.
+
+### \`nr: if / else if / else\` expressions
+
+An \`nr: if / else if / else\` expression looks like this:
+
+\`\`\`typescript
+nr:
+if (<condition>) {
+  <block of code>
+} else if (<condition>) {
+  <block of code>
+} else {
+  <block of code>
+}
+\`\`\`
+
+For example:
+
+\`\`\`typescript
+const temperatureInTheHouse: number = 70
+if (temperatureInTheHouse <= 65) {
+  console.log("Brrr. It's cold! Turn on the heater!")
+} else if (temperatureInTheHouse > 65 && temperatureInTheHouse < 78) {
+  console.log("It's comfortable. We don't need to turn on the air conditioner or the heater.")
+} else {
+  console.log("It's hot! Turn on the air conditioner!")
+}
+\`\`\`
+
+An \`nr: if / else if / else\` expression runs the first block of code when the first condition is \`nr: true\`.
+If the first condition is \`nr: false\`, then we don't run the first block of code, and instead we consider the second condition (the \`else if\` condition). If the second condition is \`nr: true\`, then we run the second block of code.
+If the second condition is \`nr: false\`, then we don't run the first or second block of code, and instead we run the last block of code (the \`else\` condition).
+
+Only one of the blocks of code will run, and then the if/else if/else expression is finished.
+Whatever code comes after the if/else if/else expression is run next.
+
+
+### Special rules in TypeScript
+
+TypeScript (like JavaScript) has specific rules about how we must write \`nr: if\`, \`nr: else if\`, and \`nr: else\` expressions (conditional expressions):
+
+- Conditions go inside parentheses: \`nr: if (condition) { ... }\`.
+- Code blocks go inside curly braces: \`nr: { ... }\`.
+- There are no colons at the end of the \`nr: if\`, \`nr: else if\`, or \`nr: else\` lines.
+- Indentation is not required by the language but is strongly recommended for readability.
+- Each condition should be a boolean expression (something that evaluates to \`nr: true\` or \`nr: false\`).
+  - Remember from the Operators section that boolean expressions like \`nr: 4 === 4\` or \`nr: 1 < 5\` or \`nr: 1 === 2\` evaluate to \`nr: true\` or \`nr: false\`).
+- In TypeScript, you can add type annotations to variables used in conditions to make your code clearer (e.g., \`nr: const isNight: boolean = true\`).
+
+
+### Example: Hubcap of Havoc
+
+Here is another example that demonstrates the conditions we use to play a game:
+
+<div>
+  <img src="/hubcap_of_havoc.png" alt="Hubcap of Havoc" />
+</div>
+
+In this game, a lucky contestant spins the Hubcap of Havoc and does whatever the arrow points to.
+
+To play the Hubcap of Havoc game, we follow these steps:
+
+> Spin the wheel.
+> If the arrow points to 0:
+> &nbsp;&nbsp; We milk a bear.
+> If the arrow points to 1:
+> &nbsp;&nbsp; We adopt a wolverine.
+> If the arrow points to 2:
+> &nbsp;&nbsp; We eat a basketball.
+> If the arrow points to 3:
+> &nbsp;&nbsp; We tickle an electric eel.
+> If the arrow points to 4:
+> &nbsp;&nbsp; We sleep on an ant bed.
+> If the arrow points to 5:
+> &nbsp;&nbsp; We kiss a shark.
+> If the arrow points to 6:
+> &nbsp;&nbsp; We give a lion a bath.
+> If the arrow points to 7:
+> &nbsp;&nbsp; We shave a gorilla.
+
+In TypeScript, we can write this as:
+
+\`\`\`typescript
+function spinTheWheel(): number {
+  return Math.floor(Math.random() * 8) // 0..7
+}
+
+function playHubcapOfHavoc(): void {
+  const spinResult: number = spinTheWheel()
+  if (spinResult === 0) {
+    console.log("Milk a bear.")
+  } else if (spinResult === 1) {
+    console.log("Adopt a wolverine.")
+  } else if (spinResult === 2) {
+    console.log("Eat a basketball.")
+  } else if (spinResult === 3) {
+    console.log("Tickle an electric eel.")
+  } else if (spinResult === 4) {
+    console.log("Sleep on an ant bed.")
+  } else if (spinResult === 5) {
+    console.log("Kiss a shark.")
+  } else if (spinResult === 6) {
+    console.log("Give a lion a bath.")
+  } else if (spinResult === 7) {
+    console.log("Shave a gorilla.")
+  }
+}
+
+console.log("Lucky contestant #1:")
+playHubcapOfHavoc()
+
+console.log("Lucky contestant #2:")
+playHubcapOfHavoc()
+
+console.log("Lucky contestant #3:")
+playHubcapOfHavoc()
+\`\`\`
+
+## One-line conditional expression
+
+Sometimes you want to choose between two values depending on a simple condition, and you want to do it in one line of code to make it easier to understand.
+
+TypeScript (like JavaScript) has a compact form of if/else expression for this case: \`nr: condition ? A : B\`. It evaluates to \`nr: A\` when the condition is \`nr: true\`, and evaluates to \`nr: B\` when the condition is \`nr: false\`.
+
+\`\`\`typescript
+// title: Conditional expression — cond ? A : B
+// description: Pick one value based on a condition.
+let age: number = 8
+---
+age < 10 ? "kid" : "teen"
+---
+(6 % 2 === 0) ? "even" : "odd"
+\`\`\`
+`,
     previousSection: 'functions',
-    nextSection: 'types',
+    nextSection: 'loops',
+  },
+  {
+    id: 'loops',
+    title: 'Loops',
+    order: 10,
+    content: `Loops let you perform the same action multiple times.
+
+For example, here is a simple instruction in English:
+
+> Count down from 3 to 1, saying each number out loud.
+> Then say "Lift off!"
+
+For example, in TypeScript, we could count down using a while loop:
+
+\`\`\`typescript
+let i: number = 3;
+while (i > 0) {
+  console.log(i);
+  i--;
+}
+console.log("Lift off!");
+\`\`\`
+
+There are also other ways to do the same thing. The next section will explain the ways we can write a loop in TypeScript.
+
+## Different kinds of loop
+
+### \`nr: while\` loop
+
+The while loop runs a block of code while a condition stays \`nr: true\`:
+
+\`\`\`typescript
+nr:
+while (condition) {
+  // block of code
+}
+\`\`\`
+
+For example:
+
+\`\`\`typescript
+let i: number = 1;
+while (i <= 10) {
+  console.log(\`Is \${i} even or odd?\`);
+  if (i % 2 === 0) {
+    console.log(\`\${i} is even.\`);
+  } else {
+    console.log(\`\${i} is odd.\`);
+  }
+  console.log("---");
+  i++;
+}
+\`\`\`
+
+#### Infinite loop
+
+If the condition never becomes \`nr: false\`, the loop will run forever. This is called an infinite loop.
+
+Here is an example of an infinite loop (don't try to run it; it will never finish and your browser will freeze and stop responding!):
+
+\`\`\`typescript
+nr:
+while (true) {
+  console.log("This will run forever!");
+}
+\`\`\`
+
+### \`nr: while (true)\` with \`nr: break\`
+
+A \`nr: while (true)\` loop runs a block of code over and over until you break out of it with \`nr: break\`:
+
+\`\`\`typescript
+nr:
+while (true) {
+  // block of code
+  if (condition_to_stop) {
+    break;
+  }
+}
+\`\`\`
+
+If you don't ever break out of a \`nr: while (true)\` loop, it will run forever.
+
+### \`nr: for\` loop
+
+The for loop runs a block of code for a specified number of iterations:
+
+\`\`\`typescript
+nr:
+for (initialization; condition; increment) {
+  // block of code
+}
+\`\`\`
+
+For example:
+
+\`\`\`typescript
+for (let i: number = 4; i < 8; i++) {
+  console.log(i);
+}
+\`\`\`
+
+### \`nr: for...of\` loop
+
+The for...of loop runs a block of code for each item in an iterable (like an array):
+
+\`\`\`typescript
+nr:
+for (const item of iterable) {
+  // block of code
+}
+\`\`\`
+
+For example:
+
+\`\`\`typescript
+const fruits: string[] = ["apple", "banana", "cherry"];
+for (const fruit of fruits) {
+  console.log(fruit);
+}
+\`\`\`
+
+### Special rules in TypeScript
+
+- \`nr: break\` exits the loop immediately; \`nr: continue\` skips to the next iteration.
+- \`nr: for...in\` loops over object keys; \`nr: for...of\` loops over iterable values.
+- TypeScript provides type safety for loop variables and iterables.
+
+## Iteration
+
+One of the most common patterns in any programming language is to loop through a collection of items and perform some action on each item.
+
+For example:
+
+\`\`\`typescript
+const names: string[] = ["Alice", "Bob", "Charlie"];
+let i: number = 0;
+while (i < names.length) {
+  const name: string = names[i];
+  console.log(\`Hello, \${name}!\`);
+  i++;
+}
+\`\`\`
+
+This pattern of looping through a collection of items and performing some action on each item is called iteration.
+
+Most programming languages have features that make it easy to iterate through a collection without using a manual index.
+
+For example:
+
+\`\`\`typescript
+const names: string[] = ["Alice", "Bob", "Charlie"];
+for (const name of names) {
+  console.log(\`Hello, \${name}!\`);
+}
+\`\`\`
+
+### Transforming a collection
+
+Another very common pattern is to transform a collection of items into another collection of items.
+
+For example, you can use a loop to transform an array of items into another array of items:
+
+\`\`\`typescript
+// title: Transforming an array of items into another array with a loop
+const names: string[] = ["Alice", "Bob", "Charlie"];
+let i: number = 0;
+const upperCaseNames: string[] = [];
+while (i < names.length) {
+  const name: string = names[i];
+  upperCaseNames.push(name.toUpperCase());
+  i++;
+}
+upperCaseNames;
+\`\`\`
+
+Instead of using a loop to transform one array into another array, we can use the \`nr: map\` method:
+
+\`\`\`typescript
+// title: Transforming an array of items into another array with map
+const names: string[] = ["Alice", "Bob", "Charlie"];
+const upperCaseNames: string[] = names.map((name: string) => name.toUpperCase());
+upperCaseNames;
+\`\`\`
+
+### Filtering a collection
+
+When we want to pick out certain items from a collection, we call that filtering.
+
+For example, if we say "pick out all the red M&Ms from the bag", we are filtering the M&Ms by color:
+- we are selecting the red M&Ms
+
+We can filter a collection with a loop by creating a new collection and adding only the items from the original collection that match our condition:
+
+For example:
+
+\`\`\`typescript
+// title: Filtering an array of items with a loop
+const names: string[] = ["Alice", "Bill", "Bob", "Charlie"];
+const namesThatStartWithUpperCaseB: string[] = [];
+for (const name of names) {
+  if (name.startsWith("B")) {
+    namesThatStartWithUpperCaseB.push(name);
+  }
+}
+namesThatStartWithUpperCaseB;
+\`\`\`
+
+Instead of using a loop, we can use the \`nr: filter\` method to grab only the items that match a condition:
+
+\`\`\`typescript
+// title: Filtering an array of items with filter
+const names: string[] = ["Alice", "Bill", "Bob", "Charlie"];
+const namesThatStartWithUpperCaseB: string[] = names.filter((name: string) => name.startsWith("B"));
+namesThatStartWithUpperCaseB;
+\`\`\`
+
+We can also filter to grab everything except the items that match a condition:
+
+\`\`\`typescript
+// title: Rejecting items with filter
+const names: string[] = ["Alice", "Bob", "Charlie"];
+const namesThatDoNotStartWithUpperCaseB: string[] = names.filter((name: string) => !name.startsWith("B"));
+namesThatDoNotStartWithUpperCaseB;
+\`\`\`
+
+### Searching for an item in a collection
+
+We can use a loop to search for an item in a collection, but there are built-in methods that make it easy in TypeScript.
+
+For example, if we have an array of numbers and we want to find the first number greater than 100, we could use a loop to do that, like this:
+
+\`\`\`typescript
+// title: Searching for an item in a collection with a loop
+const numbers: number[] = [5, 80, 138, 1, 36, 101];
+let i: number = 0;
+let firstNumberGreaterThan100: number | null = null;
+while (i < numbers.length) {
+  const number: number = numbers[i];
+  if (number > 100) {
+    firstNumberGreaterThan100 = number;
+    break;
+  }
+  i++;
+}
+firstNumberGreaterThan100;
+\`\`\`
+
+Instead of a loop, we can use \`nr: find\` to find the first item that matches a condition:
+
+\`\`\`typescript
+// title: Searching for an item in a collection with find
+const numbers: number[] = [5, 80, 138, 1, 36, 101];
+const firstNumberGreaterThan100: number | undefined = numbers.find((number: number) => number > 100);
+firstNumberGreaterThan100;
+\`\`\`
+
+`,
+    previousSection: 'conditionals',
+    nextSection: 'next-steps',
   },
   {
     id: 'next-steps',

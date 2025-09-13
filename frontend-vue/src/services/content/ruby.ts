@@ -389,7 +389,7 @@ You now know the common operators (binary and unary) and where Ruby adds extras;
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 10,
+    order: 11,
     content: `A type is a set of values that we give a name to.
 
 We can name a type anything we want. For example:
@@ -497,7 +497,7 @@ Ruby has a bunch of built in classes:
 * \`nr: Set\`
 * and many more
 `,
-    previousSection: 'conditionals',
+    previousSection: 'loops',
     nextSection: 'next-steps',
   },
   {
@@ -1117,50 +1117,484 @@ Like having a toolbox full of specialized tools, functions let you build reusabl
     id: 'conditionals',
     title: 'Conditional Expressions',
     order: 9,
-    content: `The primary conditional or branching expression is the \`if\` / \`elsif\` / \`else\` expression.
+    content: `Conditional expressions (also called branching expressions) let you make decisions in your program.
+
+For example, here is a conditional expression written in english:
+
+> If the temperature outside is colder than 50 degrees:
+> &nbsp;&nbsp; Wear a coat.
+> Otherwise:
+> &nbsp;&nbsp; Wear shorts and flip-flops.
+
+Here is an illustration that helps to understand the decision we are making:
+
+<div>
+  <img src="/temperature_condition.png" alt="Temperature Condition: if temperature_outside < 50: Wear a coat. else: Wear shorts and flip-flops." />
+</div>
+
+A conditional expression is how we tell the program to consider a situation and then make different decisions based on the situation.
+
+In Ruby, we can write this as:
+
+\`\`\`ruby
+temperature_outside = rand(30..100)
+puts "Temperature outside: #{temperature_outside}"
+
+if temperature_outside < 50
+  puts "Wear a coat."
+else
+  puts "Wear shorts and flip-flops."
+end
+\`\`\`
+
+## \`nr: if\` / \`nr: elsif\` / \`nr: else\` Expressions
+
+The way we can make decisions in our Ruby programs is to use \`nr: if\` / \`nr: elsif\` / \`nr: else\` expressions.
 
 There are three variations:
 
-* \`if\`
-  * The \`if\` keyword is always followed by a boolean expression - an expression that evaluates to \`true\` or \`false\`.
-  * When the boolean expression evaluates to \`true\`, the body of the \`if\` expression is evaluated; otherwise the body is skipped.
+### \`nr: if\` expressions
+
+Simple \`nr: if\` expressions look like this:
 
 \`\`\`ruby
-if i_am_hungry
-  puts "I'm starving!"
+nr:
+if <condition>
+  <block of code>
 end
 \`\`\`
 
-* \`if\` / \`else\`
+For example:
 
 \`\`\`ruby
-if i_am_hungry
-  puts "I'm starving!"
+is_night = true
+if is_night
+  puts "Turn on the night light."
+end
+\`\`\`
+
+An \`nr: if\` expression runs a block of code when the condition is \`nr: true\`. If the condition is \`nr: false\`, the block of code is skipped.
+
+### \`nr: if / else\` expressions
+
+An \`nr: if / else\` expression looks like this:
+
+\`\`\`ruby
+nr:
+if <condition>
+  <block of code>
 else
-  puts "I am full."
+  <block of code>
 end
 \`\`\`
 
-* \`if\` / \`elsif\` / \`else\`
+For example:
 
 \`\`\`ruby
-if age < 5
-  puts "You are younger than five years old."
-elsif age < 10
-  puts "You are five to nine years old."
+is_night = true
+if is_night
+  puts "Turn on the night light."
 else
-  puts "You are ten or older"
+  puts "Turn off the night light."
 end
 \`\`\`
 
-In each case, the \`if\` expression is always followed by an expression that evaluates to a boolean value.`,
+An \`nr: if / else\` expression runs the first block of code when the condition is \`nr: true\`. If the condition is \`nr: false\`, the second block of code is run.
+
+Only one of the blocks of code will run, and then the if/else expression is finished.
+
+Whatever code comes after the if/else expression is run next.
+
+### \`nr: if / elsif / else\` expressions
+
+An \`nr: if / elsif / else\` expression looks like this:
+
+\`\`\`ruby
+nr:
+if <condition>
+  <block of code>
+elsif <condition>
+  <block of code>
+else
+  <block of code>
+end
+\`\`\`
+
+For example:
+
+\`\`\`ruby
+temperature_in_the_house = 70
+if temperature_in_the_house <= 65
+  puts "Brrr. It's cold! Turn on the heater!"
+elsif temperature_in_the_house > 65 && temperature_in_the_house < 78
+  puts "It's comfortable. We don't need to turn on the air conditioner or the heater."
+else
+  puts "It's hot! Turn on the air conditioner!"
+end
+\`\`\`
+
+An \`nr: if / elsif / else\` expression runs the first block of code when the first condition is \`nr: true\`.
+If the first condition is \`nr: false\`, then we don't run the first block of code, and instead we consider the second condition (the \`nr: elsif\` condition). If the second condition is \`nr: true\`, then we run the second block of code.
+If the second condition is \`nr: false\`, then we don't run the first or second block of code, and instead we run the last block of code (the \`nr: else\` condition).
+
+Only one of the blocks of code will run, and then the if/elsif/else expression is finished.
+Whatever code comes after the if/elsif/else expression is run next.
+
+
+### Special rules in Ruby
+
+Ruby has specific rules about how we write \`nr: if\`, \`nr: elsif\`, and \`nr: else\` expressions (conditional expressions):
+
+- Parentheses around the condition are optional: \`nr: if cond\` or \`nr: if (cond)\`.
+- Code blocks are indented for readability and must be closed with \`nr: end\`.
+- Use \`nr: elsif\` (no second "e") — not \`nr: elif\` or \`nr: else if\`.
+- Ruby evaluates “truthiness”: only \`nr: false\` and \`nr: nil\` are falsey; everything else is truthy.
+- Each condition should be something that Ruby can evaluate to truthy or falsey (often a boolean expression like \`nr: 4 == 4\`, \`nr: 1 < 5\`, or \`nr: 1 == 2\`).
+
+
+### Example: Hubcap of Havoc
+
+Here is another example that demonstrates the conditions we use to play a game:
+
+<div>
+  <img src="/hubcap_of_havoc.png" alt="Hubcap of Havoc" />
+</div>
+
+In this game, a lucky contestant spins the Hubcap of Havoc and does whatever the arrow points to.
+
+To play the Hubcap of Havoc game, we follow these steps:
+
+> Spin the wheel.
+> If the arrow points to 0:
+> &nbsp;&nbsp; We milk a bear.
+> If the arrow points to 1:
+> &nbsp;&nbsp; We adopt a wolverine.
+> If the arrow points to 2:
+> &nbsp;&nbsp; We eat a basketball.
+> If the arrow points to 3:
+> &nbsp;&nbsp; We tickle an electric eel.
+> If the arrow points to 4:
+> &nbsp;&nbsp; We sleep on an ant bed.
+> If the arrow points to 5:
+> &nbsp;&nbsp; We kiss a shark.
+> If the arrow points to 6:
+> &nbsp;&nbsp; We give a lion a bath.
+> If the arrow points to 7:
+> &nbsp;&nbsp; We shave a gorilla.
+
+In Ruby, we can write this as:
+
+\`\`\`ruby
+def spin_the_wheel
+  rand(0..7)
+end
+
+def play_hubcap_of_havoc
+  spin_result = spin_the_wheel
+  if spin_result == 0
+    puts "Milk a bear."
+  elsif spin_result == 1
+    puts "Adopt a wolverine."
+  elsif spin_result == 2
+    puts "Eat a basketball."
+  elsif spin_result == 3
+    puts "Tickle an electric eel."
+  elsif spin_result == 4
+    puts "Sleep on an ant bed."
+  elsif spin_result == 5
+    puts "Kiss a shark."
+  elsif spin_result == 6
+    puts "Give a lion a bath."
+  elsif spin_result == 7
+    puts "Shave a gorilla."
+  end
+end
+
+puts "Lucky contestant #1:"
+play_hubcap_of_havoc
+
+puts "Lucky contestant #2:"
+play_hubcap_of_havoc
+
+puts "Lucky contestant #3:"
+play_hubcap_of_havoc
+\`\`\`
+
+## One-line conditional expression
+
+Sometimes you want to choose between two values depending on a simple condition, and you want to do it in one line of code to make it easier to understand.
+
+Ruby has a compact form of if/else expression for this case: \`nr: condition ? A : B\`. It evaluates to \`nr: A\` when the condition is \`nr: true\`, and evaluates to \`nr: B\` when the condition is \`nr: false\`.
+
+\`\`\`ruby
+# title: Conditional expression — cond ? A : B
+# description: Pick one value based on a condition.
+age = 8
+---
+age < 10 ? "kid" : "teen"
+---
+(6 % 2 == 0) ? "even" : "odd"
+\`\`\`
+`,
     previousSection: 'functions',
+    nextSection: 'loops',
+  },
+  {
+    id: 'loops',
+    title: 'Loops',
+    order: 10,
+    content: `Loops let you perform the same action multiple times.
+
+For example, here is a simple instruction in English:
+
+> Count down from 3 to 1, saying each number out loud.
+> Then say "Lift off!"
+
+For example, in Ruby, we could count down using a while loop:
+
+\`\`\`ruby
+i = 3
+while i > 0
+  puts i
+  i -= 1
+end
+puts "Lift off!"
+\`\`\`
+
+There are also other ways to do the same thing. The next section will explain the ways we can write a loop in Ruby.
+
+## Different kinds of loop
+
+### \`nr: while\` loop
+
+The while loop runs a block of code while a condition stays \`nr: true\`:
+
+\`\`\`ruby
+nr:
+while <condition>
+  <block of code>
+end
+\`\`\`
+
+For example:
+
+\`\`\`ruby
+i = 1
+while i <= 10
+  puts "Is #{i} even or odd?"
+  if i % 2 == 0
+    puts "#{i} is even."
+  else
+    puts "#{i} is odd."
+  end
+  puts "---"
+  i += 1
+end
+\`\`\`
+
+#### Infinite loop
+
+If the condition never becomes \`nr: false\`, the loop will run forever. This is called an infinite loop.
+
+Here is an example of an infinite loop (don't try to run it; it will never finish and your browser will freeze and stop responding!):
+
+\`\`\`ruby
+nr:
+while true
+  puts "This will run forever!"
+end
+\`\`\`
+
+### \`nr: loop do\` ... \`nr: end\`
+
+The \`nr: loop do ... end\` loop runs a block of code over and over until you break out of it with \`nr: break\` or \`nr: next\`:
+
+\`\`\`ruby
+nr:
+loop do
+  <block of code>
+  break if <condition to stop>
+end
+\`\`\`
+
+If you don't ever break out of a \`nr: loop do ... end\` loop, it will run forever.
+
+Here is an example of an infinite loop (don't try to run it; it will never finish and your browser will freeze and stop responding!):
+
+\`\`\`ruby
+nr:
+loop do
+  puts "This will run forever!"
+end
+\`\`\`
+
+### \`nr: for\` loop
+
+The for loop runs a block of code for each item in a collection or range:
+
+\`\`\`ruby
+nr:
+for item in <collection or range>
+  <block of code>
+end
+\`\`\`
+
+For example:
+
+\`\`\`ruby
+for i in 4..7
+  puts i
+end
+\`\`\`
+
+## Special rules in Ruby
+
+- \`nr: break\` exits the loop immediately; \`nr: next\` skips to the next iteration; \`nr: redo\` restarts the current iteration.
+
+## Iteration
+
+One of the most common patterns in any programming language is to loop through a collection of items and perform some action on each item.
+
+For example:
+
+\`\`\`ruby
+names = ["Alice", "Bob", "Charlie"]
+i = 0
+while i < names.length
+  name = names[i]
+  puts "Hello, #{name}!"
+  i += 1
+end
+\`\`\`
+
+This pattern of looping through a collection of items and performing some action on each item is called iteration.
+
+Most programming languages have features that make it easy to iterate through a collection without using a loop.
+
+For example:
+
+\`\`\`ruby
+names = ["Alice", "Bob", "Charlie"]
+names.each do |name|
+  puts "Hello, #{name}!"
+end
+\`\`\`
+
+Notice how by using the special \`nr: each\` method, we can iterate through the collection of names more easily than with a loop. You don't have to worry about counting the number of items in the collection, and you don't have to worry about calculating the index of the item in the collection.
+
+### Transforming a collection
+
+Another very common pattern is to transform a collection of items into another collection of items.
+
+For example, you can use a loop to transform an array of items into another array of items:
+
+\`\`\`ruby
+# title: Transforming an array of items into another array of items with a loop
+names = ["Alice", "Bob", "Charlie"]
+i = 0
+upper_case_names = []
+while i < names.length
+  name = names[i]
+  upper_case_names << name.upcase
+  i += 1
+end
+upper_case_names
+\`\`\`
+
+Instead of using a loop to transform one array into another array, we can use a special method called \`nr: map\`:
+
+\`\`\`ruby
+# title: Transforming an array of items into another array of items with map
+names = ["Alice", "Bob", "Charlie"]
+upper_case_names = names.map { |name| name.upcase }
+upper_case_names
+\`\`\`
+
+### Filtering a collection
+
+When we want to pick out certain items from a collection, we call that filtering.
+
+For example, if we say "pick out all the red M&Ms from the bag", we are filtering the M&Ms by color:
+- we are selecting the red M&Ms
+- we are also rejecting the blue, green, yellow, and orange M&Ms - we are not selecting them
+
+We can filter a collection with a loop by creating a new collection and adding only the items from the original collection that match our condition:
+
+For example:
+
+\`\`\`ruby
+# title: Filtering an array of items with a loop
+names = ["Alice", "Bill", "Bob", "Charlie"]
+names_that_start_with_upper_case_b = []
+i = 0
+while i < names.length
+  name = names[i]
+  if name.start_with?("B")
+    names_that_start_with_upper_case_b << name
+  end
+  i += 1
+end
+names_that_start_with_upper_case_b
+\`\`\`
+
+Instead of using a loop, we can use the special \`nr: select\` method to grab only the items that match a condition:
+
+\`\`\`ruby
+# title: Filtering an array of items with select
+names = ["Alice", "Bill", "Bob", "Charlie"]
+names_that_start_with_upper_case_b = names.select { |name| name.start_with?("B") }
+names_that_start_with_upper_case_b
+\`\`\`
+
+We can also use the special \`nr: reject\` method to grab everything *except* the items that match a condition:
+
+\`\`\`ruby
+# title: Filtering an array of items with reject
+names = ["Alice", "Bob", "Charlie"]
+names_that_do_not_start_with_upper_case_b = names.reject { |name| name.start_with?("B") }
+names_that_do_not_start_with_upper_case_b
+\`\`\`
+
+### Searching for an item in a collection
+
+We can use a loop to search for an item in a collection, but there is a special method called \`nr: find\` that makes it easier to do that.
+
+For example, if we have a list of numbers and we want to find the first number greater than 100, we could use a loop to do that, like this:
+
+\`\`\`ruby
+# title: Searching for an item in a collection with a loop
+numbers = [5, 80, 138, 1, 36, 101]
+i = 0
+first_number_greater_than_100 = nil
+while i < numbers.length
+  number = numbers[i]
+  if number > 100
+    first_number_greater_than_100 = number
+    break
+  end
+  i += 1
+end
+first_number_greater_than_100
+\`\`\`
+
+Instead of a loop, we can use the special \`nr: find\` method to find the first item that matches a condition:
+
+\`\`\`ruby
+# title: Searching for an item in a collection with find
+numbers = [5, 80, 138, 1, 36, 101]
+first_number_greater_than_100 = numbers.find { |number| number > 100 }
+first_number_greater_than_100
+\`\`\`
+
+
+`,
+    previousSection: 'conditionals',
     nextSection: 'types',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 11,
+    order: 12,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice

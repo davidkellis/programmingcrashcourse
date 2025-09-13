@@ -1000,15 +1000,112 @@ else:
   print("Wear shorts and flip-flops.")
 \`\`\`
 
-## Example: Hubcap of Havoc
+## \`nr: if\` / \`nr: elif\` / \`nr: else\` Expressions
+
+The way we can make decisions in our Python programs is to use \`nr: if\` / \`nr: elif\` / \`nr: else\` expressions.
+
+There are three variations:
+
+### \`nr: if\` expressions
+
+Simple \`nr: if\` expressions look like this:
+
+\`\`\`python
+nr:
+if <condition>:
+  <block of code>
+\`\`\`
+
+For example:
+
+\`\`\`python
+is_night = True
+if is_night:
+  print("Turn on the night light.")
+\`\`\`
+
+An \`nr: if\` expression runs a block of code when the condition is \`nr: True\`. If the condition is \`nr: False\`, the block of code is skipped.
+
+### \`nr: if / else\` expressions
+
+An \`nr: if / else\` expression looks like this:
+
+\`\`\`python
+nr:
+if <condition>:
+  <block of code>
+else:
+  <block of code>
+\`\`\`
+
+For example:
+
+\`\`\`python
+is_night = True
+if is_night:
+  print("Turn on the night light.")
+else:
+  print("Turn off the night light.")
+\`\`\`
+
+An \`nr: if / else\` expression runs the first block of code when the condition is \`nr: True\`. If the condition is \`nr: False\`, the second block of code is run.
+
+Only one of the blocks of code will run, and then the if/else expression is finished.
+
+Whatever code comes after the if/else expression is run next.
+
+### \`nr: if / elif / else\` expressions
+
+An \`nr: if / elif / else\` expression looks like this:
+
+\`\`\`python
+nr:
+if <condition>:
+  <block of code>
+elif <condition>:
+  <block of code>
+else:
+  <block of code>
+\`\`\`
+
+For example:
+
+\`\`\`python
+temperature_in_the_house = 70
+if temperature_in_the_house <= 65:
+  print("Brrr. It's cold! Turn on the heater!")
+elif temperature_in_the_house > 65 and temperature_in_the_house < 78:
+  print("It's comfortable. We don't need to turn on the air conditioner or the heater.")
+else:
+  print("It's hot! Turn on the air conditioner!")
+\`\`\`
+
+An \`nr: if / elif / else\` expression runs the first block of code when the first condition is \`nr: True\`.
+If the first condition is \`nr: False\`, then we don't run the first block of code, and instead we consider the second condition (the \`elif\` condition). If the second condition is \`nr: True\`, then we run the second block of code.
+If the second condition is \`nr: False\`, then we don't run the first or second second block of code, and instead we run the last block of code (the \`else\` condition).
+
+Only one of the blocks of code will run, and then the if/elif/else expression is finished.
+Whatever code comes after the if/elif/else expression is run next.
+
+
+
+### Special rules in Python
+
+Python has special rules about how we must write \`nr: if\`, \`nr: elif\`, and \`nr: else\` expressions (conditional expressions):
+
+- The line with \`nr: if\`, \`nr: elif\`, or \`nr: else\` must end with a colon \`nr: :\`.
+- The block of code that should run when one condition is true must be indented underneath the \`nr: if\`, \`nr: elif\`, or \`nr: else\` line (that indented part is called the “block” or “body”).
+- Each condition must be a boolean expression (something that evaluates to \`nr: True\` or \`nr: False\`).
+  - Remember from the Operators section that boolean expressions like \`4 == 4\` or \`1 < 5\` or \`1 == 2\` evaluate to \`nr: True\` or \`nr: False\`.
+
+
+### Example: Hubcap of Havoc
 
 Here is another example that demonstrates the conditions we use to play a game:
 
 <div>
   <img src="/hubcap_of_havoc.png" alt="Hubcap of Havoc" />
 </div>
-
-To illustrate this logic with a flowchart, we might write it as:
 
 In this game, a lucky contestant spins the Hubcap of Havoc and does whatever the arrow points to.
 
@@ -1067,66 +1164,6 @@ print("Lucky contestant #3:")
 play_hubcap_of_havoc()
 \`\`\`
 
-## Three primary variations of conditional expression:
-
-- \`nr: if\` — run a block of code when the condition is \`nr: True\`.
-- \`nr: if / else\` — run the first block of code when the condition is \`nr: True\`, run the second block of code when the condition is \`nr: False\`.
-- \`nr: if / elif / else\` — this variation lets us make decisions based on multiple conditions.
-
-### Special rules in Python
-
-Python has special rules about how we must write \`nr: if\`, \`nr: elif\`, and \`nr: else\` expressions (conditional expressions):
-
-- The line with \`nr: if\`, \`nr: elif\`, or \`nr: else\` must end with a colon \`nr: :\`.
-- The block of code that should run when one condition is true must be indented underneath the \`nr: if\`, \`nr: elif\`, or \`nr: else\` line (that indented part is called the “block” or “body”).
-- Each condition must be a boolean expression (something that evaluates to \`nr: True\` or \`nr: False\`).
-  - Remember from the Operators section that boolean expressions like \`4 == 4\` or \`1 < 5\` or \`1 == 2\` evaluate to \`nr: True\` or \`nr: False\`.
-
-### 1) \`nr: if\` expression
-
-This keeps your original example, cleaned up and runnable:
-
-\`\`\`python
-# title: if — run only when the condition is True
-# description: The body executes when the test is True; otherwise it is skipped.
-i_am_hungry = True
----
-if i_am_hungry:
-  print("I'm starving!")
-\`\`\`
-
-### 2) \`nr: if\` / \`nr: else\` expression
-
-Choose between two paths — also your original example, tidied:
-
-\`\`\`python
-# title: if/else — choose one of two blocks
-# description: Exactly one branch runs.
-i_am_hungry = False
----
-if i_am_hungry:
-  print("I'm starving!")
-else:
-  print("I am full.")
-\`\`\`
-
-### 3) \`nr: if\` / \`nr: elif\` / \`nr: else\` expression
-
-Pick the first matching case — your age example, clarified:
-
-\`\`\`python
-# title: if/elif/else — first match wins
-# description: Conditions are checked top-to-bottom; only one block runs.
-age = 8
----
-if age < 5:
-  print("You are younger than five years old.")
-elif age < 10:
-  print("You are five to nine years old.")
-else:
-  print("You are ten or older.")
-\`\`\`
-
 ## One-line conditional expression
 
 Sometimes you want to choose between two values depending on a simple condition, and you want to do it in one line of code to make it easier to understand.
@@ -1151,13 +1188,238 @@ snack
   - So, we want to write \`nr: if x == 5:\` to compare \`nr: x\` to \`nr: 5\`, not \`nr: if x = 5:\`.
 `,
     previousSection: 'functions',
+    nextSection: 'loops',
+  },
+  {
+    id: 'loops',
+    title: 'Loops',
+    order: 10,
+    content: `
+Loops let you perform the same action multiple times.
+
+For example, here is a simple instruction in English:
+
+> Count down from 3 to 1, saying each number out loud.
+> Then say "Lift off!"
+
+For example, in Python, we could count down using a while loop:
+
+\`\`\`python
+i = 3
+while i > 0:
+  print(i)
+  i -= 1
+print("Lift off!")
+\`\`\`
+
+There are also other ways to do the same thing. The next section will explain the ways we can write a loop in Python.
+
+## Different kinds of loop
+
+### \`nr: while\` loop
+
+The while loop runs a block of code while a condition stays \`nr: True\`:
+
+\`\`\`python
+nr:
+while <condition>:
+  <block of code>
+\`\`\`
+
+For example:
+
+\`\`\`python
+i = 1
+while i <= 10:
+  print(f"Is {i} even or odd?")
+  if i % 2 == 0:
+    print(f"{i} is even.")
+  else:
+    print(f"{i} is odd.")
+  print("---")
+  i += 1
+\`\`\`
+
+#### Infinite loop
+
+If the condition never becomes \`nr: False\`, the loop will run forever. This is called an infinite loop.
+
+Here is an example of an infinite loop (don't try to run it; it will never finish and your browser will freeze and stop responding!):
+
+\`\`\`python
+nr:
+while True:
+  print("This will run forever!")
+\`\`\`
+
+### \`nr: while True\` with \`nr: break\`
+
+A \`nr: while True\` loop runs a block of code over and over until you break out of it with \`nr: break\`:
+
+\`\`\`python
+nr:
+while True:
+  <block of code>
+  if <condition to stop>:
+    break
+\`\`\`
+
+If you don't ever break out of a \`nr: while True\` loop, it will run forever.
+
+### \`nr: for\` loop
+
+The for loop runs a block of code for each item in a collection (an iterable):
+
+\`\`\`python
+nr:
+for item in <iterable>:
+  <block of code>
+\`\`\`
+
+For example:
+
+\`\`\`python
+for i in range(4, 8):
+  print(i)
+\`\`\`
+
+### Special rules in Python
+
+- \`nr: break\` exits the loop immediately; \`nr: continue\` skips to the next iteration.
+- \`nr: pass\` does nothing; you can use it as a placeholder inside loops.
+
+## Iteration
+
+One of the most common patterns in any programming language is to loop through a collection of items and perform some action on each item.
+
+For example:
+
+\`\`\`python
+names = ["Alice", "Bob", "Charlie"]
+i = 0
+while i < len(names):
+  name = names[i]
+  print(f"Hello, {name}!")
+  i += 1
+\`\`\`
+
+This pattern of looping through a collection of items and performing some action on each item is called iteration.
+
+Most programming languages have features that make it easy to iterate through a collection without using a manual index.
+
+For example:
+
+\`\`\`python
+names = ["Alice", "Bob", "Charlie"]
+for name in names:
+  print(f"Hello, {name}!")
+\`\`\`
+
+### Transforming a collection
+
+Another very common pattern is to transform a collection of items into another collection of items.
+
+For example, you can use a loop to transform a list of items into another list of items:
+
+\`\`\`python
+# title: Transforming a list of items into another list with a loop
+names = ["Alice", "Bob", "Charlie"]
+i = 0
+upper_case_names = []
+while i < len(names):
+  name = names[i]
+  upper_case_names.append(name.upper())
+  i += 1
+upper_case_names
+\`\`\`
+
+Instead of using a loop to transform one list into another list, we can use a list comprehension:
+
+\`\`\`python
+# title: Transforming a list of items into another list with a comprehension
+names = ["Alice", "Bob", "Charlie"]
+upper_case_names = [name.upper() for name in names]
+upper_case_names
+\`\`\`
+
+### Filtering a collection
+
+When we want to pick out certain items from a collection, we call that filtering.
+
+For example, if we say "pick out all the red M&Ms from the bag", we are filtering the M&Ms by color:
+- we are selecting the red M&Ms
+
+We can filter a collection with a loop by creating a new collection and adding only the items from the original collection that match our condition:
+
+For example:
+
+\`\`\`python
+# title: Filtering a list of items with a loop
+names = ["Alice", "Bill", "Bob", "Charlie"]
+names_that_start_with_upper_case_b = []
+for name in names:
+  if name.startswith("B"):
+    names_that_start_with_upper_case_b.append(name)
+names_that_start_with_upper_case_b
+\`\`\`
+
+Instead of using a loop, we can use a list comprehension to grab only the items that match a condition:
+
+\`\`\`python
+# title: Filtering a list of items with a comprehension
+names = ["Alice", "Bill", "Bob", "Charlie"]
+names_that_start_with_upper_case_b = [name for name in names if name.startswith("B")]
+names_that_start_with_upper_case_b
+\`\`\`
+
+We can also use a comprehension to grab everything except the items that match a condition:
+
+\`\`\`python
+# title: Rejecting items with a comprehension
+names = ["Alice", "Bob", "Charlie"]
+names_that_do_not_start_with_upper_case_b = [name for name in names if not name.startswith("B")]
+names_that_do_not_start_with_upper_case_b
+\`\`\`
+
+### Searching for an item in a collection
+
+We can use a loop to search for an item in a collection, but there is a pattern using nr: next with a generator expression that makes it easy in Python.
+
+For example, if we have a list of numbers and we want to find the first number greater than 100, we could use a loop to do that, like this:
+
+\`\`\`python
+# title: Searching for an item in a collection with a loop
+numbers = [5, 80, 138, 1, 36, 101]
+i = 0
+first_number_greater_than_100 = None
+while i < len(numbers):
+  number = numbers[i]
+  if number > 100:
+    first_number_greater_than_100 = number
+    break
+  i += 1
+first_number_greater_than_100
+\`\`\`
+
+Instead of a loop, we can use nr: next to find the first item that matches a condition:
+
+\`\`\`python
+# title: Searching for an item in a collection with next(...)
+numbers = [5, 80, 138, 1, 36, 101]
+first_number_greater_than_100 = next((number for number in numbers if number > 100), None)
+first_number_greater_than_100
+\`\`\`
+
+`,
+    previousSection: 'conditionals',
     nextSection: 'types',
   },
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 10,
-    content: `## Sets
+    order: 11,
+    content: `
+## Sets
 A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
 
 In other words, a set is a group of values where every value is different; there cannot be two of anything.
@@ -1333,7 +1595,7 @@ Python has a bunch of built in types:
 * \`nr: dict\` - dictionary (also called a map)
 * and many more
 `,
-    previousSection: 'conditionals',
+    previousSection: 'loops',
     nextSection: 'next-steps',
   },
 ]

@@ -4,17 +4,24 @@
     <div class="toc-rail">
       <div
         class="toc-panel"
-        v-show="tocHover"
-        :class="{ open: tocHover }"
+        :class="{ open: tocOpen }"
         :style="{ top: `${tocTop}px` }"
         role="navigation"
         aria-label="On this page"
-        @mouseenter="tocHover = true"
-        @mouseleave="tocHover = false"
       >
-        <div class="toc-header">On this page</div>
+        <button
+          type="button"
+          class="toc-header"
+          :aria-expanded="tocOpen"
+          aria-controls="toc-list"
+          @click="tocOpen = !tocOpen"
+          title="Toggle table of contents"
+        >
+          <span>On this page</span>
+          <span class="toc-chevron" :class="{ open: tocOpen }" aria-hidden="true"></span>
+        </button>
         <div v-if="headings.length === 0" class="toc-empty">No subsections</div>
-        <ul v-else class="toc-list">
+        <ul v-else class="toc-list" id="toc-list">
           <li
             v-for="h in headings"
             :key="h.id"
@@ -29,12 +36,11 @@
       <!-- Always-visible Notion-like handle to reveal the ToC -->
       <button
         class="toc-handle"
-        v-show="!tocHover"
+        v-show="!tocOpen"
         :style="{ top: `${tocTop}px` }"
         title="On this page"
         aria-label="Open table of contents"
-        @mouseenter="tocHover = true"
-        @click="tocHover = true"
+        @click="tocOpen = true"
       >
         <span class="line line-1"></span>
         <span class="line line-2"></span>
@@ -101,7 +107,7 @@ const inlineSnippetIds = ref<string[]>([])
 type HeadingItem = { id: string; text: string; level: number; top: number }
 const headings = ref<HeadingItem[]>([])
 const activeHeadingId = ref<string>('')
-const tocHover = ref(false)
+const tocOpen = ref(true)
 let scrollListener: ((e: Event) => void) | null = null
 let resizeListener: ((e: Event) => void) | null = null
 let scrollContainer: HTMLElement | null = null
@@ -189,6 +195,50 @@ const getMarkdown = (): MarkdownIt => {
     const language = token.info || ''
     const code = token.content
 
+    // Detect no-run directive at the very start of the fenced block content.
+    // Supported prefixes mirror inline behavior: "norun:", "no-run:", "nr:".
+    const noRunPrefixes = ['norun:', 'no-run:', 'nr:']
+    const escapeHtml = (str: string) =>
+      str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+
+    // Check first non-empty line for a no-run directive
+    const lines = code.split(/\r?\n/)
+    const firstLineRaw = lines[0] ?? ''
+    const firstLine = firstLineRaw.trim()
+    const matchedPrefix = noRunPrefixes.find((p) => firstLine.startsWith(p))
+    const hasNoRun = Boolean(matchedPrefix)
+
+    if (hasNoRun) {
+      // Remove directive and preserve remainder if present on the same line.
+      // If directive is alone on its own line, also skip an optional immediate blank line.
+      let startIdx = 1
+      const remainder = matchedPrefix ? firstLine.slice(matchedPrefix.length).trim() : ''
+      if (!remainder && lines[1] != null && lines[1].trim() === '') startIdx = 2
+      const displayLines = [] as string[]
+      if (remainder) displayLines.push(remainder)
+      displayLines.push(...lines.slice(startIdx))
+      const displayCode = displayLines.join('\n')
+
+      if (import.meta.env.DEV) {
+        try {
+          console.log('[Fence] Rendering plain (no-run) code block', {
+            language,
+            codePreview: displayCode.slice(0, 60),
+          })
+        } catch {}
+      }
+
+      const escaped = escapeHtml(displayCode)
+      const langClass = language ? ` class="language-${language}"` : ''
+      return `<pre class="md-code-block no-run"><code${langClass}>${escaped}</code></pre>`
+    }
+
+    // Default: render Ace editor placeholder for runnable blocks
     const codeId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     codeBlocks.value[codeId] = code
 
@@ -1063,9 +1113,8 @@ const scrollToHeading = (id: string) => {
   // Recompute heading positions right after programmatic scroll to account for
   // any lazy layout shifts so our section detection uses fresh coordinates.
   recomputeHeadingPositions()
-
-  // Hide the panel so the handle reappears
-  tocHover.value = false
+  // Keep the ToC state unchanged after navigating
+  // tocOpen value remains as-is
 
   // Ensure highlight is correct after scroll completes
   window.setTimeout(() => updateActiveHeading(), 100)
@@ -1248,9 +1297,38 @@ const handleCodeBlockClick = (event: Event) => {
 }
 
 .toc-header {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.25rem;
+  margin: 0 0 0.25rem 0;
+  cursor: pointer;
   font-weight: 700;
   color: #111827;
-  margin-bottom: 0.25rem;
+  border-radius: 6px;
+}
+.toc-header:hover {
+  background: #f3f4f6;
+}
+
+.toc-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: #6b7280;
+}
+.toc-chevron::before {
+  content: '▸';
+  line-height: 1;
+}
+.toc-chevron.open::before {
+  content: '▾';
 }
 
 .toc-empty {
@@ -1696,6 +1774,26 @@ const handleCodeBlockClick = (event: Event) => {
   position: relative !important;
   visibility: visible !important;
   box-sizing: border-box !important;
+}
+
+/* Plain markdown code blocks marked as no-run (non-editable, non-runnable) */
+.content-text :deep(pre.md-code-block.no-run) {
+  background: #f8fafc;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0 1.5rem 0;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.content-text :deep(pre.md-code-block.no-run code) {
+  background: transparent;
+  display: block;
+  white-space: pre;
 }
 
 /* Inline code run buttons */

@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Whoops! — a Sorry-style OOP board game</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f6f8ff;
+        --ink: #1c2233;
+        --panel: #fff;
+        --line: #d7dbef;
+        --muted: #6b7290;
+        --accent: #0b6cfb;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Arial;
+      }
+      header {
+        padding: 12px 16px;
+        background: linear-gradient(#fff, #fafbff);
+        border-bottom: 1px solid #eceffd;
+      }
+      h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+      .wrap {
+        display: grid;
+        grid-template-columns: minmax(600px, 1fr) 360px;
+        gap: 16px;
+        padding: 16px;
+      }
+      .board {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 8px;
+        box-shadow: 0 2px 8px #0001;
+      }
+      canvas {
+        width: 600px;
+        height: 600px;
+        border-radius: 8px;
+        display: block;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 2px 8px #0001;
+      }
+      .controls button {
+        margin: 0.25rem 0.25rem 0.25rem 0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 9px;
+        border: 1px solid #d9def4;
+        background: #fff;
+        cursor: pointer;
+      }
+      .controls button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: #0a5fe0;
+      }
+      .controls label {
+        margin-left: 0.5rem;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.4rem;
+        margin: 0.5rem 0 0;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 13px;
+      }
+      .disk {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1px solid #0003;
+        display: inline-block;
+      }
+      .small {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .log {
+        max-height: 520px;
+        overflow: auto;
+        border: 1px solid #eceffd;
+        border-radius: 8px;
+        background: #fcfdff;
+        padding: 8px;
+      }
+      .log p {
+        margin: 0.35rem 0;
+        font-size: 13px;
+        line-height: 1.28;
+      }
+      code {
+        background: #f4f6ff;
+        border: 1px solid #e3e7ff;
+        border-radius: 6px;
+        padding: 0.06rem 0.33rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header><h1>Whoops! — a Sorry-style board game for learning OOP</h1></header>
+
+    <div class="wrap">
+      <div class="board"><canvas id="board" width="600" height="600"></canvas></div>
+      <aside class="panel">
+        <div class="controls">
+          <button id="step" class="primary">Play One Turn</button>
+          <button id="auto">Auto-Play</button>
+          <button id="pause">Pause</button>
+          <button id="reset">Reset</button>
+          <label><input type="checkbox" id="fast" /> fast</label>
+        </div>
+
+        <div class="legend">
+          <div class="chip"><span class="disk" style="background: #e74c3c"></span>Red</div>
+          <div class="chip"><span class="disk" style="background: #2e86de"></span>Blue</div>
+          <div class="chip"><span class="disk" style="background: #2ecc71"></span>Green</div>
+          <div class="chip"><span class="disk" style="background: #f1c40f"></span>Yellow</div>
+        </div>
+
+        <p class="small">
+          Deck: classic distribution — <code>1×5</code>, <code>2,3,4,5,7,8,10,11,12×4</code>, and
+          <code>SORRY!×4</code>.
+          Implemented: start on 1/2; 2 draws one extra card; 4 backward; 10 forward 10 or back 1; 11
+          forward 11 or swap; 12 forward 12; 7 may split; slides on any landing (incl. SORRY!/swap)
+          with bumping; exact count required to
+          enter Home; simple blockades (can’t pass two same-color pawns).
+        </p>
+
+        <h3>Move Log</h3>
+        <div id="log" class="log" role="log" aria-live="polite"></div>
+      </aside>
+    </div>
+
+    <script>
+      /* ===================== constants/util ===================== */
+      const COLORS = { red: '#e74c3c', blue: '#2e86de', green: '#2ecc71', yellow: '#f1c40f' }
+      const ORDER = ['yellow', 'green', 'red', 'blue']
+      const clamp = (n, a, b) => Math.max(a, Math.min(b, n))
+      function shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[a[i], a[j]] = [a[j], a[i]]
+        }
+        return a
+      }
+      function deep(o) {
+        return JSON.parse(JSON.stringify(o))
+      }
+
+      /* ===================== Board (drawing + geometry) ===================== */
+      class Board {
+        constructor(canvas) {
+          this.canvas = canvas
+          this.ctx = canvas.getContext('2d')
+          this.trackCount = 60
+          this.square = 36
+          this.margin = 70
+          this.path = this.computeTrack()
+
+          // Number the outer ring squares from 1..60, starting at the corner RED and GREEN share
+          // (board BR in our geometry), advancing clockwise. So N=1 corresponds to path index 30.
+          const nStart = 30
+          const n2idx = (N) => this.wrap(nStart + (N - 1))
+          // User-specified mapping:
+          // RED  home-in: 3,  entry: 5
+          // BLUE home-in: 18, entry: 20
+          // YELLOW home-in: 33, entry: 35
+          // GREEN home-in: 48, entry: 50
+          this.homeEntry = {
+            red: n2idx(3),
+            blue: n2idx(18),
+            yellow: n2idx(33),
+            green: n2idx(48),
+          }
+          this.entries = {
+            red: n2idx(5),
+            blue: n2idx(20),
+            yellow: n2idx(35),
+            green: n2idx(50),
+          }
+          this.safetyLen = 5
+
+          // Slides defined using the 1..60 numbering (N) mapped via n2idx(N)
+          // Red: 2–5 (len 3), 10–14 (len 4)
+          // Blue: 17–20 (len 3), 25–29 (len 4)
+          this.slides = [
+            { color: 'red', start: n2idx(2), len: 3 },
+            { color: 'red', start: n2idx(10), len: 4 },
+            // Left (blue) side ~16..30
+            { color: 'blue', start: n2idx(17), len: 3 }, // 17–20
+            { color: 'blue', start: n2idx(25), len: 4 }, // 25–29
+            // Top (yellow) side
+            { color: 'yellow', start: n2idx(32), len: 3 }, // 32–35
+            { color: 'yellow', start: n2idx(40), len: 4 }, // 40–44
+            // Right (green) side ~46..60
+            { color: 'green', start: n2idx(47), len: 3 }, // 47–50
+            { color: 'green', start: n2idx(55), len: 4 }, // 55–59
+          ]
+
+          this.safety = this.computeSafety()
+          this.homes = this.computeHomes()
+          this.starts = this.computeStarts()
+        }
+        wrap(i) {
+          const n = this.trackCount
+          return ((i % n) + n) % n
+        }
+
+        computeTrack() {
+          const p = []
+          const m = this.margin,
+            w = this.canvas.width,
+            h = this.canvas.height
+          const left = m,
+            right = w - m,
+            top = m,
+            bottom = h - m
+          const seg = 15 // 16 spots across a side => 15 segments
+          const dx = (right - left) / seg
+          const dy = (bottom - top) / seg
+          // Top: include both corners (TL..TR) => 16 positions
+          for (let i = 0; i <= seg; i++) p.push({ x: left + i * dx, y: top })
+          // Right: from just below TR to BR => 15 positions
+          for (let i = 1; i <= seg; i++) p.push({ x: right, y: top + i * dy })
+          // Bottom: from just left of BR to BL => 15 positions
+          for (let i = 1; i <= seg; i++) p.push({ x: right - i * dx, y: bottom })
+          // Left: from just above BL to just before TL => 14 positions (avoid duplicating TL)
+          for (let i = 1; i < seg; i++) p.push({ x: left, y: bottom - i * dy })
+          // Now p.length === 60, corners at indices 0 (TL), 15 (TR), 30 (BR), 45 (BL)
+          return p
+        }
+
+        computeSafety() {
+          const lanes = {}
+          const m = this.margin,
+            w = this.canvas.width,
+            h = this.canvas.height,
+            top = m,
+            right = w - m,
+            bottom = h - m,
+            left = m
+          // perimeter spacing (center-to-center) used along each side
+          const seg = 15
+          const stepH = (right - left) / seg
+          const stepV = (bottom - top) / seg
+          const makeLane = (color) => {
+            const idx = this.homeEntry[color]
+            const pt = this.path[this.wrap(idx)]
+            // decide inward direction by nearest side
+            const dists = [
+              { side: 'top', d: Math.abs(pt.y - top), dir: { x: 0, y: 1 } },
+              { side: 'right', d: Math.abs(pt.x - right), dir: { x: -1, y: 0 } },
+              { side: 'bottom', d: Math.abs(pt.y - bottom), dir: { x: 0, y: -1 } },
+              { side: 'left', d: Math.abs(pt.x - left), dir: { x: 1, y: 0 } },
+            ]
+            dists.sort((a, b) => a.d - b.d)
+            const dir = dists[0].dir
+            const step = Math.abs(dir.x) === 1 ? stepH : stepV
+            const firstOffset = step // first safety square one "step" inward
+            return Array.from({ length: this.safetyLen }, (_, i) => ({
+              x: pt.x + dir.x * (firstOffset + i * step),
+              y: pt.y + dir.y * (firstOffset + i * step),
+            }))
+          }
+          for (const color of ORDER) lanes[color] = makeLane(color)
+          return lanes
+        }
+        computeHomes() {
+          const r = 28
+          const homes = {}
+          const m = this.margin,
+            w = this.canvas.width,
+            h = this.canvas.height,
+            top = m,
+            right = w - m,
+            bottom = h - m,
+            left = m
+          const tailOffset = 56 // distance from last safety square to home circle center
+          const homeFor = (color) => {
+            const lane = this.safety[color]
+            const last = lane[lane.length - 1]
+            // pick inward direction same as safety orientation
+            const dists = [
+              { side: 'top', d: Math.abs(this.path[this.homeEntry[color]].y - top), dir: { x: 0, y: 1 } },
+              { side: 'right', d: Math.abs(this.path[this.homeEntry[color]].x - right), dir: { x: -1, y: 0 } },
+              { side: 'bottom', d: Math.abs(this.path[this.homeEntry[color]].y - bottom), dir: { x: 0, y: -1 } },
+              { side: 'left', d: Math.abs(this.path[this.homeEntry[color]].x - left), dir: { x: 1, y: 0 } },
+            ]
+            dists.sort((a, b) => a.d - b.d)
+            const dir = dists[0].dir
+            return { x: last.x + dir.x * tailOffset, y: last.y + dir.y * tailOffset, r }
+          }
+          for (const color of ORDER) homes[color] = homeFor(color)
+          return homes
+        }
+        computeStarts() {
+          const m = this.margin,
+            w = this.canvas.width,
+            h = this.canvas.height
+          const top = m,
+            right = w - m,
+            bottom = h - m,
+            left = m
+          // use same step spacing as perimeter for consistent geometry
+          const seg = 15
+          const stepH = (right - left) / seg
+          const stepV = (bottom - top) / seg
+          const startDistFactor = 1.6 // ~1.6 steps inward from the Entry
+          const makeStart = (color) => {
+            const idx = this.entries[color]
+            const pt = this.path[this.wrap(idx)]
+            const dists = [
+              { side: 'top', d: Math.abs(pt.y - top), dir: { x: 0, y: 1 } },
+              { side: 'right', d: Math.abs(pt.x - right), dir: { x: -1, y: 0 } },
+              { side: 'bottom', d: Math.abs(pt.y - bottom), dir: { x: 0, y: -1 } },
+              { side: 'left', d: Math.abs(pt.x - left), dir: { x: 1, y: 0 } },
+            ]
+            dists.sort((a, b) => a.d - b.d)
+            const dir = dists[0].dir
+            const step = Math.abs(dir.x) === 1 ? stepH : stepV
+            const dist = step * startDistFactor
+            return { x: pt.x + dir.x * dist, y: pt.y + dir.y * dist, r: 20 }
+          }
+          return {
+            yellow: makeStart('yellow'),
+            green: makeStart('green'),
+            red: makeStart('red'),
+            blue: makeStart('blue'),
+          }
+        }
+
+        // drawing
+        draw() {
+          const ctx = this.ctx,
+            w = this.canvas.width,
+            h = this.canvas.height
+          ctx.clearRect(0, 0, w, h)
+          // border band
+          ctx.fillStyle = '#dee2ff'
+          ctx.fillRect(
+            this.margin - 30,
+            this.margin - 30,
+            w - 2 * (this.margin - 30),
+            h - 2 * (this.margin - 30),
+          )
+          // outer frame
+          ctx.strokeStyle = '#c7ccec'
+          ctx.lineWidth = 22
+          ctx.strokeRect(
+            this.margin - 30,
+            this.margin - 30,
+            w - 2 * (this.margin - 30),
+            h - 2 * (this.margin - 30),
+          )
+          // main track squares
+          for (let i = 0; i < this.path.length; i++) {
+            const { x, y } = this.path[i]
+            this.squareAt(x, y)
+          }
+          // slides
+          for (const sl of this.slides) {
+            this.drawSlide(sl)
+          }
+          this.drawZones()
+          this.title()
+        }
+        title() {
+          const c = this.ctx
+          c.save()
+          c.fillStyle = '#16203f'
+          c.font = '700 28px ui-sans-serif,system-ui'
+          c.textAlign = 'center'
+          c.fillText('WHOOPS!', this.canvas.width / 2, this.canvas.height / 2 + 10)
+          c.restore()
+        }
+        squareAt(x, y) {
+          const s = 22,
+            c = this.ctx
+          c.beginPath()
+          c.rect(x - s / 2, y - s / 2, s, s)
+          c.fillStyle = '#fff'
+          c.fill()
+          c.lineWidth = 1.4
+          c.strokeStyle = '#c9cdeb'
+          c.stroke()
+        }
+        highlightTile(x, y, color, label) {
+          const c = this.ctx
+          const s = 26
+          c.save()
+          c.lineWidth = 3
+          c.strokeStyle = color
+          c.strokeRect(x - s / 2, y - s / 2, s, s)
+          c.globalAlpha = 0.12
+          c.fillStyle = color
+          c.fillRect(x - s / 2, y - s / 2, s, s)
+          c.globalAlpha = 1
+          c.fillStyle = '#16203f'
+          c.font = 'bold 9px system-ui'
+          c.textAlign = 'center'
+          c.fillText(label, x, y - (s / 2 + 6))
+          c.restore()
+        }
+        drawSlide(sl) {
+          const s = sl.start,
+            e = this.wrap(s + sl.len)
+          const a = this.path[s],
+            b = this.path[e]
+          const c = this.ctx
+          c.save()
+          c.globalAlpha = 0.18
+          c.fillStyle = COLORS[sl.color]
+          c.beginPath()
+          c.moveTo(a.x, a.y)
+          c.lineTo(b.x, b.y)
+          // small wing triangle
+          const vx = b.x - a.x,
+            vy = b.y - a.y,
+            nx = -Math.sign(vy),
+            ny = Math.sign(vx)
+          c.lineTo(b.x + nx * 18, b.y + ny * 18)
+          c.closePath()
+          c.fill()
+          c.restore()
+          // mark start and end squares clearly
+          const mark = (pt, txt) => {
+            c.save()
+            c.lineWidth = 2.5
+            c.strokeStyle = COLORS[sl.color]
+            c.strokeRect(pt.x - 14, pt.y - 14, 28, 28)
+            c.fillStyle = COLORS[sl.color] + '22'
+            c.fillRect(pt.x - 14, pt.y - 14, 28, 28)
+            c.fillStyle = '#16203f'
+            c.font = 'bold 9px system-ui'
+            c.textAlign = 'center'
+            c.fillText(txt, pt.x, pt.y + 3)
+            c.restore()
+          }
+          mark(a, 'S')
+          mark(b, 'E')
+        }
+        drawZones() {
+          const c = this.ctx
+          // START circles
+          for (const color of ORDER) {
+            const s = this.starts[color]
+            c.beginPath()
+            c.arc(s.x, s.y, 20, 0, Math.PI * 2)
+            c.fillStyle = COLORS[color]
+            c.globalAlpha = 0.25
+            c.fill()
+            c.globalAlpha = 1
+            c.lineWidth = 2
+            c.strokeStyle = '#0002'
+            c.stroke()
+            c.fillStyle = '#000'
+            c.font = '10px system-ui'
+            c.textAlign = 'center'
+            c.fillText('START', s.x, s.y + 3)
+          }
+          // SAFETY lanes
+          for (const color of ORDER) {
+            const arr = this.safety[color] || []
+            for (let i = 0; i < arr.length; i++) {
+              const p = arr[i]
+              if (!p) continue // guard fixes the crash you saw
+              const s = 22
+              c.beginPath()
+              c.rect(p.x - s / 2, p.y - s / 2, s, s)
+              c.fillStyle = '#fff'
+              c.fill()
+              c.lineWidth = 1.4
+              // match perimeter square stroke
+              c.strokeStyle = '#c9cdeb'
+              c.stroke()
+              // no numbers to match perimeter styling
+            }
+          }
+          // HOME circles
+          for (const color of ORDER) {
+            const h = this.homes[color]
+            c.beginPath()
+            c.arc(h.x, h.y, h.r, 0, Math.PI * 2)
+            c.fillStyle = COLORS[color]
+            c.globalAlpha = 0.16
+            c.fill()
+            c.globalAlpha = 1
+            c.lineWidth = 3
+            c.strokeStyle = COLORS[color] + '99'
+            c.stroke()
+            c.fillStyle = '#222'
+            c.font = 'bold 12px system-ui'
+            c.textAlign = 'center'
+            c.fillText('HOME', h.x, h.y + 4)
+          }
+          // Emphasize Entry Square and Home Row Entrance for each color
+          for (const color of ORDER) {
+            const entryIdx = this.entries[color]
+            const entryPt = this.path[this.wrap(entryIdx)]
+            this.highlightTile(entryPt.x, entryPt.y, COLORS[color], 'ENTRY')
+            const homeIdx = this.homeEntry[color]
+            const homePt = this.path[this.wrap(homeIdx)]
+            this.highlightTile(homePt.x, homePt.y, COLORS[color], 'HOME IN')
+          }
+        }
+        posFor(loc, color) {
+          if (loc.type === 'track') return this.path[this.wrap(loc.index)]
+          if (loc.type === 'safety')
+            return (this.safety[color] || [])[clamp(loc.index, 0, this.safetyLen - 1)]
+          if (loc.type === 'start') return this.starts[color]
+          if (loc.type === 'home') return this.homes[color]
+        }
+        drawPawn(pawn, slot = 0) {
+          const at = this.posFor(pawn.location, pawn.color)
+          if (!at) return
+          const c = this.ctx,
+            r = 15,
+            ang = slot * (Math.PI / 6),
+            k = 8
+          const x = at.x + (slot ? Math.cos(ang) * k : 0),
+            y = at.y + (slot ? Math.sin(ang) * k : 0)
+          c.beginPath()
+          c.arc(x, y, r, 0, Math.PI * 2)
+          c.fillStyle = COLORS[pawn.color]
+          c.fill()
+          c.lineWidth = 2
+          c.strokeStyle = '#0005'
+          c.stroke()
+          c.fillStyle = '#fff'
+          c.font = 'bold 12px ui-sans-serif'
+          c.textAlign = 'center'
+          c.fillText(String(pawn.id + 1), x, y + 4)
+        }
+        isSlideStart(i) {
+          return this.slides.find((s) => s.start === this.wrap(i))
+        }
+      }
+
+      /* ===================== deck & pieces ===================== */
+      class Deck {
+        constructor() {
+          this.reset()
+        }
+        reset() {
+          this.cards = []
+          // Classic deck: 1×5; 2,3,4,5,7,8,10,11,12×4; SORRY!×4
+          for (let i = 0; i < 5; i++) this.cards.push(1)
+          for (const n of [2, 3, 4, 5, 7, 8, 10, 11, 12]) for (let i = 0; i < 4; i++) this.cards.push(n)
+          for (let i = 0; i < 4; i++) this.cards.push('SORRY')
+          shuffle(this.cards)
+        }
+        draw() {
+          if (!this.cards.length) this.reset()
+          return this.cards.pop()
+        }
+      }
+      class Pawn {
+        constructor(color, id) {
+          this.color = color
+          this.id = id
+          this.location = { type: 'start' }
+        }
+        atStart() {
+          return this.location.type === 'start'
+        }
+        inHome() {
+          return this.location.type === 'home'
+        }
+      }
+
+      /* ===================== Player base + example strategies ===================== */
+      // Player strategy API
+      // chooseMove(game, card, options)
+      //  - card: 1,2,3,4,5,7,8,10,11,12 or 'SORRY'
+      //  - options: array of move objects with shapes:
+      //      { type: 'move', pawn, steps, to, path, notes }
+      //      { type: 'swap', myPawn, withPawn, notes }
+      //      { type: 'sorry', fromPawn, targetPawn, to, notes }
+      //      { type: 'split7', parts: [moveA, moveB], notes }
+      //    Return one option (or null) to play.
+      class Player {
+        constructor(color, name) {
+          this.color = color
+          this.name = name || `${color} bot`
+          this.pawns = [0, 1, 2, 3].map((i) => new Pawn(color, i))
+        }
+        chooseMove(game, card, options) {
+          return options[0] || null
+        } // simple default
+      }
+      class SwapOn11Player extends Player {
+        chooseMove(game, card, options) {
+          if (card === 11) {
+            const swaps = options.filter((o) => o.type === 'swap')
+            if (swaps.length) {
+              const home = game.board.homeEntry[this.color]
+              let best = swaps[0],
+                bestD = 1e9
+              for (const s of swaps) {
+                const idx = s.withPawn.location.index
+                const d = (home - idx + game.board.trackCount) % game.board.trackCount
+                if (d < bestD) {
+                  bestD = d
+                  best = s
+                }
+              }
+              return best
+            }
+          }
+          return super.chooseMove(game, card, options)
+        }
+      }
+      class FurthestForwardPlayer extends Player {
+        chooseMove(game, card, options) {
+          const entry = game.board.homeEntry[this.color]
+          const dist = (idx) => (entry - idx + game.board.trackCount) % game.board.trackCount
+          const forward = options.filter(
+            (o) => o.type === 'move' && o.steps > 0 && o.pawn.location.type === 'track',
+          )
+          if (forward.length) {
+            forward.sort((a, b) => dist(a.pawn.location.index) - dist(b.pawn.location.index))
+            return forward[0]
+          }
+          return super.chooseMove(game, card, options)
+        }
+      }
+
+      /* ===================== Game engine ===================== */
+      class Game {
+        constructor(canvas, logEl) {
+          this.board = new Board(canvas)
+          this.deck = new Deck()
+          this.players = [
+            new SwapOn11Player('red', 'Red SwapBot'),
+            new FurthestForwardPlayer('blue', 'Blue FarBot'),
+            // new Player("green","Green Basic"),
+            // new Player("yellow","Yellow Basic"),
+          ]
+          this.turn = 0
+          this.extraTurn = false
+          this.logEl = logEl
+          this.draw()
+        }
+        reset() {
+          this.deck.reset()
+          for (const p of this.players) p.pawns = [0, 1, 2, 3].map((i) => new Pawn(p.color, i))
+          this.turn = 0
+          this.extraTurn = false
+          this.logEl.innerHTML = ''
+          this.draw()
+        }
+        current() {
+          return this.players[this.turn]
+        }
+        log(html) {
+          const p = document.createElement('p')
+          p.innerHTML = html
+          this.logEl.appendChild(p)
+          this.logEl.scrollTop = this.logEl.scrollHeight
+        }
+
+        draw() {
+          this.board.draw()
+          // pile pawns by location so overlapping disks get tiny offsets
+          const piles = new Map()
+          for (const pl of this.players)
+            for (const pw of pl.pawns) {
+              const key = JSON.stringify(pw.location) + pw.color
+              if (!piles.has(key)) piles.set(key, [])
+              piles.get(key).push(pw)
+            }
+          for (const [_, list] of piles) list.forEach((p, i) => this.board.drawPawn(p, i))
+          // turn banner
+          const c = this.board.ctx
+          c.fillStyle = '#16203f'
+          c.font = 'bold 14px system-ui'
+          c.fillText(`Turn: ${this.current().name}`, 20, 26)
+        }
+
+        step() {
+          const me = this.current()
+          const wasBonus = this.extraTurn
+          const card = this.deck.draw()
+          const options = this.legalMoves(me, card)
+          const pick = me.chooseMove(this, card, options)
+          this.log(`${me.name} draws <b>${card}</b>. ${options.length ? '' : 'No legal moves.'}`)
+          if (pick) {
+            this.apply(pick, card, me)
+            this.draw()
+          }
+          if (me.pawns.every((p) => p.inHome())) {
+            this.log(`<b>${me.name}</b> wins!`)
+            return 'done'
+          }
+          if (!wasBonus && card === 2 && pick) {
+            // grant exactly one extra draw
+            this.extraTurn = true
+            this.log(`${me.name} drew a 2 and will draw one extra card.`)
+          } else {
+            // after any non-2 draw or after consuming the bonus draw, advance turn
+            if (wasBonus) this.extraTurn = false
+            this.turn = (this.turn + 1) % this.players.length
+          }
+          return 'ok'
+        }
+
+        // ---------- rules helpers ----------
+        others(p) {
+          return this.players.filter((x) => x !== p)
+        }
+        allOpponentPawns(p) {
+          return this.others(p).flatMap((o) => o.pawns)
+        }
+        trackOcc() {
+          const m = new Map()
+          for (const pl of this.players)
+            for (const pw of pl.pawns) {
+              if (pw.location.type === 'track') {
+                const k = this.board.wrap(pw.location.index)
+                if (!m.has(k)) m.set(k, [])
+                m.get(k).push(pw)
+              }
+            }
+          return m
+        }
+        pawnAtSafety(color, idx) {
+          for (const pl of this.players)
+            for (const pw of pl.pawns) {
+              if (pw.color === color && pw.location.type === 'safety' && pw.location.index === idx)
+                return pw
+            }
+          return null
+        }
+        isBlockade(idx) {
+          const occ = this.trackOcc().get(this.board.wrap(idx)) || []
+          if (occ.length < 2) return false
+          return occ.every((p) => p.color === occ[0].color)
+        }
+
+        // ---------- legal move generation ----------
+        legalMoves(player, card) {
+          const opts = []
+          const B = this.board
+          const occ = this.trackOcc()
+          const myCountAt = (i) => (occ.get(B.wrap(i)) || []).filter((p) => p.color === player.color).length
+          const squareHasMine = (i) => myCountAt(i) > 0
+          const bumpAt = (i) => (occ.get(B.wrap(i)) || []).filter((p) => p.color !== player.color)
+
+          for (const pawn of player.pawns) {
+            // SORRY!
+            if (card === 'SORRY') {
+              if (pawn.atStart()) {
+                for (const op of this.allOpponentPawns(player)) {
+                  if (
+                    op.location.type === 'track' &&
+                    !squareHasMine(op.location.index) &&
+                    !this.isBlockade(op.location.index)
+                  ) {
+                    opts.push({
+                      type: 'sorry',
+                      fromPawn: pawn,
+                      targetPawn: op,
+                      to: { type: 'track', index: op.location.index },
+                      notes: `Place on ${op.location.index}, bump ${op.color}#${op.id + 1}`,
+                    })
+                  }
+                }
+              }
+              continue
+            }
+
+            // leaving START on 1/2
+            if (pawn.atStart() && (card === 1 || card === 2)) {
+              const entry = B.entries[player.color]
+              // official: may enter even if one of your own pawns is on the entry (forms a blockade),
+              // but may NOT enter onto any blockade
+              if (!this.isBlockade(entry)) {
+                const bump = bumpAt(entry)
+                opts.push({
+                  type: 'move',
+                  pawn,
+                  steps: +1,
+                  to: { type: 'track', index: entry },
+                  path: [entry],
+                  notes: `from START to ${entry}${bump.length ? ' (bumps ' + bump.map((p) => `${p.color}#${p.id + 1}`).join(', ') + ')' : ''}`,
+                })
+              }
+            }
+
+            if (pawn.inHome()) continue // can’t move from home
+
+            const trySteps = (steps) => {
+              const mv = this.tryMovePawn(
+                player,
+                pawn,
+                steps,
+                squareHasMine.bind(this),
+                bumpAt.bind(this),
+              )
+              if (mv) opts.push(mv)
+            }
+
+            if (card === 10) {
+              trySteps(-1)
+              trySteps(+10)
+            } else if (card === 4) {
+              trySteps(-4)
+            } else if (typeof card === 'number') {
+              trySteps(+card)
+            }
+          }
+
+          // split seven
+          if (card === 7) {
+            const movers = player.pawns.filter(
+              (p) => p.location.type !== 'start' && p.location.type !== 'home',
+            )
+            for (let i = 0; i < movers.length; i++)
+              for (let j = i + 1; j < movers.length; j++) {
+                for (let a = 1; a <= 6; a++) {
+                  const b = 7 - a
+                  const A = this.tryMovePawn(
+                    player,
+                    movers[i],
+                    a,
+                    (i) => false,
+                    (i) => [],
+                  ) // safety/own collisions checked inside
+                  const Bm = this.tryMovePawn(
+                    player,
+                    movers[j],
+                    b,
+                    (i) => false,
+                    (i) => [],
+                  )
+                  if (A && Bm) {
+                    // Validate combined landings: cannot stack on own pawns or each other
+                    const wrap = (idx) => this.board.wrap(idx)
+                    const sameDest =
+                      A.to.type === 'track' && Bm.to.type === 'track' && wrap(A.to.index) === wrap(Bm.to.index)
+                    if (sameDest) continue
+                    const conflicts = (mv, pi, pj) => {
+                      if (mv.to.type !== 'track') return false
+                      const dest = wrap(mv.to.index)
+                      for (const p of player.pawns) {
+                        if (p === movers[pi] || p === movers[pj]) continue // the two movers may vacate
+                        if (p.location.type === 'track' && wrap(p.location.index) === dest) return true
+                      }
+                      return false
+                    }
+                    if (conflicts(A, i, j) || conflicts(Bm, i, j)) continue
+                    opts.push({
+                      type: 'split7',
+                      parts: [A, Bm],
+                      notes: `Split 7: ${movers[i].id + 1}+${a}, ${movers[j].id + 1}+${b}`,
+                    })
+                  }
+                }
+              }
+          }
+
+          // 11 swap
+          if (card === 11) {
+            for (const my of player.pawns) {
+              if (my.location.type === 'track') {
+                for (const op of this.allOpponentPawns(player)) {
+                  if (op.location.type === 'track') {
+                    // cannot swap onto own pawn (besides the one leaving)
+                    const occAt = (
+                      this.trackOcc().get(this.board.wrap(op.location.index)) || []
+                    ).filter((p) => p !== my)
+                    // cannot swap into a blockade square
+                    if (occAt.length >= 2 && occAt.every((p) => p.color === occAt[0].color)) continue
+                    if (occAt.some((p) => p.color === player.color)) continue
+                    opts.push({
+                      type: 'swap',
+                      myPawn: my,
+                      withPawn: op,
+                      notes: `Swap ${my.color}#${my.id + 1} with ${op.color}#${op.id + 1}`,
+                    })
+                  }
+                }
+              }
+            }
+          }
+
+          return opts
+        }
+
+        // attempt to move a single pawn by steps (+fwd, -back). Returns a normalized move or null.
+        tryMovePawn(player, pawn, steps, squareHasMine, bumpAt) {
+          const B = this.board
+          if (pawn.location.type === 'start') {
+            // only 1/2 leaves start handled elsewhere
+            return null
+          }
+          if (pawn.location.type === 'home') return null
+
+          // inside SAFETY: only forward, exact into home
+          if (pawn.location.type === 'safety') {
+            if (steps < 0) return null
+            const target = pawn.location.index + steps
+            if (target > B.safetyLen) return null
+            if (target === B.safetyLen)
+              return {
+                type: 'move',
+                pawn,
+                steps,
+                to: { type: 'home' },
+                path: [],
+                notes: `enters HOME`,
+              }
+            if (this.pawnAtSafety(player.color, target)) return null
+            return {
+              type: 'move',
+              pawn,
+              steps,
+              to: { type: 'safety', index: target },
+              path: [],
+              notes: `to SAFETY ${target + 1}`,
+            }
+          }
+
+          // on TRACK
+          let idx = pawn.location.index
+          const dir = Math.sign(steps)
+          if (dir === 0) return null
+          let remaining = Math.abs(steps)
+          const path = []
+
+          // utility
+          const passBlock = (i) => {
+            if (this.isBlockade(i)) return false
+            return true
+          }
+
+          while (remaining > 0) {
+            const next = B.wrap(idx + dir)
+
+            // turning into SAFETY when moving forward from the home entry square
+            if (dir > 0 && idx === B.homeEntry[player.color]) {
+              // go into safety lane for remaining steps
+              const target = remaining - 1 // first step enters safety[0]
+              if (target > B.safetyLen) return null // overshoot beyond home
+              if (target === B.safetyLen)
+                return {
+                  type: 'move',
+                  pawn,
+                  steps,
+                  to: { type: 'home' },
+                  path,
+                  notes: `enters HOME`,
+                }
+              if (this.pawnAtSafety(player.color, target)) return null
+              return {
+                type: 'move',
+                pawn,
+                steps,
+                to: { type: 'safety', index: target },
+                path,
+                notes: `turns into SAFETY`,
+              }
+            }
+
+            if (!passBlock(next)) return null
+            idx = next
+            path.push(idx)
+            remaining--
+          }
+
+          // landing on track
+          // allow landing on your own single pawn (forms blockade), but not onto your own existing blockade
+          {
+            const occAt = this.trackOcc().get(B.wrap(idx)) || []
+            const myCount = occAt.filter((p) => p.color === player.color).length
+            if (myCount >= 2) return null
+          }
+          const slide = B.isSlideStart(idx)
+          let notes = `to ${idx}`
+          if (slide && slide.color !== pawn.color) notes += ` and SLIDES ${slide.len}`
+          const bumps = bumpAt(idx)
+          if (bumps.length)
+            notes += ` (bumps ${bumps.map((p) => `${p.color}#${p.id + 1}`).join(', ')})`
+          return { type: 'move', pawn, steps, to: { type: 'track', index: idx }, path, notes }
+        }
+
+        // ---------- apply chosen option ----------
+        apply(opt, card, player) {
+          const B = this.board
+          const bumpOn = (idx) => {
+            // bump opponent pawns at a single track index
+            for (const pl of this.others(player)) {
+              for (const op of pl.pawns) {
+                if (op.location.type === 'track' && B.wrap(op.location.index) === B.wrap(idx)) {
+                  op.location = { type: 'start' }
+                  this.log(`&nbsp;&nbsp;Bumped <b>${op.color}#${op.id + 1}</b> to START.`)
+                }
+              }
+            }
+          }
+          const bumpAllExcept = (idx, exceptPawn) => {
+            // bump all pawns (any color) at idx except the sliding pawn itself
+            for (const pl of this.players) {
+              for (const pw of pl.pawns) {
+                if (pw === exceptPawn) continue
+                if (pw.location.type === 'track' && B.wrap(pw.location.index) === B.wrap(idx)) {
+                  pw.location = { type: 'start' }
+                  this.log(`&nbsp;&nbsp;Slide bumps <b>${pw.color}#${pw.id + 1}</b> to START.`)
+                }
+              }
+            }
+          }
+          const applySlideFor = (pawn) => {
+            if (pawn.location.type !== 'track') return
+            const sl = B.isSlideStart(pawn.location.index)
+            if (sl && sl.color !== pawn.color) {
+              for (let k = 1; k <= sl.len; k++) bumpAllExcept(B.wrap(pawn.location.index + k), pawn)
+              pawn.location = { type: 'track', index: B.wrap(pawn.location.index + sl.len) }
+              this.log(`&nbsp;&nbsp;${player.name} slides ${sl.len} to ${pawn.location.index}.`)
+            }
+          }
+
+          if (opt.type === 'move') {
+            if (opt.to.type === 'track') {
+              bumpOn(opt.to.index)
+              opt.pawn.location = deep(opt.to)
+              applySlideFor(opt.pawn)
+            } else {
+              opt.pawn.location = deep(opt.to)
+            }
+            this.log(
+              `&nbsp;&nbsp;${player.name} moves ${opt.pawn.color}#${opt.pawn.id + 1}: ${opt.notes}.`,
+            )
+            return
+          }
+
+          if (opt.type === 'swap') {
+            const a = opt.myPawn,
+              b = opt.withPawn
+            const tmp = a.location
+            a.location = b.location
+            b.location = tmp
+            this.log(
+              `&nbsp;&nbsp;${player.name} swaps ${a.color}#${a.id + 1} with ${b.color}#${b.id + 1}.`,
+            )
+            applySlideFor(a)
+            applySlideFor(b)
+            return
+          }
+
+          if (opt.type === 'sorry') {
+            opt.fromPawn.location = { type: 'track', index: opt.to.index }
+            this.log(
+              `&nbsp;&nbsp;${player.name} plays SORRY! placing ${opt.fromPawn.color}#${opt.fromPawn.id + 1} on ${opt.to.index}.`,
+            )
+            opt.targetPawn.location = { type: 'start' }
+            this.log(
+              `&nbsp;&nbsp;Bumped ${opt.targetPawn.color}#${opt.targetPawn.id + 1} to START.`,
+            )
+            applySlideFor(opt.fromPawn)
+            return
+          }
+
+          if (opt.type === 'split7') {
+            for (const part of opt.parts) {
+              if (part.to.type === 'track') bumpOn(part.to.index)
+              part.pawn.location = deep(part.to)
+              applySlideFor(part.pawn)
+            }
+            this.log(`&nbsp;&nbsp;${player.name} ${opt.notes}.`)
+            return
+          }
+        }
+      }
+
+      /* ===================== boot & UI ===================== */
+      const canvas = document.getElementById('board')
+      const logEl = document.getElementById('log')
+      const game = new Game(canvas, logEl)
+
+      let timer = null
+      const fast = () => document.getElementById('fast').checked
+      function tick() {
+        if (game.step() === 'done') {
+          stop()
+          return
+        }
+        timer = setTimeout(tick, fast() ? 45 : 360)
+      }
+      function stop() {
+        if (timer) {
+          clearTimeout(timer)
+          timer = null
+        }
+      }
+
+      document.getElementById('step').onclick = () => {
+        stop()
+        game.step()
+      }
+      document.getElementById('auto').onclick = () => {
+        stop()
+        tick()
+      }
+      document.getElementById('pause').onclick = stop
+      document.getElementById('reset').onclick = () => {
+        stop()
+        game.reset()
+      }
+
+      /* ======= Student hook (simple example) =======
+class MyStrategy extends Player{
+  chooseMove(game,card,options){
+    const swap=options.find(o=>o.type==="swap");
+    if(card===11 && swap) return swap;
+    const fromStart=options.find(o=>o.type==="move" && o.pawn.location.type==="start");
+    if(fromStart) return fromStart;
+    return options[options.length-1]||null;
+  }
+}
+// Then replace a player in new Game(...):
+//   this.players=[ new MyStrategy("red","StudentBot"), new Player("blue") ];
+*/
+    </script>
+  </body>
+</html>

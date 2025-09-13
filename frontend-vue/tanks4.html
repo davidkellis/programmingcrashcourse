@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Simple Robocode</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+      }
+      .container {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      #arena {
+        border: 2px solid #000;
+        background-color: #fff;
+      }
+      .scoreboard {
+        width: 360px;
+        background: #fff;
+        border: 2px solid #000;
+        border-radius: 4px;
+        padding: 10px 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .scoreboard h3 {
+        margin: 6px 0 10px 0;
+        font-size: 18px;
+      }
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .controls {
+        width: 360px;
+        background: #fff;
+        border: 2px solid #000;
+        border-radius: 4px;
+        padding: 10px 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .controls label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 4px;
+        color: #333;
+      }
+      .controls input[type='range'] {
+        width: 100%;
+      }
+      .controls .speed-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .sb-entry {
+        margin-bottom: 10px;
+      }
+      .sb-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+      }
+      .sb-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sb-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 1px solid #333;
+        flex: 0 0 12px;
+      }
+      .sb-status {
+        font-size: 12px;
+        color: #555;
+      }
+      .sb-bar {
+        height: 6px;
+        background: #eee;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .sb-bar > span {
+        display: block;
+        height: 100%;
+        background: #4caf50;
+      }
+      .sb-meta {
+        font-size: 12px;
+        color: #333;
+        margin-top: 4px;
+        white-space: nowrap;
+      }
+
+      /* Overlay banner for end-of-battle */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+      }
+      .banner {
+        width: 360px;
+        max-width: calc(100vw - 40px);
+        background: #fff;
+        border: 2px solid #000;
+        border-radius: 6px;
+        padding: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .banner h2 {
+        margin: 6px 0 8px 0;
+        font-size: 20px;
+      }
+      .banner .body {
+        font-size: 14px;
+        color: #333;
+        margin-top: 4px;
+      }
+      .banner .actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 12px;
+      }
+      .banner button {
+        padding: 8px 10px;
+        border: 1px solid #333;
+        background: #f7f7f7;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .banner button:hover {
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="arena" width="800" height="600"></canvas>
+      <div class="sidebar">
+        <div id="controls" class="controls">
+          <div class="speed-line">
+            <label for="speed">Speed</label>
+            <span id="speed-label">1.0x</span>
+          </div>
+          <input id="speed" type="range" min="0.1" max="3" step="0.05" value="1" />
+        </div>
+        <div id="scoreboard" class="scoreboard"></div>
+      </div>
+    </div>
+    <div id="overlay" class="overlay">
+      <div class="banner">
+        <h2 id="banner-title">Battle Over</h2>
+        <div id="banner-body" class="body"></div>
+        <div class="actions">
+          <button id="btn-new">New Battle</button>
+          <button id="btn-best">Best of 3</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Constants
+      const ARENA_WIDTH = 800
+      const ARENA_HEIGHT = 600
+      const TANK_SIZE = 20
+      const TANK_RADIUS = TANK_SIZE / 2
+      const MAX_SPEED = 5
+      const MAX_TURN_RATE = 10 // degrees per tick
+      const BULLET_SPEED = 10
+      const MAX_POWER = 3
+      const FIRE_COOLDOWN = 20 // ticks
+      const RAD_TO_DEG = 180 / Math.PI
+      const DEG_TO_RAD = Math.PI / 180
+
+      // Utility functions
+      function normalizeAngle(angle) {
+        while (angle > 180) angle -= 360
+        while (angle < -180) angle += 360
+        return angle
+      }
+
+      function distance(x1, y1, x2, y2) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+      }
+
+      // Bullet class
+      class Bullet {
+        constructor(x, y, angle, power, owner) {
+          this.x = x
+          this.y = y
+          this.angle = angle
+          this.power = power
+          this.owner = owner
+          this.active = true
+        }
+
+        update(dt = 1) {
+          this.x += BULLET_SPEED * dt * Math.cos(this.angle * DEG_TO_RAD)
+          this.y += BULLET_SPEED * dt * Math.sin(this.angle * DEG_TO_RAD)
+          if (this.x < 0 || this.x > ARENA_WIDTH || this.y < 0 || this.y > ARENA_HEIGHT) {
+            this.active = false
+          }
+        }
+
+        draw(ctx) {
+          ctx.beginPath()
+          ctx.arc(this.x, this.y, 2, 0, 2 * Math.PI)
+          ctx.fillStyle = '#f00'
+          ctx.fill()
+        }
+      }
+
+      // Base Tank class - extend this to create custom tanks
+      class Tank {
+        constructor(name, centerX, centerY, heading, color) {
+          this.name = name
+          this.centerX = centerX
+          this.centerY = centerY
+          this.heading = heading // degrees, 0 = right, 90 = up, etc.
+          this.energy = 100
+          this.speed = 0
+          this.turnRate = 0
+          this.color = color
+          this.fireCooldown = 0
+          this.alive = true
+          // Stats
+          this.kills = 0
+          this.shotsFired = 0
+          this.shotsHit = 0
+          this.wins = 0
+          // Game reference (set when added to Game)
+          this.game = null
+          // Lifecycle
+          this._started = false
+          // Autopilot state
+          this._driveTarget = null // { x, y, speed, tolerance, stopOnArrive }
+          this._turnTarget = null // absolute heading in degrees [0..360)
+          this._path = null // array of {x, y}
+          this._pathIndex = 0
+          this._pathLoop = false
+          this._pathTolerance = 8
+          this._pathSpeed = 3
+          // Position cache (can be useful for distance tracking)
+          this._prevX = centerX
+          this._prevY = centerY
+        }
+
+        // Override this method in subclasses for tank behavior
+        run() {
+          // Default: do nothing
+        }
+
+        // Called once on the very first update; great for setting up paths
+        onStart() {
+          // Default: do nothing
+        }
+
+        // Methods available to tanks
+        setSpeed(speed) {
+          this.speed = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, speed))
+        }
+
+        turnSteeringWheel(turnRate) {
+          this.turnRate = Math.max(-MAX_TURN_RATE, Math.min(MAX_TURN_RATE, turnRate))
+        }
+
+        ahead(distance) {
+          this.setSpeed(distance > 0 ? MAX_SPEED : -MAX_SPEED)
+          // Note: Doesn't block; sets speed for ongoing movement
+        }
+
+        back(distance) {
+          this.ahead(-distance)
+        }
+
+        turnLeft(degrees) {
+          this.turnSteeringWheel(-Math.abs(degrees))
+        }
+
+        turnRight(degrees) {
+          this.turnSteeringWheel(Math.abs(degrees))
+        }
+
+        fire(power) {
+          if (this.fireCooldown <= 0 && this.alive) {
+            power = Math.min(MAX_POWER, Math.max(0.1, power))
+            // Require sufficient energy to fire
+            if (this.energy < power) {
+              return
+            }
+            const rad = this.heading * DEG_TO_RAD
+            const bulletX = this.centerX + (TANK_SIZE / 2) * Math.cos(rad)
+            const bulletY = this.centerY + (TANK_SIZE / 2) * Math.sin(rad)
+            if (this.game)
+              this.game.bullets.push(new Bullet(bulletX, bulletY, this.heading, power, this))
+            this.fireCooldown = FIRE_COOLDOWN
+            this.energy -= power // Cost energy to fire
+            if (this.energy < 0) this.energy = 0
+            this.shotsFired += 1
+          }
+        }
+
+        getScannedRobots() {
+          const scanned = []
+          const arenaTanks = this.game ? this.game.tanks : []
+          for (let tank of arenaTanks) {
+            if (tank !== this && tank.alive) {
+              const dx = tank.centerX - this.centerX
+              const dy = tank.centerY - this.centerY
+              const dist = distance(this.centerX, this.centerY, tank.centerX, tank.centerY)
+              let bearing = Math.atan2(dy, dx) * RAD_TO_DEG - this.heading
+              bearing = normalizeAngle(bearing)
+              scanned.push({
+                name: tank.name,
+                bearing: bearing,
+                distance: dist,
+                energy: tank.energy,
+              })
+            }
+          }
+          // Sort by distance ascending
+          scanned.sort((a, b) => a.distance - b.distance)
+          return scanned
+        }
+
+        getX() {
+          return this.centerX
+        }
+        getY() {
+          return this.centerY
+        }
+        getHeading() {
+          return this.heading
+        }
+        getEnergy() {
+          return this.energy
+        }
+
+        // Position helpers
+        getPosition() {
+          return { x: this.centerX, y: this.centerY }
+        }
+        getPositionPair() {
+          return [this.centerX, this.centerY]
+        }
+
+        // Distance helpers
+        distanceToTank(other) {
+          if (!other) return Infinity
+          return distance(this.centerX, this.centerY, other.centerX, other.centerY)
+        }
+        static distanceBetween(t1, t2) {
+          if (!t1 || !t2) return Infinity
+          return distance(t1.centerX, t1.centerY, t2.centerX, t2.centerY)
+        }
+
+        // Child-friendly movement helpers (no trigonometry needed!)
+        // Drive straight to a point (x, y). Options: { speed, tolerance, stopOnArrive }
+        driveTo(x, y, options = {}) {
+          const {
+            speed = MAX_SPEED,
+            tolerance = this._arrivalTolerance || 6,
+            stopOnArrive = true,
+          } = options
+          this._driveTarget = { x, y, speed, tolerance, stopOnArrive }
+        }
+
+        // Move forward by a certain distance (based on current heading)
+        goForward(distance, options = {}) {
+          const rad = this.heading * DEG_TO_RAD
+          const targetX = this.centerX + distance * Math.cos(rad)
+          const targetY = this.centerY + distance * Math.sin(rad)
+          this.driveTo(targetX, targetY, options)
+        }
+
+        // Turn to an absolute heading (0 = east/right, 90 = up)
+        turnTo(angleDeg) {
+          let a = angleDeg % 360
+          if (a < 0) a += 360
+          this._turnTarget = a
+        }
+
+        // Turn to face a point on the map
+        facePoint(x, y) {
+          const dx = x - this.centerX
+          const dy = y - this.centerY
+          let angle = Math.atan2(dy, dx) * RAD_TO_DEG
+          if (angle < 0) angle += 360
+          this.turnTo(angle)
+        }
+
+        // Follow a list of waypoints: [{x,y}, ...] or [[x,y], ...]. Options: { loop, speed, tolerance }
+        followPath(points, options = {}) {
+          const norm = points.map((p) => ({ x: p.x ?? p[0], y: p.y ?? p[1] }))
+          this._path = norm
+          this._pathIndex = 0
+          this._pathLoop = !!options.loop
+          this._pathSpeed = options.speed ?? this._pathSpeed
+          this._pathTolerance = options.tolerance ?? this._pathTolerance
+          this._driveTarget = null // will be set in _stepAutopilot
+        }
+
+        clearPath() {
+          this._path = null
+          this._pathIndex = 0
+        }
+
+        // Stop any current autopilot motion
+        stop() {
+          this._driveTarget = null
+          this._turnTarget = null
+          this.setSpeed(0)
+          this.turnSteeringWheel(0)
+        }
+
+        // Internal: handle autopilot each tick
+        _stepAutopilot() {
+          // If we have an active path but no current drive target, set next waypoint
+          if (this._path && !this._driveTarget) {
+            const next = this._path[this._pathIndex]
+            if (next) {
+              this.driveTo(next.x, next.y, {
+                speed: this._pathSpeed,
+                tolerance: this._pathTolerance,
+              })
+            }
+          }
+
+          // Handle turning to a target heading
+          if (this._turnTarget !== null && this._turnTarget !== undefined) {
+            const diff = normalizeAngle(this._turnTarget - this.heading)
+            const turn = Math.max(-MAX_TURN_RATE, Math.min(MAX_TURN_RATE, diff))
+            this.turnSteeringWheel(turn)
+            if (Math.abs(diff) < 2) {
+              this.turnSteeringWheel(0)
+              this._turnTarget = null
+            }
+          }
+
+          // Handle driving to a point
+          if (this._driveTarget) {
+            const { x, y, speed, tolerance, stopOnArrive } = this._driveTarget
+            const dx = x - this.centerX
+            const dy = y - this.centerY
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist <= tolerance) {
+              if (stopOnArrive) this.setSpeed(0)
+              this._driveTarget = null
+              // Advance path if any
+              if (this._path) {
+                this._pathIndex += 1
+                if (this._pathIndex >= this._path.length) {
+                  if (this._pathLoop && this._path.length > 0) {
+                    this._pathIndex = 0
+                  } else {
+                    this.clearPath()
+                  }
+                }
+              }
+            } else {
+              const targetAngle = Math.atan2(dy, dx) * RAD_TO_DEG
+              const diff = normalizeAngle(targetAngle - this.heading)
+              const turn = Math.max(-MAX_TURN_RATE, Math.min(MAX_TURN_RATE, diff))
+              this.turnSteeringWheel(turn)
+              this.setSpeed(Math.max(-MAX_SPEED, Math.min(MAX_SPEED, speed)))
+            }
+          }
+        }
+
+        // Internal update
+        update(dt = 1) {
+          if (!this.alive) return
+
+          // onStart hook once
+          if (!this._started) {
+            this._started = true
+            try {
+              this.onStart()
+            } catch (e) {
+              console.error('onStart() error in tank', this.name, e)
+            }
+          }
+
+          // Run user code (can enqueue autopilot actions)
+          this.run()
+
+          // Autopilot processing (may adjust speed and turnRate)
+          this._stepAutopilot()
+
+          // Energy gate: below 5 energy cannot move or turn
+          if (this.energy < 5) {
+            this.setSpeed(0)
+            this.turnSteeringWheel(0)
+          }
+
+          // Apply movement
+          this.heading += this.turnRate * dt
+          this.heading = (this.heading + 360) % 360
+          const rad = this.heading * DEG_TO_RAD
+          this.centerX += this.speed * dt * Math.cos(rad)
+          this.centerY += this.speed * dt * Math.sin(rad)
+
+          // Clamp to arena
+          this.centerX = Math.max(TANK_RADIUS, Math.min(ARENA_WIDTH - TANK_RADIUS, this.centerX))
+          this.centerY = Math.max(TANK_RADIUS, Math.min(ARENA_HEIGHT - TANK_RADIUS, this.centerY))
+
+          // Cooldown
+          if (this.fireCooldown > 0) this.fireCooldown = Math.max(0, this.fireCooldown - dt)
+        }
+
+        // Draw
+        draw(ctx) {
+          if (!this.alive) return
+
+          ctx.save()
+          ctx.translate(this.centerX, this.centerY)
+          ctx.rotate(this.heading * DEG_TO_RAD)
+          ctx.fillStyle = this.color
+          ctx.fillRect(-TANK_SIZE / 2, -TANK_SIZE / 2, TANK_SIZE, TANK_SIZE)
+          // Gun barrel
+          ctx.strokeStyle = '#000'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(0, 0)
+          ctx.lineTo(TANK_SIZE / 2, 0)
+          ctx.stroke()
+          ctx.restore()
+
+          // Name and health
+          ctx.fillStyle = '#000'
+          ctx.font = '12px Arial'
+          ctx.fillText(this.name, this.centerX - 20, this.centerY - TANK_SIZE / 2 - 5)
+          ctx.fillRect(
+            this.centerX - TANK_SIZE / 2,
+            this.centerY - TANK_SIZE / 2 - 15,
+            TANK_SIZE * (this.energy / 100),
+            5,
+          )
+        }
+
+        // Check hit by bullet
+        hitBy(bullet) {
+          if (distance(this.centerX, this.centerY, bullet.x, bullet.y) < TANK_RADIUS) {
+            const damage = bullet.power * 4 // Simple damage calc
+            this.energy -= damage
+            if (this.energy <= 0) {
+              this.energy = 0
+              this.alive = false
+              if (bullet.owner && bullet.owner !== this) {
+                bullet.owner.kills += 1
+              }
+            }
+            bullet.active = false
+            // Give energy to shooter
+            if (bullet.owner) {
+              bullet.owner.energy += damage / 2
+              if (bullet.owner !== this) {
+                bullet.owner.shotsHit += 1
+              }
+            }
+          }
+        }
+      }
+
+      // Example Tank 4: Demonstrates child-friendly path following and facing
+      class PathTank extends Tank {
+        onStart() {
+          // Create a simple rectangular patrol path
+          const pad = 60
+          const pts = [
+            { x: pad, y: pad },
+            { x: ARENA_WIDTH - pad, y: pad },
+            { x: ARENA_WIDTH - pad, y: ARENA_HEIGHT - pad },
+            { x: pad, y: ARENA_HEIGHT - pad },
+          ]
+          this.followPath(pts, { loop: true, speed: 3, tolerance: 10 })
+        }
+
+        run() {
+          // Face the nearest enemy and take shots when aligned
+          const enemies = this.getScannedRobots()
+          if (enemies.length > 0) {
+            const nearest = enemies[0]
+            const dx = Math.cos((this.heading + nearest.bearing) * DEG_TO_RAD)
+            // Turn slightly to try to keep aim while moving along the path
+            this.turnSteeringWheel(nearest.bearing / 6)
+            if (Math.abs(nearest.bearing) < 8) {
+              this.fire(2)
+            }
+          }
+        }
+      }
+
+      // Example Tank 5: Sniper that kites to maintain distance and fires when aligned
+      class SniperTank extends Tank {
+        onStart() {
+          this.desiredRange = 250
+          this.rangeBuffer = 30
+          this.kiteSpeed = 3
+        }
+
+        run() {
+          if (!this.game) return
+          // Find the nearest living enemy object
+          const enemies = this.game.tanks.filter((t) => t !== this && t.alive)
+          if (enemies.length === 0) {
+            // Slow scan if no enemies
+            this.setSpeed(0)
+            this.turnSteeringWheel(1)
+            return
+          }
+          enemies.sort(
+            (a, b) =>
+              distance(this.centerX, this.centerY, a.centerX, a.centerY) -
+              distance(this.centerX, this.centerY, b.centerX, b.centerY),
+          )
+          const target = enemies[0]
+
+          // Face the target
+          this.facePoint(target.centerX, target.centerY)
+
+          // Maintain desired range by moving forward/backward while facing target
+          const distTo = distance(this.centerX, this.centerY, target.centerX, target.centerY)
+          if (distTo < this.desiredRange - this.rangeBuffer) {
+            // Too close: back up fast while facing target
+            this.setSpeed(-MAX_SPEED)
+          } else if (distTo > this.desiredRange + this.rangeBuffer) {
+            // Too far: move forward
+            this.setSpeed(Math.min(MAX_SPEED, this.kiteSpeed))
+          } else {
+            // In the sweet spot: hold
+            this.setSpeed(0)
+          }
+
+          // Fire when nearly aligned
+          const dx = target.centerX - this.centerX
+          const dy = target.centerY - this.centerY
+          const targetAngle = Math.atan2(dy, dx) * RAD_TO_DEG
+          const diff = normalizeAngle(targetAngle - this.heading)
+          if (Math.abs(diff) < 6) {
+            this.fire(3)
+          }
+        }
+      }
+
+      // Example Tank 1: Circles and fires at nearest
+      class CircleTank extends Tank {
+        run() {
+          // Circle steadily
+          this.setSpeed(2)
+          this.turnSteeringWheel(1)
+          const enemies = this.getScannedRobots()
+          if (enemies.length > 0) {
+            const nearest = enemies[0]
+            // Fire when roughly aligned to keep the circling behavior
+            if (Math.abs(nearest.bearing) < 8) {
+              this.fire(2)
+            }
+          }
+        }
+      }
+
+      // Example Tank 2: Rams and fires
+      class RamTank extends Tank {
+        run() {
+          const enemies = this.getScannedRobots()
+          if (enemies.length > 0) {
+            const nearest = enemies[0]
+            this.turnSteeringWheel(nearest.bearing / 2)
+            this.setSpeed(MAX_SPEED)
+            if (nearest.distance < 100) {
+              this.fire(3)
+            }
+          } else {
+            this.setSpeed(0)
+            this.turnSteeringWheel(0)
+          }
+        }
+      }
+
+      // Example Tank 3: Straight lines with wall bounces
+      class BouncingTank extends Tank {
+        run() {
+          // If we are in the middle of a bounce rotation, finish it first
+          if (this._bounceTarget !== undefined && this._bounceTarget !== null) {
+            const diff = normalizeAngle(this._bounceTarget - this.heading)
+            const turn = Math.max(-MAX_TURN_RATE, Math.min(MAX_TURN_RATE, diff))
+            this.turnSteeringWheel(turn)
+            // Rotate in place for a crisp bounce
+            this.setSpeed(0)
+            if (Math.abs(diff) < 2) {
+              // Done rotating; resume straight motion
+              this._bounceTarget = null
+              this.turnSteeringWheel(0)
+              this.setSpeed(MAX_SPEED)
+            }
+            return
+          }
+
+          // Default: go straight at constant speed
+          this.turnSteeringWheel(0)
+          this.setSpeed(MAX_SPEED)
+
+          // Predict next position to detect an imminent wall hit
+          const rad = this.heading * DEG_TO_RAD
+          const nextX = this.centerX + this.speed * Math.cos(rad)
+          const nextY = this.centerY + this.speed * Math.sin(rad)
+          const hitVertical = nextX <= TANK_RADIUS || nextX >= ARENA_WIDTH - TANK_RADIUS
+          const hitHorizontal = nextY <= TANK_RADIUS || nextY >= ARENA_HEIGHT - TANK_RADIUS
+
+          if (hitVertical || hitHorizontal) {
+            let newHeading = this.heading
+            if (hitVertical && hitHorizontal) {
+              // Corner: reverse direction
+              newHeading = (this.heading + 180) % 360
+            } else if (hitVertical) {
+              // Reflect on Y axis: angle -> 180 - angle
+              newHeading = normalizeAngle(180 - this.heading)
+            } else if (hitHorizontal) {
+              // Reflect on X axis: angle -> -angle
+              newHeading = normalizeAngle(-this.heading)
+            }
+            // Begin bounce rotation toward newHeading
+            this._bounceTarget = (newHeading + 360) % 360
+            const diffNow = normalizeAngle(this._bounceTarget - this.heading)
+            const turnNow = Math.max(-MAX_TURN_RATE, Math.min(MAX_TURN_RATE, diffNow))
+            this.turnSteeringWheel(turnNow)
+            this.setSpeed(0)
+            return
+          }
+
+          // Opportunistic shots while traveling straight
+          const enemies = this.getScannedRobots()
+          if (enemies.length > 0) {
+            const nearest = enemies[0]
+            if (Math.abs(nearest.bearing) < 8) {
+              this.fire(2)
+            }
+          }
+        }
+      }
+
+      // Add more tank classes here, extending Tank and overriding run()
+      // class MyCustomTank extends Tank {
+      //     run() {
+      //         // Your logic here
+      //     }
+      // }
+
+      // Game class encapsulating state, loop, and UI updates
+      class Game {
+        constructor(canvas, scoreboardEl) {
+          this.canvas = canvas
+          this.ctx = canvas.getContext('2d')
+          this.scoreboardEl = scoreboardEl
+          this.tanks = []
+          this.bullets = []
+          this._stopped = false
+          this._loop = this._loop.bind(this)
+          // Roster (list of tank descriptors to spawn each battle)
+          this.roster = []
+          // Trial mode state
+          this._trialActive = false
+          this._trialsRemaining = 0
+          this._trialWinCounts = {}
+          this._trialResults = []
+          // Draw detection
+          this.prevAliveCount = 0
+          this.drawTimeoutMs = 10000
+          this.lastKillAt = 0
+          // Overlay/banner elements
+          this.overlayEl = document.getElementById('overlay')
+          this.bannerTitleEl = document.getElementById('banner-title')
+          this.bannerBodyEl = document.getElementById('banner-body')
+          this.btnNew = document.getElementById('btn-new')
+          this.btnBest = document.getElementById('btn-best')
+          if (this.btnNew)
+            this.btnNew.onclick = () => {
+              this.hideOverlay()
+              this.startNewBattle()
+            }
+          if (this.btnBest)
+            this.btnBest.onclick = () => {
+              this.hideOverlay()
+              this.runBestOf(3)
+            }
+          // Game speed controls
+          this.timeScale = 1.0
+          this.speedInput = document.getElementById('speed')
+          this.speedLabel = document.getElementById('speed-label')
+          if (this.speedInput) {
+            this.speedInput.addEventListener('input', () => {
+              const val = parseFloat(this.speedInput.value)
+              this.timeScale = isNaN(val) ? 1.0 : val
+              if (this.speedLabel) this.speedLabel.textContent = `${this.timeScale.toFixed(1)}x`
+            })
+          }
+          if (this.speedLabel) this.speedLabel.textContent = `${this.timeScale.toFixed(1)}x`
+        }
+
+        addTank(tank) {
+          tank.game = this
+          this.tanks.push(tank)
+          return tank
+        }
+
+        // Pick a random spawn position inside the arena bounds, avoiding overlap with existing tanks
+        getRandomSpawnPosition(minDistance = TANK_SIZE * 1.8, margin = TANK_RADIUS + 10) {
+          let attempts = 0
+          while (attempts++ < 1000) {
+            const x = margin + Math.random() * (ARENA_WIDTH - 2 * margin)
+            const y = margin + Math.random() * (ARENA_HEIGHT - 2 * margin)
+            let ok = true
+            for (const t of this.tanks) {
+              if (distance(x, y, t.centerX, t.centerY) < minDistance) {
+                ok = false
+                break
+              }
+            }
+            if (ok) return { x, y }
+          }
+          // Fallback (in case of very crowded arena)
+          return {
+            x: margin + Math.random() * (ARENA_WIDTH - 2 * margin),
+            y: margin + Math.random() * (ARENA_HEIGHT - 2 * margin),
+          }
+        }
+
+        updateScoreboard() {
+          const sb = this.scoreboardEl
+          if (!sb) return
+          let html = '<h3>Scoreboard</h3>'
+          html += '<div class="sb-list">'
+          for (const t of this.tanks) {
+            const status = t.alive ? 'Alive' : 'Destroyed'
+            const acc = t.shotsFired > 0 ? Math.round((t.shotsHit / t.shotsFired) * 100) : 0
+            const energyPct = Math.max(0, Math.min(100, t.energy))
+            const useTrialWins =
+              (this._trialWinCounts && Object.keys(this._trialWinCounts).length > 0) ||
+              this._trialActive
+            const winsDisplay = useTrialWins ? this._trialWinCounts[t.name] || 0 : t.wins
+            html += `
+              <div class="sb-entry">
+                <div class="sb-row">
+                  <div class="sb-left">
+                    <span class="sb-dot" style="background:${t.color}"></span>
+                    <strong>${t.name}</strong>
+                  </div>
+                  <span class="sb-status">${status}</span>
+                </div>
+                <div class="sb-bar"><span style="width:${energyPct}%;"></span></div>
+                <div class="sb-meta">
+                  Energy: ${Math.round(t.energy)} | Kills: ${t.kills} | Shots: ${t.shotsFired} | Hits: ${t.shotsHit} | Acc: ${acc}% | Wins: ${winsDisplay}
+                </div>
+              </div>
+            `
+          }
+          html += '</div>'
+          sb.innerHTML = html
+        }
+
+        resolveCollisions() {
+          for (let i = 0; i < this.tanks.length; i++) {
+            for (let j = i + 1; j < this.tanks.length; j++) {
+              const t1 = this.tanks[i]
+              const t2 = this.tanks[j]
+              if (!t1.alive || !t2.alive) continue
+              const distVal = distance(t1.centerX, t1.centerY, t2.centerX, t2.centerY)
+              const minDist = TANK_SIZE
+              if (distVal < minDist && distVal > 0) {
+                const overlap = minDist - distVal
+                const dx = t2.centerX - t1.centerX
+                const dy = t2.centerY - t1.centerY
+                const pushX = (dx / distVal) * (overlap / 2)
+                const pushY = (dy / distVal) * (overlap / 2)
+                t1.centerX -= pushX
+                t1.centerY -= pushY
+                t2.centerX += pushX
+                t2.centerY += pushY
+                // Clamp again
+                t1.centerX = Math.max(TANK_RADIUS, Math.min(ARENA_WIDTH - TANK_RADIUS, t1.centerX))
+                t1.centerY = Math.max(TANK_RADIUS, Math.min(ARENA_HEIGHT - TANK_RADIUS, t1.centerY))
+                t2.centerX = Math.max(TANK_RADIUS, Math.min(ARENA_WIDTH - TANK_RADIUS, t2.centerX))
+                t2.centerY = Math.max(TANK_RADIUS, Math.min(ARENA_HEIGHT - TANK_RADIUS, t2.centerY))
+              }
+            }
+          }
+        }
+
+        _updateBullets(dt) {
+          this.bullets.forEach((b) => b.update(dt))
+          this.bullets = this.bullets.filter((b) => b.active)
+          // Bullet collisions
+          for (const bullet of this.bullets) {
+            for (const tank of this.tanks) {
+              if (tank.alive && tank !== bullet.owner) {
+                tank.hitBy(bullet)
+              }
+            }
+          }
+        }
+
+        _draw() {
+          this.ctx.clearRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT)
+          this.tanks.forEach((t) => t.draw(this.ctx))
+          this.bullets.forEach((b) => b.draw(this.ctx))
+        }
+
+        _now() {
+          return typeof performance !== 'undefined' && performance.now
+            ? performance.now()
+            : Date.now()
+        }
+
+        _loop() {
+          if (this._stopped) return
+          const now = this._now()
+          if (this._lastTime === undefined) this._lastTime = now
+          const dt = ((now - this._lastTime) / (1000 / 60)) * (this.timeScale || 1)
+          this._lastTime = now
+          // Update tanks
+          this.tanks.forEach((t) => t.update(dt))
+          // Resolve collisions between tanks
+          this.resolveCollisions()
+          // Update bullets and apply damage
+          this._updateBullets(dt)
+          // Update UI
+          this.updateScoreboard()
+          // End condition
+          const alive = this.tanks.filter((t) => t.alive)
+          if (this.prevAliveCount === undefined) this.prevAliveCount = alive.length
+          if (alive.length < this.prevAliveCount) {
+            this.lastKillAt = now
+          }
+          this.prevAliveCount = alive.length
+
+          let winners = null
+          let isDraw = false
+          if (alive.length <= 1) {
+            winners = [alive[0] ? alive[0].name : 'None']
+          } else if (now - this.lastKillAt >= this.drawTimeoutMs) {
+            winners = alive.map((t) => t.name)
+            isDraw = true
+          }
+          if (winners) {
+            this._stopped = true
+            this.onBattleFinished(winners, isDraw)
+            return
+          }
+          // Render
+          this._draw()
+          requestAnimationFrame(this._loop)
+        }
+
+        start() {
+          this._stopped = false
+          this.updateScoreboard()
+          requestAnimationFrame(this._loop)
+        }
+
+        // ----- Overlay helpers -----
+        showOverlay(title, bodyHtml) {
+          if (!this.overlayEl) return
+          if (this.bannerTitleEl) this.bannerTitleEl.textContent = title
+          if (this.bannerBodyEl) this.bannerBodyEl.innerHTML = bodyHtml
+          this.overlayEl.style.display = 'flex'
+        }
+        hideOverlay() {
+          if (this.overlayEl) this.overlayEl.style.display = 'none'
+        }
+        showWinnerOverlay(winners, isDraw = false) {
+          if (!Array.isArray(winners)) winners = winners ? [winners] : []
+          if (isDraw) {
+            const list = winners.length ? winners.join(', ') : 'None'
+            const body = `No tank destroyed for 10 seconds.<br/>Survivors (win +1): <strong>${list}</strong>`
+            this.showOverlay('Draw!', body)
+          } else {
+            const name = winners[0] || 'None'
+            const body = name === 'None' ? 'No survivors.' : `Winner: <strong>${name}</strong>`
+            this.showOverlay('Battle Over!', body)
+          }
+        }
+
+        // ----- Roster and battle control -----
+        setDefaultRoster() {
+          this.roster = [
+            { cls: CircleTank, name: 'CircleBot', color: '#00f', heading: 0 },
+            { cls: RamTank, name: 'Rammer', color: '#f00', heading: 180 },
+            { cls: BouncingTank, name: 'Bouncer', color: '#0a0', heading: 90 },
+            { cls: PathTank, name: 'Pathy', color: '#9050ff', heading: 0 },
+            { cls: SniperTank, name: 'Sniper', color: '#222', heading: 0 },
+          ]
+          return this
+        }
+        spawnRoster() {
+          this.tanks = []
+          for (const item of this.roster) {
+            const p = this.getRandomSpawnPosition()
+            const t = new item.cls(item.name, p.x, p.y, item.heading, item.color)
+            this.addTank(t)
+          }
+        }
+        startNewBattle() {
+          this._stopped = true
+          this.bullets = []
+          this.tanks = []
+          // If not in trial mode, clear any prior trial win counts so the
+          // scoreboard's Wins reflect the current context.
+          if (!this._trialActive) {
+            this._trialWinCounts = {}
+          }
+          this.spawnRoster()
+          this.hideOverlay()
+          this._stopped = false
+          this.prevAliveCount = this.tanks.filter((t) => t.alive).length
+          this.lastKillAt = this._now()
+          this._lastTime = this.lastKillAt
+          this.updateScoreboard()
+          requestAnimationFrame(this._loop)
+        }
+
+        runBestOf(n = 3) {
+          this._trialActive = true
+          this._trialsRemaining = n
+          this._trialWinCounts = {}
+          this._trialResults = []
+          this.startNewBattle()
+        }
+        onBattleFinished(winners, isDraw = false) {
+          // Award wins to winners
+          const winnerSet = new Set(Array.isArray(winners) ? winners : [winners])
+          for (const t of this.tanks) {
+            if (winnerSet.has(t.name) && t.name !== 'None') t.wins += 1
+          }
+
+          // Record stats for trial mode
+          if (this._trialActive) {
+            const list = Array.isArray(winners) ? winners : [winners]
+            for (const name of list) {
+              if (!name || name === 'None') continue
+              this._trialWinCounts[name] = (this._trialWinCounts[name] || 0) + 1
+            }
+            // Reflect updated trial wins immediately
+            this.updateScoreboard()
+            this._trialsRemaining -= 1
+            if (this._trialsRemaining > 0) {
+              // Continue to next trial after short pause
+              setTimeout(() => this.startNewBattle(), 400)
+            } else {
+              // Trials complete: compute champion
+              this._trialActive = false
+              let bestName = 'None'
+              let bestWins = -1
+              for (const [name, wins] of Object.entries(this._trialWinCounts)) {
+                if (wins > bestWins) {
+                  bestName = name
+                  bestWins = wins
+                }
+              }
+              const lines =
+                Object.entries(this._trialWinCounts)
+                  .map(([name, wins]) => `${name}: ${wins} win${wins === 1 ? '' : 's'}`)
+                  .join('<br/>') || 'No winners'
+              const body = `Champion (best of 3): <strong>${bestName}</strong><br/><br/>Results:<br/>${lines}`
+              this.showOverlay('Trials Complete', body)
+            }
+          } else {
+            // Update scoreboard for single-battle win display
+            this.updateScoreboard()
+            this.showWinnerOverlay(winners, isDraw)
+          }
+        }
+      }
+
+      // Bootstrap
+      const canvas = document.getElementById('arena')
+      const scoreboard = document.getElementById('scoreboard')
+      const game = new Game(canvas, scoreboard)
+      game.setDefaultRoster()
+      game.startNewBattle()
+    </script>
+  </body>
+</html>
