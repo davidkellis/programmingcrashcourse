@@ -1,0 +1,1359 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gorillas Game</title>
+    <style>
+      body {
+        margin: 0;
+        background: skyblue;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 16px;
+      }
+      canvas {
+        border: 1px solid black;
+        background: white;
+      }
+      .container {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .panel {
+        width: 320px;
+        background: #fff;
+        border: 2px solid #000;
+        border-radius: 6px;
+        padding: 12px 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .panel h2 {
+        margin: 6px 0 10px;
+        font-size: 20px;
+      }
+      .panel .meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 13px;
+        color: #333;
+        margin: 6px 0 12px;
+      }
+      .panel label {
+        display: block;
+        font-size: 12px;
+        margin: 8px 0 4px;
+        color: #333;
+      }
+      .panel input[type='number'],
+      .panel input[type='range'] {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .panel button {
+        margin-top: 10px;
+        padding: 8px 10px;
+        border: 1px solid #333;
+        background: #f7f7f7;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .panel button:hover {
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      <div class="panel">
+        <h2>Gorillas</h2>
+        <div class="meta">
+          <div>Player: <strong id="current-player">1</strong></div>
+          <div>Wind: <strong id="wind-value">0.0</strong></div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 8px">
+          <div style="flex: 1">
+            <label for="p1-type">Player 1</label>
+            <select id="p1-type" style="width: 100%">
+              <option value="human" selected>Human</option>
+              <option value="random">Random Bot</option>
+              <option value="aim">Aiming Bot</option>
+            </select>
+          </div>
+          <div style="flex: 1">
+            <label for="p2-type">Player 2</label>
+            <select id="p2-type" style="width: 100%">
+              <option value="human">Human</option>
+              <option value="random" selected>Random Bot</option>
+              <option value="aim">Aiming Bot</option>
+            </select>
+          </div>
+        </div>
+        <form id="shoot-form">
+          <label for="angle">Angle (degrees)</label>
+          <input id="angle" type="number" min="0" max="90" step="1" value="45" />
+          <input id="angle-range" type="range" min="0" max="90" step="1" value="45" />
+          <label for="velocity">Velocity</label>
+          <input id="velocity" type="number" min="5" max="120" step="1" value="50" />
+          <input id="velocity-range" type="range" min="5" max="120" step="1" value="50" />
+          <div>
+            <button id="btn-throw" type="submit">Throw</button>
+            <button id="btn-new" type="button">New Game</button>
+          </div>
+        </form>
+        <div style="font-size: 12px; color: #333; margin-top: 8px">
+          Tip: 0° is straight, 90° is straight up. Increase velocity to throw farther.
+        </div>
+      </div>
+    </div>
+    <script>
+      const canvas = document.getElementById('gameCanvas')
+      const ctx = canvas.getContext('2d')
+      // UI elements
+      const form = document.getElementById('shoot-form')
+      const angleInput = document.getElementById('angle')
+      const angleRange = document.getElementById('angle-range')
+      const velocityInput = document.getElementById('velocity')
+      const velocityRange = document.getElementById('velocity-range')
+      const windValueEl = document.getElementById('wind-value')
+      const currentPlayerEl = document.getElementById('current-player')
+      const newGameBtn = document.getElementById('btn-new')
+      const p1Select = document.getElementById('p1-type')
+      const p2Select = document.getElementById('p2-type')
+      function clamp(n, min, max) {
+        return Math.max(min, Math.min(max, n))
+      }
+      function setControlsEnabled(enabled) {
+        ;[angleInput, angleRange, velocityInput, velocityRange].forEach((el) => {
+          if (el) el.disabled = !enabled
+        })
+        const throwBtn = document.getElementById('btn-throw')
+        if (throwBtn) throwBtn.disabled = !enabled
+      }
+      function updateUI() {
+        if (currentPlayerEl) currentPlayerEl.textContent = String(currentPlayer)
+        if (windValueEl) windValueEl.textContent = wind.toFixed(1)
+      }
+      // Sync sliders and numbers
+      if (angleInput && angleRange) {
+        angleInput.addEventListener('input', () => (angleRange.value = angleInput.value))
+        angleRange.addEventListener('input', () => (angleInput.value = angleRange.value))
+      }
+      if (velocityInput && velocityRange) {
+        velocityInput.addEventListener('input', () => (velocityRange.value = velocityInput.value))
+        velocityRange.addEventListener('input', () => (velocityInput.value = velocityRange.value))
+      }
+
+      // Game constants
+      const GRAVITY = 9.81
+      const GORILLA_SIZE = 20
+      const BANANA_SIZE = 5
+      const WIND_MAX = 10
+      const TERRAIN_MIN_Y = canvas.height - 240
+      const TERRAIN_MAX_Y = canvas.height - 60
+      const PLAYER1_ACCENT = '#2ecc40' // bright green
+      const PLAYER2_ACCENT = '#ff3ab9' // magenta/pink
+      const GORILLA_BODY = '#5a3b2e'
+      const GORILLA_OUTLINE = '#3c291f'
+      const TRAJ1_COLOR = 'rgba(46,204,64,0.7)'
+      const TRAJ2_COLOR = 'rgba(255,58,185,0.7)'
+      const CRATER_BASE_RADIUS = 34
+      const CRATER_BASE_DEPTH = 18
+
+      // OO: Terrain, Projectile, AimAssistant
+      class Terrain {
+        constructor(width, minY, maxY) {
+          this.width = width
+          this.minY = minY
+          this.maxY = maxY
+          this.heights = new Float32Array(width)
+        }
+        generate() {
+          const base = (this.minY + this.maxY) / 2
+          const a1 = 40 + Math.random() * 50
+          const a2 = 20 + Math.random() * 30
+          const a3 = 10 + Math.random() * 20
+          const f1 = (2 * Math.PI) / (200 + Math.random() * 250)
+          const f2 = (2 * Math.PI) / (90 + Math.random() * 130)
+          const f3 = (2 * Math.PI) / (35 + Math.random() * 60)
+          const p1 = Math.random() * Math.PI * 2
+          const p2 = Math.random() * Math.PI * 2
+          const p3 = Math.random() * Math.PI * 2
+          for (let x = 0; x < this.width; x++) {
+            let y =
+              base +
+              a1 * Math.sin(f1 * x + p1) +
+              a2 * Math.sin(f2 * x + p2) +
+              a3 * Math.sin(f3 * x + p3)
+            if (y < this.minY) y = this.minY
+            if (y > this.maxY) y = this.maxY
+            this.heights[x] = y
+          }
+          for (let x = 1; x < this.width - 1; x++) {
+            this.heights[x] = (this.heights[x - 1] + this.heights[x] + this.heights[x + 1]) / 3
+          }
+        }
+        heightAt(x) {
+          if (x <= 0) return this.heights[0]
+          if (x >= this.width - 1) return this.heights[this.width - 1]
+          const xi = Math.floor(x)
+          const t = x - xi
+          const y0 = this.heights[xi]
+          const y1 = this.heights[xi + 1]
+          return y0 * (1 - t) + y1 * t
+        }
+        crater(cx, radius = CRATER_BASE_RADIUS, depth = CRATER_BASE_DEPTH) {
+          const minX = Math.max(0, Math.floor(cx - radius))
+          const maxX = Math.min(this.width - 1, Math.ceil(cx + radius))
+          for (let x = minX; x <= maxX; x++) {
+            const dx = x - cx
+            const dist = Math.abs(dx)
+            if (dist <= radius) {
+              const factor = 1 - (dist / radius) ** 2
+              const delta = depth * factor
+              this.heights[x] = Math.min(this.maxY, this.heights[x] + delta)
+            }
+          }
+          for (let x = Math.max(1, minX); x <= Math.min(this.width - 2, maxX); x++) {
+            this.heights[x] = (this.heights[x - 1] + this.heights[x] + this.heights[x + 1]) / 3
+          }
+        }
+        draw(ctx) {
+          ctx.fillStyle = '#e6e6e6'
+          ctx.beginPath()
+          ctx.moveTo(0, canvas.height)
+          ctx.lineTo(0, this.heights[0])
+          for (let x = 1; x < this.width; x++) ctx.lineTo(x, this.heights[x])
+          ctx.lineTo(this.width, canvas.height)
+          ctx.closePath()
+          ctx.fill()
+          ctx.strokeStyle = '#aaa'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(0, this.heights[0])
+          for (let x = 1; x < this.width; x++) ctx.lineTo(x, this.heights[x])
+          ctx.stroke()
+        }
+      }
+
+      class Projectile {
+        constructor(x, y, vx, vy) {
+          this.x = x
+          this.y = y
+          this.vx = vx
+          this.vy = vy
+        }
+        step(wind, gravity) {
+          this.x += this.vx + wind / 10
+          this.y += this.vy
+          this.vy += gravity / 10
+          return { x: this.x, y: this.y }
+        }
+        static simulate(angle, velocity, startX, startY, targetX, targetY, env = {}) {
+          const rad = (angle * Math.PI) / 180
+          const dir = startX < targetX ? 1 : -1
+          const vx = velocity * Math.cos(rad) * dir
+          let vy = -velocity * Math.sin(rad)
+          let x = startX
+          let y = startY
+          const windLocal = typeof env.wind === 'number' ? env.wind : 0
+          const gravityLocal = typeof env.gravity === 'number' ? env.gravity : GRAVITY
+          const groundAt =
+            typeof env.groundHeightAt === 'function' ? env.groundHeightAt : (xx) => canvas.height
+          const worldWidth = typeof env.worldWidth === 'number' ? env.worldWidth : canvas.width
+          const gorillaSize = typeof env.gorillaSize === 'number' ? env.gorillaSize : GORILLA_SIZE
+          let minDist = Infinity
+          let collidedBeforeTarget = false
+          for (let i = 0; i < 1000; i++) {
+            x += vx + windLocal / 10
+            y += vy
+            vy += gravityLocal / 10
+            const d = Math.hypot(x - targetX, y - (targetY + gorillaSize / 2))
+            if (d < minDist) minDist = d
+            if (x < 0 || x > worldWidth) break
+            if (y >= groundAt(x)) {
+              collidedBeforeTarget = dir > 0 ? x < targetX : x > targetX
+              break
+            }
+          }
+          return { minDist, collidedBeforeTarget }
+        }
+      }
+
+      class AimAssistant {
+        evaluate(angle, velocity, from, to, env) {
+          return Projectile.simulate(angle, velocity, from.x, from.y, to.x, to.y, env)
+        }
+        gridSearch(angleList, velocityList, from, to, env) {
+          let best = { score: Infinity, angle: 45, velocity: 60 }
+          for (const a of angleList) {
+            for (const v of velocityList) {
+              const res = this.evaluate(a, v, from, to, env)
+              const penalty = res.collidedBeforeTarget ? 2000 : 0
+              const score = res.minDist + penalty
+              if (score < best.score) best = { score, angle: a, velocity: v }
+            }
+          }
+          return { angle: best.angle, velocity: best.velocity, score: best.score }
+        }
+        refine(
+          shot,
+          from,
+          to,
+          angleSteps = [-6, -3, 0, 3, 6],
+          velSteps = [-10, -5, 0, 5, 10],
+          iterations = 2,
+          env,
+        ) {
+          let best = { angle: shot.angle, velocity: shot.velocity }
+          let bestScore = this._score(best, from, to, env)
+          for (let k = 0; k < iterations; k++) {
+            let improved = false
+            for (const da of angleSteps) {
+              for (const dv of velSteps) {
+                const a2 = clamp(best.angle + da, 0, 90)
+                const v2 = clamp(best.velocity + dv, 5, 120)
+                const s = this._score({ angle: a2, velocity: v2 }, from, to, env)
+                if (s + 0.01 < bestScore) {
+                  bestScore = s
+                  best = { angle: a2, velocity: v2 }
+                  improved = true
+                }
+              }
+            }
+            if (!improved) break
+          }
+          return best
+        }
+        feedbackAdjust(prevShot, outcome, env) {
+          if (!prevShot || !outcome) return null
+          if (outcome.hit) return prevShot
+          const baseA = prevShot.angle
+          const baseV = prevShot.velocity
+          const tryAngles = [baseA - 4, baseA, baseA + 4]
+          const tryVels = [baseV + (outcome.short ? 10 : -10), baseV + (outcome.short ? 6 : -6)]
+          const from = { x: outcome.fromX ?? 0, y: outcome.fromY ?? 0 }
+          const to = { x: outcome.targetX ?? 0, y: outcome.targetY ?? 0 }
+          let best = { angle: baseA, velocity: baseV }
+          let bestScore = Infinity
+          for (const a of tryAngles) {
+            for (const v of tryVels) {
+              const s = this._score(
+                { angle: clamp(a, 0, 90), velocity: clamp(v, 5, 120) },
+                from,
+                to,
+                env,
+              )
+              if (s < bestScore) {
+                bestScore = s
+                best = { angle: clamp(a, 0, 90), velocity: clamp(v, 5, 120) }
+              }
+            }
+          }
+          best.angle = clamp(best.angle + randomInRange(-1.2, 1.2), 0, 90)
+          best.velocity = clamp(best.velocity + randomInRange(-3, 3), 5, 120)
+          return best
+        }
+        _score(shot, from, to, env) {
+          const res = this.evaluate(shot.angle, shot.velocity, from, to, env)
+          return res.minDist + (res.collidedBeforeTarget ? 2000 : 0)
+        }
+      }
+
+      class Gorilla {
+        constructor(x, y, accentColor) {
+          this.x = x
+          this.y = y
+          this.accent = accentColor || '#000'
+        }
+        getSize() {
+          return GORILLA_SIZE
+        }
+        standOnTerrain(terrain) {
+          if (!terrain) return
+          this.y = terrain.heightAt(this.x) - GORILLA_SIZE
+        }
+        draw(ctx) {
+          const feetY = this.y + GORILLA_SIZE
+          ctx.save()
+          ctx.translate(this.x, this.y)
+          ctx.fillStyle = GORILLA_BODY
+          ctx.strokeStyle = GORILLA_OUTLINE
+          ctx.lineWidth = 1.5
+          ctx.beginPath()
+          ctx.ellipse(0, GORILLA_SIZE - 8, 10, 12, 0, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.stroke()
+          ctx.beginPath()
+          ctx.arc(0, GORILLA_SIZE - 22, 6, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.stroke()
+          ctx.beginPath()
+          ctx.arc(-5, GORILLA_SIZE - 24, 2, 0, Math.PI * 2)
+          ctx.arc(5, GORILLA_SIZE - 24, 2, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.stroke()
+          ctx.fillStyle = '#8a5b3c'
+          ctx.beginPath()
+          ctx.ellipse(0, GORILLA_SIZE - 20, 5, 3, 0, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.fillStyle = '#000'
+          ctx.beginPath()
+          ctx.arc(-2, GORILLA_SIZE - 22.5, 0.8, 0, Math.PI * 2)
+          ctx.arc(2, GORILLA_SIZE - 22.5, 0.8, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.fillStyle = '#7b5845'
+          ctx.beginPath()
+          ctx.ellipse(0, GORILLA_SIZE - 10, 6, 4, 0, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.fillStyle = GORILLA_BODY
+          ctx.strokeStyle = this.accent
+          ctx.lineWidth = 3
+          ctx.beginPath()
+          ctx.moveTo(-6, GORILLA_SIZE - 23)
+          ctx.lineTo(6, GORILLA_SIZE - 23)
+          ctx.stroke()
+          ctx.strokeStyle = GORILLA_OUTLINE
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(-6, GORILLA_SIZE - 16)
+          ctx.lineTo(-12, GORILLA_SIZE - 26)
+          ctx.moveTo(6, GORILLA_SIZE - 16)
+          ctx.lineTo(12, GORILLA_SIZE - 26)
+          ctx.stroke()
+          ctx.strokeStyle = this.accent
+          ctx.lineWidth = 3
+          ctx.beginPath()
+          ctx.moveTo(-10, GORILLA_SIZE)
+          ctx.lineTo(10, GORILLA_SIZE)
+          ctx.stroke()
+          ctx.restore()
+        }
+      }
+
+      class RobotPitcherAvatar {
+        constructor(x, y, accentColor) {
+          this.x = x
+          this.y = y
+          this.accent = accentColor || '#000'
+        }
+        getSize() {
+          return GORILLA_SIZE
+        }
+        standOnTerrain(terrain) {
+          if (!terrain) return
+          this.y = terrain.heightAt(this.x) - this.getSize()
+        }
+        draw(ctx) {
+          const size = this.getSize()
+          ctx.save()
+          ctx.translate(this.x, this.y)
+          // Legs/base
+          ctx.fillStyle = '#888'
+          ctx.fillRect(-8, size - 6, 16, 6)
+          // Body
+          ctx.fillStyle = '#bbb'
+          ctx.strokeStyle = '#666'
+          ctx.lineWidth = 1.5
+          ctx.fillRect(-7, size - 20, 14, 14)
+          ctx.strokeRect(-7, size - 20, 14, 14)
+          // Head
+          ctx.fillStyle = '#ccc'
+          ctx.strokeStyle = '#666'
+          ctx.fillRect(-5, size - 28, 10, 8)
+          ctx.strokeRect(-5, size - 28, 10, 8)
+          // Eyes
+          ctx.fillStyle = '#222'
+          ctx.fillRect(-3, size - 26, 2, 2)
+          ctx.fillRect(1, size - 26, 2, 2)
+          // Antenna
+          ctx.strokeStyle = this.accent
+          ctx.beginPath()
+          ctx.moveTo(0, size - 28)
+          ctx.lineTo(0, size - 32)
+          ctx.stroke()
+          ctx.beginPath()
+          ctx.arc(0, size - 33.5, 1.5, 0, Math.PI * 2)
+          ctx.fillStyle = this.accent
+          ctx.fill()
+          // Pitching arm
+          ctx.strokeStyle = this.accent
+          ctx.lineWidth = 2.5
+          ctx.beginPath()
+          ctx.moveTo(7, size - 18)
+          ctx.lineTo(14, size - 28)
+          ctx.stroke()
+          // Glove/hand
+          ctx.beginPath()
+          ctx.arc(14, size - 28, 2, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.restore()
+        }
+      }
+
+      class TankAvatar {
+        constructor(x, y, accentColor) {
+          this.x = x
+          this.y = y
+          this.accent = accentColor || '#000'
+        }
+        getSize() {
+          return GORILLA_SIZE
+        }
+        standOnTerrain(terrain) {
+          if (!terrain) return
+          this.y = terrain.heightAt(this.x) - this.getSize()
+        }
+        draw(ctx) {
+          const size = this.getSize()
+          ctx.save()
+          ctx.translate(this.x, this.y)
+          // Tracks/base
+          ctx.fillStyle = '#3d3d3d'
+          ctx.fillRect(-10, size - 6, 20, 6)
+          // Hull
+          ctx.fillStyle = '#4f6d5a'
+          ctx.strokeStyle = '#2f4037'
+          ctx.lineWidth = 1.5
+          ctx.fillRect(-9, size - 16, 18, 10)
+          ctx.strokeRect(-9, size - 16, 18, 10)
+          // Turret
+          ctx.fillStyle = '#6e8a7a'
+          ctx.fillRect(-5, size - 22, 10, 6)
+          // Barrel
+          ctx.strokeStyle = this.accent
+          ctx.lineWidth = 3
+          ctx.beginPath()
+          ctx.moveTo(5, size - 19)
+          ctx.lineTo(14, size - 22)
+          ctx.stroke()
+          // Accent stripe
+          ctx.strokeStyle = this.accent
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(-9, size - 14)
+          ctx.lineTo(9, size - 14)
+          ctx.stroke()
+          ctx.restore()
+        }
+      }
+
+      function createAvatar(avatarType, x, y, accentColor) {
+        switch (avatarType) {
+          case 'robot':
+            return new RobotPitcherAvatar(x, y, accentColor)
+          case 'tank':
+            return new TankAvatar(x, y, accentColor)
+          case 'gorilla':
+          default:
+            return new Gorilla(x, y, accentColor)
+        }
+      }
+
+      // Game state
+      let terrain = new Float32Array(canvas.width) // legacy buffer (unused by OO Terrain)
+      let terrainObj = null
+      let gorilla1 = { x: 0, y: 0 }
+      let gorilla2 = { x: 0, y: 0 }
+      let currentPlayer = 1
+      let wind = Math.random() * WIND_MAX * 2 - WIND_MAX
+      let gameOver = false
+      let bananaInterval = null
+      let lastTrajByPlayer = { 1: [], 2: [] }
+      let players = [] // [p1, p2]
+      let activeGame = null
+
+      // OOP: Players
+      class BasePlayer {
+        constructor(id, name, accentColor, avatarType = 'gorilla') {
+          this.id = id // 1 or 2
+          this.name = name
+          this.accent = accentColor
+          this.avatarType = avatarType
+        }
+        get isHuman() {
+          return false
+        }
+        async getShot(info) {
+          return { angle: 45, velocity: 60 }
+        }
+        learn(result) {
+          // Default: no-op
+        }
+        // --- General-purpose helpers shared by players ---
+        delay(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms))
+        }
+        buildEnvironment(info = {}) {
+          return {
+            wind:
+              typeof info.wind === 'number'
+                ? info.wind
+                : ((activeGame ? activeGame.wind : wind) ?? 0),
+            gravity: typeof info.gravity === 'number' ? info.gravity : GRAVITY,
+            groundHeightAt:
+              typeof info.groundHeightAt === 'function'
+                ? info.groundHeightAt
+                : (x) => (activeGame ? activeGame.groundHeightAt(x) : groundHeightAt(x)),
+            worldWidth:
+              typeof info.worldWidth === 'number'
+                ? info.worldWidth
+                : activeGame
+                  ? activeGame.canvas.width
+                  : canvas.width,
+            gorillaSize: typeof info.gorillaSize === 'number' ? info.gorillaSize : GORILLA_SIZE,
+          }
+        }
+        evaluateShot(shot, from, to, env) {
+          return Projectile.simulate(shot.angle, shot.velocity, from.x, from.y, to.x, to.y, env)
+        }
+        scoreShot(shot, from, to, env) {
+          const res = this.evaluateShot(shot, from, to, env)
+          return res.minDist + (res.collidedBeforeTarget ? 2000 : 0)
+        }
+        pickBetterShot(a, b, from, to, env) {
+          if (!a) return b
+          if (!b) return a
+          const sa = this.scoreShot(a, from, to, env)
+          const sb = this.scoreShot(b, from, to, env)
+          return sa <= sb ? a : b
+        }
+        jitterShot(shot, angleJitter = 1.5, velocityJitter = 3) {
+          return {
+            angle: clamp(shot.angle + randomInRange(-angleJitter, angleJitter), 0, 90),
+            velocity: clamp(shot.velocity + randomInRange(-velocityJitter, velocityJitter), 5, 120),
+          }
+        }
+      }
+
+      class HumanPlayer extends BasePlayer {
+        get isHuman() {
+          return true
+        }
+        async getShot(info) {
+          return new Promise((resolve) => {
+            if (!activeGame) {
+              resolve({ angle: 45, velocity: 60 })
+              return
+            }
+            activeGame.humanTurnResolver = (shot) => {
+              activeGame.humanTurnResolver = null
+              resolve(shot)
+            }
+          })
+        }
+      }
+
+      class RandomBot extends BasePlayer {
+        constructor(id, name, accentColor, avatarType = 'tank') {
+          super(id, name, accentColor, avatarType)
+        }
+        async getShot(info) {
+          const angle = 15 + Math.random() * 60
+          const velocity = 35 + Math.random() * 70
+          return { angle, velocity }
+        }
+      }
+
+      class AimingBot extends BasePlayer {
+        constructor(id, name, accentColor) {
+          super(id, name, accentColor)
+          this.prevShot = null
+          this.prevOutcome = null
+          this.aim = new AimAssistant()
+        }
+        async getShot(info) {
+          const { from, to } = this._extractPositions(info)
+          const env = this.buildEnvironment(info)
+
+          const adjusted = this._attemptFeedbackAdjustment(from, to, env)
+          if (adjusted) return this._finalize(adjusted)
+
+          const coarse = this._coarseSearch(from, to, env)
+          const seeded = this._considerPreviousShot(coarse, from, to, env)
+          const refined = this._refineShot(seeded, from, to, env)
+          return this._finalize(refined)
+        }
+        learn(result) {
+          this.prevOutcome = result
+        }
+        _extractPositions(info) {
+          return {
+            from: { x: info.fromX, y: info.fromY },
+            to: { x: info.targetX, y: info.targetY },
+          }
+        }
+        _attemptFeedbackAdjustment(from, to, env) {
+          if (this.prevShot && this.prevOutcome && !this.prevOutcome.hit) {
+            const adjusted = this.aim.feedbackAdjust(
+              this.prevShot,
+              {
+                ...this.prevOutcome,
+                fromX: from.x,
+                fromY: from.y,
+                targetX: to.x,
+                targetY: to.y,
+              },
+              env,
+            )
+            if (adjusted) return { angle: adjusted.angle, velocity: adjusted.velocity }
+          }
+          return null
+        }
+        _coarseSearch(from, to, env) {
+          const baseAngles = [20, 30, 40, 50, 60, 70]
+          const baseVelocities = [40, 55, 70, 85, 100]
+          const best = this.aim.gridSearch(baseAngles, baseVelocities, from, to, env)
+          return { angle: best.angle, velocity: best.velocity }
+        }
+        _considerPreviousShot(candidate, from, to, env) {
+          if (!this.prevShot) return candidate
+          const prev = { angle: this.prevShot.angle, velocity: this.prevShot.velocity }
+          return this.pickBetterShot(prev, candidate, from, to, env)
+        }
+        _refineShot(shot, from, to, env) {
+          const refined = this.aim.refine(
+            { angle: shot.angle, velocity: shot.velocity },
+            from,
+            to,
+            undefined,
+            undefined,
+            undefined,
+            env,
+          )
+          return { angle: refined.angle, velocity: refined.velocity }
+        }
+        _finalize(shot) {
+          const withNoise = this.jitterShot(shot, 1.5, 3)
+          this.prevShot = withNoise
+          return withNoise
+        }
+      }
+
+      class Game {
+        constructor(canvas, ctx) {
+          this.canvas = canvas
+          this.ctx = ctx
+          this.terrain = null
+          this.players = []
+          this.currentPlayer = 1
+          this.wind = Math.random() * WIND_MAX * 2 - WIND_MAX
+          this.gameOver = false
+          this.bananaInterval = null
+          this.lastTrajByPlayer = { 1: [], 2: [] }
+          this.humanTurnResolver = null
+          this.avatar1 = createAvatar('gorilla', 0, 0, PLAYER1_ACCENT)
+          this.avatar2 = createAvatar('gorilla', 0, 0, PLAYER2_ACCENT)
+        }
+        setControlsEnabled(enabled) {
+          ;[angleInput, angleRange, velocityInput, velocityRange].forEach((el) => {
+            if (el) el.disabled = !enabled
+          })
+          const throwBtn = document.getElementById('btn-throw')
+          if (throwBtn) throwBtn.disabled = !enabled
+        }
+        updateUI() {
+          if (currentPlayerEl) currentPlayerEl.textContent = String(this.currentPlayer)
+          if (windValueEl) windValueEl.textContent = this.wind.toFixed(1)
+        }
+        groundHeightAt(x) {
+          return this.terrain ? this.terrain.heightAt(x) : this.canvas.height
+        }
+        generateTerrain() {
+          this.terrain = new Terrain(this.canvas.width, TERRAIN_MIN_Y, TERRAIN_MAX_Y)
+          this.terrain.generate()
+        }
+        drawTerrain() {
+          if (this.terrain) this.terrain.draw(this.ctx)
+        }
+        makeCrater(cx, radius = CRATER_BASE_RADIUS, depth = CRATER_BASE_DEPTH) {
+          if (this.terrain) this.terrain.crater(cx, radius, depth)
+        }
+        configurePlayersFromUI() {
+          const p1Type = (p1Select && p1Select.value) || 'human'
+          const p2Type = (p2Select && p2Select.value) || 'random'
+          this.players = [
+            p1Type === 'human'
+              ? new HumanPlayer(1, 'Player 1', PLAYER1_ACCENT, 'gorilla')
+              : p1Type === 'aim'
+                ? new AimingBot(1, 'Aiming Bot', PLAYER1_ACCENT, 'robot')
+                : new RandomBot(1, 'Random Bot', PLAYER1_ACCENT, 'tank'),
+            p2Type === 'human'
+              ? new HumanPlayer(2, 'Player 2', PLAYER2_ACCENT, 'gorilla')
+              : p2Type === 'aim'
+                ? new AimingBot(2, 'Aiming Bot', PLAYER2_ACCENT, 'robot')
+                : new RandomBot(2, 'Random Bot', PLAYER2_ACCENT, 'tank'),
+          ]
+          // Keep avatar accents in sync (recreated on start)
+        }
+        start() {
+          this.generateTerrain()
+          this.configurePlayersFromUI()
+          const leftX = Math.floor(60 + Math.random() * 180)
+          const rightX = Math.floor(this.canvas.width - (60 + Math.random() * 180))
+          const p1AvatarType = this.players[0]?.avatarType || 'gorilla'
+          const p2AvatarType = this.players[1]?.avatarType || 'gorilla'
+          this.avatar1 = createAvatar(
+            p1AvatarType,
+            leftX,
+            0,
+            this.players[0]?.accent || PLAYER1_ACCENT,
+          )
+          this.avatar2 = createAvatar(
+            p2AvatarType,
+            rightX,
+            0,
+            this.players[1]?.accent || PLAYER2_ACCENT,
+          )
+          if (this.terrain) {
+            if (typeof this.avatar1.standOnTerrain === 'function')
+              this.avatar1.standOnTerrain(this.terrain)
+            if (typeof this.avatar2.standOnTerrain === 'function')
+              this.avatar2.standOnTerrain(this.terrain)
+          }
+          this.wind = Math.random() * WIND_MAX * 2 - WIND_MAX
+          this.currentPlayer = 1
+          this.gameOver = false
+          this.lastTrajByPlayer = { 1: [], 2: [] }
+          this.draw()
+          this.updateUI()
+          this.setControlsEnabled(true)
+          this.takeTurn()
+        }
+        draw() {
+          const ctx = this.ctx
+          const canvas = this.canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.fillStyle = 'skyblue'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ctx.fillStyle = 'yellow'
+          ctx.beginPath()
+          ctx.arc(canvas.width / 2, 100, 50, 0, Math.PI * 2)
+          ctx.fill()
+          this.drawTerrain()
+          if (this.terrain) {
+            if (typeof this.avatar1.standOnTerrain === 'function')
+              this.avatar1.standOnTerrain(this.terrain)
+            if (typeof this.avatar2.standOnTerrain === 'function')
+              this.avatar2.standOnTerrain(this.terrain)
+          }
+          if (typeof this.avatar1.draw === 'function') this.avatar1.draw(ctx)
+          if (typeof this.avatar2.draw === 'function') this.avatar2.draw(ctx)
+          if (this.lastTrajByPlayer[1] && this.lastTrajByPlayer[1].length > 1) {
+            ctx.strokeStyle = this.players[0]?.accent || PLAYER1_ACCENT
+            ctx.lineWidth = 2
+            ctx.beginPath()
+            ctx.moveTo(this.lastTrajByPlayer[1][0].x, this.lastTrajByPlayer[1][0].y)
+            for (let i = 1; i < this.lastTrajByPlayer[1].length; i++) {
+              ctx.lineTo(this.lastTrajByPlayer[1][i].x, this.lastTrajByPlayer[1][i].y)
+            }
+            ctx.stroke()
+          }
+          if (this.lastTrajByPlayer[2] && this.lastTrajByPlayer[2].length > 1) {
+            ctx.strokeStyle = this.players[1]?.accent || PLAYER2_ACCENT
+            ctx.lineWidth = 2
+            ctx.beginPath()
+            ctx.moveTo(this.lastTrajByPlayer[2][0].x, this.lastTrajByPlayer[2][0].y)
+            for (let i = 1; i < this.lastTrajByPlayer[2].length; i++) {
+              ctx.lineTo(this.lastTrajByPlayer[2][i].x, this.lastTrajByPlayer[2][i].y)
+            }
+            ctx.stroke()
+          }
+          ctx.fillStyle = 'black'
+          ctx.font = '16px Arial'
+          ctx.fillText(`Wind: ${this.wind.toFixed(1)}`, canvas.width / 2 - 40, 20)
+        }
+        throwBanana(angle, velocity) {
+          const ctx = this.ctx
+          const canvas = this.canvas
+          const rad = (angle * Math.PI) / 180
+          let posX = this.currentPlayer === 1 ? this.avatar1.x : this.avatar2.x
+          let posY = this.currentPlayer === 1 ? this.avatar1.y : this.avatar2.y
+          const startX = posX
+          const startY = posY
+          const velX = velocity * Math.cos(rad) * (this.currentPlayer === 1 ? 1 : -1)
+          let velY = -velocity * Math.sin(rad)
+          this.setControlsEnabled(false)
+          if (this.bananaInterval) clearInterval(this.bananaInterval)
+          const traj = []
+          let minDist = Infinity
+          this.bananaInterval = setInterval(() => {
+            posX += velX + this.wind / 10
+            posY += velY
+            velY += GRAVITY / 10
+            this.draw()
+            ctx.fillStyle = 'yellow'
+            ctx.beginPath()
+            ctx.arc(posX, posY, BANANA_SIZE, 0, Math.PI * 2)
+            ctx.fill()
+            traj.push({ x: posX, y: posY })
+            const opponent = this.currentPlayer === 1 ? this.avatar2 : this.avatar1
+            const targetSize =
+              typeof opponent.getSize === 'function' ? opponent.getSize() : GORILLA_SIZE
+            const dNow = Math.hypot(posX - opponent.x, posY - (opponent.y + targetSize / 2))
+            if (dNow < minDist) minDist = dNow
+            if (
+              Math.abs(posX - opponent.x) < targetSize / 2 + BANANA_SIZE &&
+              Math.abs(posY - opponent.y - targetSize / 2) < targetSize / 2 + BANANA_SIZE
+            ) {
+              clearInterval(this.bananaInterval)
+              this.bananaInterval = null
+              this.lastTrajByPlayer[this.currentPlayer] = traj
+              const shooter = this.players[this.currentPlayer - 1]
+              if (shooter && typeof shooter.learn === 'function') {
+                shooter.learn({
+                  hit: true,
+                  short: false,
+                  minDist,
+                  angle,
+                  velocity,
+                  fromX: startX,
+                  fromY: startY,
+                  targetX: opponent.x,
+                  targetY: opponent.y,
+                })
+              }
+              alert(`Player ${this.currentPlayer} wins!`)
+              this.gameOver = true
+              this.start()
+              return
+            }
+            if (posX < 0 || posX > canvas.width || posY >= this.groundHeightAt(posX)) {
+              clearInterval(this.bananaInterval)
+              this.bananaInterval = null
+              this.lastTrajByPlayer[this.currentPlayer] = traj
+              if (posX >= 0 && posX <= canvas.width) {
+                const craterRadius = CRATER_BASE_RADIUS + Math.min(20, velocity * 0.2)
+                const craterDepth = CRATER_BASE_DEPTH + Math.min(12, velocity * 0.1)
+                this.makeCrater(posX, craterRadius, craterDepth)
+              }
+              const shooter = this.players[this.currentPlayer - 1]
+              if (shooter && typeof shooter.learn === 'function') {
+                const targetX = (this.currentPlayer === 1 ? this.avatar2 : this.avatar1).x
+                const short = this.currentPlayer === 1 ? posX < targetX : posX > targetX
+                const opponent = this.currentPlayer === 1 ? this.avatar2 : this.avatar1
+                shooter.learn({
+                  hit: false,
+                  short,
+                  minDist,
+                  angle,
+                  velocity,
+                  fromX: startX,
+                  fromY: startY,
+                  targetX: opponent.x,
+                  targetY: opponent.y,
+                })
+              }
+              this.draw()
+              this.nextTurn()
+              return
+            }
+          }, 20)
+        }
+        nextTurn() {
+          this.currentPlayer = this.currentPlayer === 1 ? 2 : 1
+          this.draw()
+          this.updateUI()
+          this.setControlsEnabled(true)
+          this.takeTurn()
+        }
+        async takeTurn() {
+          if (this.gameOver) return
+          const me = this.players[this.currentPlayer - 1]
+          const self = this.currentPlayer === 1 ? this.avatar1 : this.avatar2
+          const opp = this.currentPlayer === 1 ? this.avatar2 : this.avatar1
+          this.updateUI()
+          if (me && me.isHuman) this.setControlsEnabled(true)
+          else this.setControlsEnabled(false)
+          const shot = await me.getShot({
+            fromX: self.x,
+            fromY: self.y,
+            targetX: opp.x,
+            targetY: opp.y,
+            wind: this.wind,
+            gravity: GRAVITY,
+            groundHeightAt: (x) => this.groundHeightAt(x),
+            worldWidth: this.canvas.width,
+            gorillaSize: typeof opp.getSize === 'function' ? opp.getSize() : GORILLA_SIZE,
+          })
+          this.throwBanana(shot.angle, shot.velocity)
+        }
+        onHumanFormSubmit(angle, velocity) {
+          if (this.gameOver || this.bananaInterval) return
+          const me = this.players[this.currentPlayer - 1]
+          if (me && me.isHuman) {
+            if (this.humanTurnResolver) {
+              this.humanTurnResolver({ angle, velocity })
+              this.humanTurnResolver = null
+            } else {
+              this.throwBanana(angle, velocity)
+            }
+          }
+        }
+        isProjectileInFlight() {
+          return !!this.bananaInterval
+        }
+      }
+
+      function simulateShotDistance(angle, velocity, startX, startY, targetX, targetY) {
+        const env = {
+          wind: activeGame ? activeGame.wind : wind,
+          gravity: GRAVITY,
+          groundHeightAt: (x) => groundHeightAt(x),
+          worldWidth: activeGame ? activeGame.canvas.width : canvas.width,
+          gorillaSize: GORILLA_SIZE,
+        }
+        return Projectile.simulate(angle, velocity, startX, startY, targetX, targetY, env).minDist
+      }
+
+      function simulateShot(angle, velocity, startX, startY, targetX, targetY) {
+        const env = {
+          wind: activeGame ? activeGame.wind : wind,
+          gravity: GRAVITY,
+          groundHeightAt: (x) => groundHeightAt(x),
+          worldWidth: activeGame ? activeGame.canvas.width : canvas.width,
+          gorillaSize: GORILLA_SIZE,
+        }
+        return Projectile.simulate(angle, velocity, startX, startY, targetX, targetY, env)
+      }
+
+      function randomInRange(min, max) {
+        return min + Math.random() * (max - min)
+      }
+
+      function configurePlayersFromUI() {
+        const p1Type = (p1Select && p1Select.value) || 'human'
+        const p2Type = (p2Select && p2Select.value) || 'random'
+        players = [
+          p1Type === 'human'
+            ? new HumanPlayer(1, 'Player 1', PLAYER1_ACCENT)
+            : p1Type === 'aim'
+              ? new AimingBot(1, 'Aiming Bot', PLAYER1_ACCENT)
+              : new RandomBot(1, 'Random Bot', PLAYER1_ACCENT),
+          p2Type === 'human'
+            ? new HumanPlayer(2, 'Player 2', PLAYER2_ACCENT)
+            : p2Type === 'aim'
+              ? new AimingBot(2, 'Aiming Bot', PLAYER2_ACCENT)
+              : new RandomBot(2, 'Random Bot', PLAYER2_ACCENT),
+        ]
+      }
+
+      // Terrain helpers (OO wrappers)
+      function groundHeightAt(x) {
+        if (activeGame && typeof activeGame.groundHeightAt === 'function')
+          return activeGame.groundHeightAt(x)
+        return terrainObj ? terrainObj.heightAt(x) : canvas.height
+      }
+      function generateTerrain() {
+        terrainObj = new Terrain(canvas.width, TERRAIN_MIN_Y, TERRAIN_MAX_Y)
+        terrainObj.generate()
+      }
+      function drawTerrain() {
+        if (terrainObj) terrainObj.draw(ctx)
+      }
+      function makeCrater(cx, radius = CRATER_BASE_RADIUS, depth = CRATER_BASE_DEPTH) {
+        if (terrainObj) terrainObj.crater(cx, radius, depth)
+      }
+
+      function init() {
+        // New round setup
+        generateTerrain()
+
+        // Configure players and place gorillas on terrain (left and right hills)
+        configurePlayersFromUI()
+        const leftX = Math.floor(60 + Math.random() * 180)
+        const rightX = Math.floor(canvas.width - (60 + Math.random() * 180))
+        gorilla1 = { x: leftX, y: groundHeightAt(leftX) - GORILLA_SIZE }
+        gorilla2 = { x: rightX, y: groundHeightAt(rightX) - GORILLA_SIZE }
+
+        wind = Math.random() * WIND_MAX * 2 - WIND_MAX
+        currentPlayer = 1
+        gameOver = false
+        lastTrajByPlayer = { 1: [], 2: [] }
+        draw()
+        updateUI()
+        setControlsEnabled(true)
+        takeTurn()
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // Sky
+        ctx.fillStyle = 'skyblue'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+        // Sun
+        ctx.fillStyle = 'yellow'
+        ctx.beginPath()
+        ctx.arc(canvas.width / 2, 100, 50, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Terrain
+        drawTerrain()
+
+        // Ensure gorillas sit on current terrain (handles craters underfoot)
+        gorilla1.y = groundHeightAt(gorilla1.x) - GORILLA_SIZE
+        gorilla2.y = groundHeightAt(gorilla2.x) - GORILLA_SIZE
+
+        // Gorillas (with player-colored accents)
+        const p1Accent = players[0]?.accent || PLAYER1_ACCENT
+        const p2Accent = players[1]?.accent || PLAYER2_ACCENT
+        drawGorilla(gorilla1.x, gorilla1.y, p1Accent)
+        drawGorilla(gorilla2.x, gorilla2.y, p2Accent)
+
+        // Last trajectory path per player
+        if (lastTrajByPlayer[1] && lastTrajByPlayer[1].length > 1) {
+          ctx.strokeStyle = players[0]?.accent
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(lastTrajByPlayer[1][0].x, lastTrajByPlayer[1][0].y)
+          for (let i = 1; i < lastTrajByPlayer[1].length; i++) {
+            ctx.lineTo(lastTrajByPlayer[1][i].x, lastTrajByPlayer[1][i].y)
+          }
+          ctx.stroke()
+        }
+        if (lastTrajByPlayer[2] && lastTrajByPlayer[2].length > 1) {
+          ctx.strokeStyle = players[1]?.accent
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.moveTo(lastTrajByPlayer[2][0].x, lastTrajByPlayer[2][0].y)
+          for (let i = 1; i < lastTrajByPlayer[2].length; i++) {
+            ctx.lineTo(lastTrajByPlayer[2][i].x, lastTrajByPlayer[2][i].y)
+          }
+          ctx.stroke()
+        }
+
+        // Wind indicator
+        ctx.fillStyle = 'black'
+        ctx.font = '16px Arial'
+        ctx.fillText(`Wind: ${wind.toFixed(1)}`, canvas.width / 2 - 40, 20)
+      }
+
+      function throwBanana(angle, velocity) {
+        const rad = (angle * Math.PI) / 180
+        let posX = currentPlayer === 1 ? gorilla1.x : gorilla2.x
+        let posY = currentPlayer === 1 ? gorilla1.y : gorilla2.y
+        const startX = posX
+        const startY = posY
+        const velX = velocity * Math.cos(rad) * (currentPlayer === 1 ? 1 : -1)
+        let velY = -velocity * Math.sin(rad) // Up is negative
+        // Disable controls during flight
+        setControlsEnabled(false)
+        if (bananaInterval) clearInterval(bananaInterval)
+        const traj = []
+        let minDist = Infinity
+        bananaInterval = setInterval(() => {
+          // Integrate motion
+          posX += velX + wind / 10
+          posY += velY
+          velY += GRAVITY / 10
+
+          // Redraw background and banana
+          draw()
+          ctx.fillStyle = 'yellow'
+          ctx.beginPath()
+          ctx.arc(posX, posY, BANANA_SIZE, 0, Math.PI * 2)
+          ctx.fill()
+
+          // Record trajectory point
+          traj.push({ x: posX, y: posY })
+          const opponent = currentPlayer === 1 ? gorilla2 : gorilla1
+          const dNow = Math.hypot(posX - opponent.x, posY - (opponent.y + GORILLA_SIZE / 2))
+          if (dNow < minDist) minDist = dNow
+
+          // Check hit on opponent first (so near-ground hits count)
+          if (
+            Math.abs(posX - opponent.x) < GORILLA_SIZE / 2 + BANANA_SIZE &&
+            Math.abs(posY - opponent.y - GORILLA_SIZE / 2) < GORILLA_SIZE / 2 + BANANA_SIZE
+          ) {
+            clearInterval(bananaInterval)
+            bananaInterval = null
+            lastTrajByPlayer[currentPlayer] = traj
+            // Teach shooter
+            const shooter = players[currentPlayer - 1]
+            if (shooter && typeof shooter.learn === 'function') {
+              shooter.learn({
+                hit: true,
+                short: false,
+                minDist,
+                angle,
+                velocity,
+                fromX: startX,
+                fromY: startY,
+                targetX: opponent.x,
+                targetY: opponent.y,
+              })
+            }
+            alert(`Player ${currentPlayer} wins!`)
+            gameOver = true
+            init() // Restart
+            return
+          }
+
+          // Then check collision with ground or out of bounds
+          if (posX < 0 || posX > canvas.width || posY >= groundHeightAt(posX)) {
+            clearInterval(bananaInterval)
+            bananaInterval = null
+            lastTrajByPlayer[currentPlayer] = traj
+            // Apply crater only if hit terrain in-bounds
+            if (posX >= 0 && posX <= canvas.width) {
+              const craterRadius = CRATER_BASE_RADIUS + Math.min(20, velocity * 0.2)
+              const craterDepth = CRATER_BASE_DEPTH + Math.min(12, velocity * 0.1)
+              makeCrater(posX, craterRadius, craterDepth)
+            }
+            // Teach shooter about miss direction
+            const shooter = players[currentPlayer - 1]
+            if (shooter && typeof shooter.learn === 'function') {
+              const targetX = opponent.x
+              const short = currentPlayer === 1 ? posX < targetX : posX > targetX
+              shooter.learn({
+                hit: false,
+                short,
+                minDist,
+                angle,
+                velocity,
+                fromX: startX,
+                fromY: startY,
+                targetX: opponent.x,
+                targetY: opponent.y,
+              })
+            }
+            draw()
+            nextTurn()
+            return
+          }
+        }, 20)
+      }
+
+      function drawGorilla(x, y, accentColor) {
+        // y is top of bounding box; feet sit at y + GORILLA_SIZE
+        const feetY = y + GORILLA_SIZE
+        ctx.save()
+        ctx.translate(x, y)
+        // Body (oval)
+        ctx.fillStyle = GORILLA_BODY
+        ctx.strokeStyle = GORILLA_OUTLINE
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.ellipse(0, GORILLA_SIZE - 8, 10, 12, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        // Head
+        ctx.beginPath()
+        ctx.arc(0, GORILLA_SIZE - 22, 6, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        // Ears
+        ctx.beginPath()
+        ctx.arc(-5, GORILLA_SIZE - 24, 2, 0, Math.PI * 2)
+        ctx.arc(5, GORILLA_SIZE - 24, 2, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        // Face muzzle (lighter patch)
+        ctx.fillStyle = '#8a5b3c'
+        ctx.beginPath()
+        ctx.ellipse(0, GORILLA_SIZE - 20, 5, 3, 0, 0, Math.PI * 2)
+        ctx.fill()
+        // Eyes
+        ctx.fillStyle = '#000'
+        ctx.beginPath()
+        ctx.arc(-2, GORILLA_SIZE - 22.5, 0.8, 0, Math.PI * 2)
+        ctx.arc(2, GORILLA_SIZE - 22.5, 0.8, 0, Math.PI * 2)
+        ctx.fill()
+        // Chest patch
+        ctx.fillStyle = '#7b5845'
+        ctx.beginPath()
+        ctx.ellipse(0, GORILLA_SIZE - 10, 6, 4, 0, 0, Math.PI * 2)
+        ctx.fill()
+        // Reset fill for outlines
+        ctx.fillStyle = GORILLA_BODY
+        // Headband/accent
+        ctx.strokeStyle = accentColor
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.moveTo(-6, GORILLA_SIZE - 23)
+        ctx.lineTo(6, GORILLA_SIZE - 23)
+        ctx.stroke()
+        // Arms up
+        ctx.strokeStyle = GORILLA_OUTLINE
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(-6, GORILLA_SIZE - 16)
+        ctx.lineTo(-12, GORILLA_SIZE - 26)
+        ctx.moveTo(6, GORILLA_SIZE - 16)
+        ctx.lineTo(12, GORILLA_SIZE - 26)
+        ctx.stroke()
+        // Feet plate accent (thin colored ground contact)
+        ctx.strokeStyle = accentColor
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.moveTo(-10, GORILLA_SIZE)
+        ctx.lineTo(10, GORILLA_SIZE)
+        ctx.stroke()
+        ctx.restore()
+      }
+
+      function nextTurn() {
+        currentPlayer = currentPlayer === 1 ? 2 : 1
+        draw()
+        updateUI()
+        setControlsEnabled(true)
+        takeTurn()
+      }
+
+      async function takeTurn() {
+        if (gameOver) return
+        const me = players[currentPlayer - 1]
+        const self = currentPlayer === 1 ? gorilla1 : gorilla2
+        const opp = currentPlayer === 1 ? gorilla2 : gorilla1
+        updateUI()
+        // Enable/disable controls based on player type
+        if (me && me.isHuman) setControlsEnabled(true)
+        else setControlsEnabled(false)
+
+        // Await a shot from the player (human resolves on form submit)
+        const shot = await me.getShot({
+          fromX: self.x,
+          fromY: self.y,
+          targetX: opp.x,
+          targetY: opp.y,
+          wind,
+        })
+        // Fire
+        throwBanana(shot.angle, shot.velocity)
+      }
+
+      // Create and wire Game instance
+      const game = new Game(canvas, ctx)
+      activeGame = game
+
+      // Wire up form and buttons
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault()
+          const a = clamp(parseFloat(angleInput.value), 0, 90)
+          const v = clamp(parseFloat(velocityInput.value), 5, 120)
+          angleInput.value = String(a)
+          angleRange.value = String(a)
+          velocityInput.value = String(v)
+          velocityRange.value = String(v)
+          game.onHumanFormSubmit(a, v)
+        })
+      }
+      if (newGameBtn) {
+        newGameBtn.addEventListener('click', () => game.start())
+      }
+      if (p1Select) p1Select.addEventListener('change', () => game.configurePlayersFromUI())
+      if (p2Select) p2Select.addEventListener('change', () => game.configurePlayersFromUI())
+
+      game.start()
+    </script>
+  </body>
+</html>

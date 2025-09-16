@@ -389,7 +389,7 @@ You now know the common operators (binary and unary) and where Ruby adds extras;
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 11,
+    order: 12,
     content: `A type is a set of values that we give a name to.
 
 We can name a type anything we want. For example:
@@ -497,7 +497,7 @@ Ruby has a bunch of built in classes:
 * \`nr: Set\`
 * and many more
 `,
-    previousSection: 'loops',
+    previousSection: 'classes-and-objects',
     nextSection: 'next-steps',
   },
   {
@@ -1582,19 +1582,196 @@ Instead of a loop, we can use the special \`nr: find\` method to find the first 
 \`\`\`ruby
 # title: Searching for an item in a collection with find
 numbers = [5, 80, 138, 1, 36, 101]
-first_number_greater_than_100 = numbers.find { |number| number > 100 }
-first_number_greater_than_100
+  first_number_greater_than_100 = numbers.find { |number| number > 100 }
+  first_number_greater_than_100
 \`\`\`
 
-
-`,
+  `,
     previousSection: 'conditionals',
+    nextSection: 'classes-and-objects',
+  },
+  {
+    id: 'classes-and-objects',
+    title: 'Classes and Objects',
+    order: 11,
+    content: `Most popular languages let you organize your program in a way that mirrors or resembles the real world.
+
+This style of organization uses classes and objects to model real-world things.
+
+- If we want to simulate a car, we can create a class called Car and an object called \`nr: my_car\`.
+- If we want to simulate a person, we can create a class called Person and an object called \`nr: my_brother\`.
+
+To understand classes and objects, let's think of a car.
+
+There are certain things a car can do:
+- drive forward
+- drive backward
+- turn left
+- turn right
+- go faster
+- go slower
+
+And there are certain things that a car has:
+- color
+- top speed
+- a number of seats
+- a maximum range
+- the car's current speed
+- the car's current steering angle
+
+A class is like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
+
+Each car that the factory makes is different form the others. Each car is an example of an object.
+
+Classes are used to create objects.
+- Car factories create cars.
+- Person factories create people.
+
+## Classes
+
+A class is a blueprint for creating objects; it represents a thing in the real world.
+
+A class also has a special function called constructor a method that it uses to create an object.
+
+For example, we can build a game where
+
+\`\`\`ruby
+class Car
+  def initialize(color, top_speed, seats, max_range)
+    @color = color
+    @top_speed = top_speed
+    @seats = seats
+    @max_range = max_range
+    @speed = 0
+    @heading = 0
+    @steering_angle = 0
+  end
+
+  def speed_up(target_speed)
+    if target_speed > @top_speed
+      @speed = @top_speed
+    else
+      @speed = target_speed
+    end
+  end
+
+  def slow_down(target_speed)
+    if target_speed < 0
+      @speed = 0
+    else
+      @speed = target_speed
+    end
+  end
+
+  def turn_left(relative_angle)
+    @steering_angle = -relative_angle
+  end
+
+  def turn_right(relative_angle)
+    @steering_angle = relative_angle
+  end
+end
+\`\`\`
+
+- A class groups data (attributes stored in instance variables like \`nr: @color\` and \`nr: @speed\`) with behavior (methods like \`nr: go_faster\` and \`nr: turn_left\`).
+- The \`nr: initialize\` method runs when you create an object with \`nr: Car.new(...)\`.
+- Each object keeps its own copy of its data.
+
+
+\`\`\`ruby
+# title: Car as a class — attributes and behaviors
+# description: Define a Car class (our "factory"), then build and use a few car objects.
+class Car
+  attr_reader :color, :top_speed, :seats, :weight, :gas_tank
+  attr_accessor :speed, :direction
+
+  @@built_count = 0  # class-wide count of how many cars have been created
+
+  def self.built_count
+    @@built_count
+  end
+
+  def self.build_many(n, color: "silver")
+    cars = []
+    n.times do
+      cars << Car.new(color: color, top_speed: 100, seats: 4, weight: 2800, gas_tank: 14)
+    end
+    cars
+  end
+
+  def initialize(color:, top_speed:, seats:, weight:, gas_tank:)
+    @color = color
+    @top_speed = top_speed
+    @seats = seats
+    @weight = weight
+    @gas_tank = gas_tank
+    @speed = 0
+  end
+
+  def drive_forward
+    "Driving forward"
+  end
+
+  def drive_backward
+    "Driving backward"
+  end
+
+  def turn_left
+    "Turning left"
+  end
+
+  def turn_right
+    "Turning right"
+  end
+
+  def go_faster(by = 5)
+    @speed = [@speed + by, @top_speed].min
+  end
+
+  def go_slower(by = 5)
+    @speed = [@speed - by, 0].max
+  end
+
+  def info
+    "Car(color=#{@color}, speed=#{@speed}, dir=#{@direction})"
+  end
+end
+---
+# Build two different cars (two different objects)
+red  = Car.new(color: "red",  top_speed: 120, seats: 5, weight: 3200, gas_tank: 15)
+blue = Car.new(color: "blue", top_speed:  90, seats: 2, weight: 2500, gas_tank: 10)
+Car.built_count
+---
+# Each object keeps its own data and can do things independently
+red.go_faster(20)
+red.drive_forward
+red.info
+---
+blue.go_faster(10)
+blue.turn_left
+blue.info
+---
+# They are two different objects
+red.object_id == blue.object_id
+---
+# Our "factory" can build many cars at once
+cars = Car.build_many(3, color: "white")
+cars.length
+\`\`\`
+
+### Vocabulary
+
+- Instance variable: a name that starts with \`nr: @\` that stores data for one specific object (for example, \`nr: @color\`).
+- Instance method: a behavior you can do on an individual object (for example, \`nr: red.go_faster\`).
+- Class method: a behavior on the class itself, used like a factory or a helper (for example, \`nr: Car.build_many(3)\`).
+`,
+    previousSection: 'loops',
     nextSection: 'types',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 12,
+    order: 13,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice
