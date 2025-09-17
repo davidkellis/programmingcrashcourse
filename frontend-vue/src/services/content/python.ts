@@ -1415,9 +1415,157 @@ first_number_greater_than_100
     nextSection: 'types',
   },
   {
+    id: 'classes-and-objects',
+    title: 'Classes and Objects',
+    order: 11,
+    content: `Most popular languages let you organize your program in a way that mirrors or resembles the real world.
+
+This style of organization uses classes and objects to model real-world things. We call this style of organization object-oriented programming.
+
+- If we want to simulate a car, we can create a class called Car and an object called \`nr: my_car\`.
+- If we want to simulate a person, we can create a class called Person and an object called \`nr: my_brother\`.
+
+To understand classes and objects, let's think of a car.
+
+There are certain things a car can do:
+- drive forward
+- drive backward
+- turn left
+- turn right
+- go faster
+- go slower
+
+And there are certain things that a car has:
+- color
+- a number of seats
+- the car's current speed
+- the car's current steering angle
+
+A class is like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
+
+Each car that the factory makes is different from the others. Each car is an example of an object. An object is also called an instance of a class.
+
+Classes describe the design of a thing, and they are used to create objects.
+
+## Classes
+
+A class is a blueprint or a design plan for a thing in the real world.
+
+Let's think of a car.
+
+There are certain things a car can do:
+- drive forward
+- drive backward
+- turn left
+- turn right
+- go faster
+- go slower
+
+And there are certain things that a car has:
+- color
+- a number of seats
+- the car's current speed
+- the car's current steering angle
+
+A class lets us represent the car's behavior - the things it can do - and the car's attributes - the characteristics that a car has.
+
+We describe a class's behavior with functions that belong to the class, called methods.
+
+We describe a class's attributes with variables that belong to the class, called instance variables.
+
+Here's an example of a class that represents a car:
+
+\`\`\`python
+# title: Defining a Car class
+class Car:
+  cars_produced = 0
+
+  @classmethod
+  def build_many(cls, n, **kwargs):
+    return [cls(**kwargs) for _ in range(n)]
+
+  def __init__(self, color, top_speed=100, seats=4, weight=3000, gas_tank=12):
+    self.color = color
+    self.top_speed = top_speed
+    self.seats = seats
+    self.weight = weight
+    self.gas_tank = gas_tank
+    self.speed = 0
+    self.heading = 0
+    self.steering_angle = 0
+    Car.cars_produced += 1
+
+  def go_faster(self, delta):
+    self.speed = min(self.speed + delta, self.top_speed)
+
+  def slow_down(self, delta):
+    self.speed = max(self.speed - delta, 0)
+
+  def drive_forward(self):
+    self.heading = (self.heading + self.steering_angle) % 360
+
+  def turn_left(self, relative_angle=15):
+    self.steering_angle = -relative_angle
+
+  def turn_right(self, relative_angle=15):
+    self.steering_angle = relative_angle
+
+  def info(self):
+    return f"Car(color={self.color}, speed={self.speed}, top_speed={self.top_speed}, heading={self.heading}, steering_angle={self.steering_angle}, seats={self.seats})"
+\`\`\`
+
+A class is kind of like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
+
+You can see that the class has two primary things:
+- instance variables that are prefixed with \`nr: self.\` (for example, \`nr: self.color\`)
+- methods that are defined inside the class (for example, \`nr: go_faster\` and \`nr: turn_left\`)
+
+The instance variables are special variables that belong to each object that is created from the class.
+
+The methods are special functions that can change the instance variables of the object.
+
+## Objects
+
+We can use our Car class to create car objects, like this:
+
+\`\`\`python
+# title: Car as a class — attributes and behaviors
+
+# Build two different cars (two different objects)
+red  = Car(color="red",  top_speed=120, seats=5, weight=3200, gas_tank=15)
+blue = Car(color="blue", top_speed=90,  seats=2, weight=2500, gas_tank=10)
+Car.cars_produced
+---
+# Each object keeps its own data and can do things independently
+red.go_faster(20)
+red.drive_forward()
+red.info()
+---
+blue.go_faster(10)
+blue.turn_left()
+blue.info()
+---
+# They are two different objects
+id(red) == id(blue)
+---
+# Our "factory" can build many cars at once
+cars = Car.build_many(3, color="white")
+len(cars)
+\`\`\`
+
+As you run the example code in the REPL, you can see that each object keeps track of its own color, speed, heading, and steering angle.
+
+You can also see that each object can do things without affecting the other objects.
+
+For example, when we call the \`nr: go_faster\` method on the \`nr: red\` object, it only affects the \`nr: red\` object's speed, not the \`nr: blue\` object's speed.
+`,
+    previousSection: 'loops',
+    nextSection: 'types',
+  },
+  {
     id: 'types',
     title: 'Sets and Types',
-    order: 11,
+    order: 12,
     content: `
 ## Sets
 A set is a collection of unique values, like the list of all the words in the dictionary. Each word appears only once.
@@ -1595,7 +1743,7 @@ Python has a bunch of built in types:
 * \`nr: dict\` - dictionary (also called a map)
 * and many more
 `,
-    previousSection: 'loops',
+    previousSection: 'classes-and-objects',
     nextSection: 'next-steps',
   },
 ]

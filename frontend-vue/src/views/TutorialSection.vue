@@ -7,7 +7,7 @@
         :class="{ open: tocOpen }"
         :style="{ top: `${tocTop}px` }"
         role="navigation"
-        aria-label="On this page"
+        aria-label="Navigation (click to close)"
       >
         <button
           type="button"
@@ -17,7 +17,7 @@
           @click="tocOpen = !tocOpen"
           title="Toggle table of contents"
         >
-          <span>On this page</span>
+          <span>Navigation (click to close)</span>
           <span class="toc-chevron" :class="{ open: tocOpen }" aria-hidden="true"></span>
         </button>
         <div v-if="headings.length === 0" class="toc-empty">No subsections</div>

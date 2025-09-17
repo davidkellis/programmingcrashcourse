@@ -1596,7 +1596,7 @@ numbers = [5, 80, 138, 1, 36, 101]
     order: 11,
     content: `Most popular languages let you organize your program in a way that mirrors or resembles the real world.
 
-This style of organization uses classes and objects to model real-world things.
+This style of organization uses classes and objects to model real-world things. We call this style of organization object-oriented programming.
 
 - If we want to simulate a car, we can create a class called Car and an object called \`nr: my_car\`.
 - If we want to simulate a person, we can create a class called Person and an object called \`nr: my_brother\`.
@@ -1613,134 +1613,117 @@ There are certain things a car can do:
 
 And there are certain things that a car has:
 - color
-- top speed
 - a number of seats
-- a maximum range
 - the car's current speed
 - the car's current steering angle
 
 A class is like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
 
-Each car that the factory makes is different form the others. Each car is an example of an object.
+Each car that the factory makes is different from the others. Each car is an example of an object. An object is also called an instance of a class.
 
-Classes are used to create objects.
-- Car factories create cars.
-- Person factories create people.
+Classes describe the design of a thing, and they are used to create objects.
 
 ## Classes
 
-A class is a blueprint for creating objects; it represents a thing in the real world.
+A class is a blueprint or a design plan for a thing in the real world.
 
-A class also has a special function called constructor a method that it uses to create an object.
+Let's think of a car.
 
-For example, we can build a game where
+There are certain things a car can do:
+- drive forward
+- drive backward
+- turn left
+- turn right
+- go faster
+- go slower
+
+And there are certain things that a car has:
+- color
+- a number of seats
+- the car's current speed
+- the car's current steering angle
+
+A class lets us represent the car's behavior - the things it can do - and the car's attributes - the characteristics that a car has.
+
+We describe a class's behavior with functions that belong to the class, called methods.
+
+We describe a class's attributes with variables that belong to the class, called instance variables.
+
+Here's an example of a class that represents a car:
 
 \`\`\`ruby
 class Car
-  def initialize(color, top_speed, seats, max_range)
-    @color = color
-    @top_speed = top_speed
-    @seats = seats
-    @max_range = max_range
-    @speed = 0
-    @heading = 0
-    @steering_angle = 0
+  @@cars_produced = 0
+
+  def self.cars_produced
+    @@cars_produced
   end
 
-  def speed_up(target_speed)
-    if target_speed > @top_speed
-      @speed = @top_speed
-    else
-      @speed = target_speed
-    end
+  def self.build_many(n, **kwargs)
+    n.times.map { Car.new(**kwargs) }
   end
 
-  def slow_down(target_speed)
-    if target_speed < 0
-      @speed = 0
-    else
-      @speed = target_speed
-    end
-  end
+  attr_reader :color, :seats, :weight, :gas_tank, :top_speed, :speed, :heading, :steering_angle
 
-  def turn_left(relative_angle)
-    @steering_angle = -relative_angle
-  end
-
-  def turn_right(relative_angle)
-    @steering_angle = relative_angle
-  end
-end
-\`\`\`
-
-- A class groups data (attributes stored in instance variables like \`nr: @color\` and \`nr: @speed\`) with behavior (methods like \`nr: go_faster\` and \`nr: turn_left\`).
-- The \`nr: initialize\` method runs when you create an object with \`nr: Car.new(...)\`.
-- Each object keeps its own copy of its data.
-
-
-\`\`\`ruby
-# title: Car as a class — attributes and behaviors
-# description: Define a Car class (our "factory"), then build and use a few car objects.
-class Car
-  attr_reader :color, :top_speed, :seats, :weight, :gas_tank
-  attr_accessor :speed, :direction
-
-  @@built_count = 0  # class-wide count of how many cars have been created
-
-  def self.built_count
-    @@built_count
-  end
-
-  def self.build_many(n, color: "silver")
-    cars = []
-    n.times do
-      cars << Car.new(color: color, top_speed: 100, seats: 4, weight: 2800, gas_tank: 14)
-    end
-    cars
-  end
-
-  def initialize(color:, top_speed:, seats:, weight:, gas_tank:)
+  def initialize(color:, top_speed: 100, seats: 4, weight: 3000, gas_tank: 12)
     @color = color
     @top_speed = top_speed
     @seats = seats
     @weight = weight
     @gas_tank = gas_tank
     @speed = 0
+    @heading = 0
+    @steering_angle = 0
+    @@cars_produced += 1
+  end
+
+  def go_faster(delta)
+    @speed = [@speed + delta, @top_speed].min
+  end
+
+  def slow_down(delta)
+    @speed = [@speed - delta, 0].max
   end
 
   def drive_forward
-    "Driving forward"
+    @heading = (@heading + @steering_angle) % 360
   end
 
-  def drive_backward
-    "Driving backward"
+  def turn_left(relative_angle = 15)
+    @steering_angle = -relative_angle
   end
 
-  def turn_left
-    "Turning left"
-  end
-
-  def turn_right
-    "Turning right"
-  end
-
-  def go_faster(by = 5)
-    @speed = [@speed + by, @top_speed].min
-  end
-
-  def go_slower(by = 5)
-    @speed = [@speed - by, 0].max
+  def turn_right(relative_angle = 15)
+    @steering_angle = relative_angle
   end
 
   def info
-    "Car(color=#{@color}, speed=#{@speed}, dir=#{@direction})"
+    "Car(color=#{@color}, speed=#{@speed}, top_speed=#{@top_speed}, heading=#{@heading}, steering_angle=#{@steering_angle}, seats=#{@seats})"
   end
 end
----
+\`\`\`
+
+A class is kind of like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
+
+You can see that the class has two primary things:
+- instance variables that are prefixed with \`nr: @\` (for example, \`nr: @color\`)
+- methods that are defined inside the class (for example, \`nr: go_faster\` and \`nr: turn_left\`)
+
+The instance variables are special variables that belong to each object that is created from the class.
+
+The methods are special functions that can change the instance variables of the object.
+
+## Objects
+
+We can use our Car class to create car objects, like this:
+
+\`\`\`ruby
+# title: Car as a class — attributes and behaviors
+
 # Build two different cars (two different objects)
 red  = Car.new(color: "red",  top_speed: 120, seats: 5, weight: 3200, gas_tank: 15)
 blue = Car.new(color: "blue", top_speed:  90, seats: 2, weight: 2500, gas_tank: 10)
-Car.built_count
+Car.cars_produced
 ---
 # Each object keeps its own data and can do things independently
 red.go_faster(20)
@@ -1759,11 +1742,11 @@ cars = Car.build_many(3, color: "white")
 cars.length
 \`\`\`
 
-### Vocabulary
+As you run the example code in the REPL, you can see that each object keeps track of its own color, speed, heading, and steering angle.
 
-- Instance variable: a name that starts with \`nr: @\` that stores data for one specific object (for example, \`nr: @color\`).
-- Instance method: a behavior you can do on an individual object (for example, \`nr: red.go_faster\`).
-- Class method: a behavior on the class itself, used like a factory or a helper (for example, \`nr: Car.build_many(3)\`).
+You can also see that each object can do things without affecting the other objects.
+
+For example, when we call the \`nr: go_faster\` method on the \`nr: red\` object, it only affects the \`nr: red\` object's speed, not the \`nr: blue\` object's speed.
 `,
     previousSection: 'loops',
     nextSection: 'types',

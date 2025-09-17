@@ -1449,12 +1449,168 @@ firstNumberGreaterThan100;
 
 `,
     previousSection: 'conditionals',
+    nextSection: 'classes-and-objects',
+  },
+  {
+    id: 'classes-and-objects',
+    title: 'Classes and Objects',
+    order: 11,
+    content: `Most popular languages let you organize your program in a way that mirrors or resembles the real world.
+
+This style of organization uses classes and objects to model real-world things. We call this style of organization object-oriented programming.
+
+- If we want to simulate a car, we can create a class called Car and an object called \`nr: my_car\`.
+- If we want to simulate a person, we can create a class called Person and an object called \`nr: my_brother\`.
+
+To understand classes and objects, let's think of a car.
+
+There are certain things a car can do:
+- drive forward
+- drive backward
+- turn left
+- turn right
+- go faster
+- go slower
+
+And there are certain things that a car has:
+- color
+- a number of seats
+- the car's current speed
+- the car's current steering angle
+
+A class is like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
+
+Each car that the factory makes is different from the others. Each car is an example of an object. An object is also called an instance of a class.
+
+Classes describe the design of a thing, and they are used to create objects.
+
+## Classes
+
+A class is a blueprint or a design plan for a thing in the real world.
+
+There are certain things a car can do:
+- drive forward
+- drive backward
+- turn left
+- turn right
+- go faster
+- go slower
+
+And there are certain things that a car has:
+- color
+- a number of seats
+- the car's current speed
+- the car's current steering angle
+
+A class lets us represent the car's behavior — the things it can do — and the car's attributes — the characteristics that a car has.
+
+We describe a class's behavior with functions that belong to the class, called methods.
+
+We describe a class's attributes with variables that belong to the class, called instance properties.
+
+Here's an example of a class that represents a car:
+
+\`\`\`javascript
+// title: Defining a Car class
+class Car {
+  static carsProduced = 0
+
+  static buildMany(n, options = {}) {
+    const cars = []
+    for (let i = 0; i < n; i++) cars.push(new Car(options))
+    return cars
+  }
+
+  constructor({ color, topSpeed = 100, seats = 4, weight = 3000, gasTank = 12 }) {
+    this.color = color
+    this.topSpeed = topSpeed
+    this.seats = seats
+    this.weight = weight
+    this.gasTank = gasTank
+    this.speed = 0
+    this.heading = 0
+    this.steeringAngle = 0
+    Car.carsProduced += 1
+  }
+
+  goFaster(delta) {
+    this.speed = Math.min(this.speed + delta, this.topSpeed)
+  }
+
+  slowDown(delta) {
+    this.speed = Math.max(this.speed - delta, 0)
+  }
+
+  driveForward() {
+    this.heading = (this.heading + this.steeringAngle) % 360
+  }
+
+  turnLeft(relativeAngle = 15) {
+    this.steeringAngle = -relativeAngle
+  }
+
+  turnRight(relativeAngle = 15) {
+    this.steeringAngle = relativeAngle
+  }
+
+  info() {
+    return \`Car(color=\${this.color}, speed=\${this.speed}, top_speed=\${this.topSpeed}, heading=\${this.heading}, steering_angle=\${this.steeringAngle}, seats=\${this.seats})\`
+  }
+}
+\`\`\`
+
+A class is kind of like a factory that knows how to build cars. You can tell the factory to build 100 cars and it will create 100 cars for you. You get to tell the factory what kind of car to make, and it will make it for you.
+
+You can see that the class has two primary things:
+- instance properties that are accessed with \`nr: this.\` (for example, \`nr: this.color\`)
+- methods that are defined inside the class (for example, \`nr: goFaster\` and \`nr: turnLeft\`)
+
+The instance properties are special variables that belong to each object that is created from the class.
+
+The methods are special functions that can change the instance properties of the object.
+
+## Objects
+
+We can use our Car class to create car objects, like this:
+
+\`\`\`javascript
+// title: Car as a class — attributes and behaviors
+
+// Build two different cars (two different objects)
+const red  = new Car({ color: "red",  topSpeed: 120, seats: 5, weight: 3200, gasTank: 15 })
+const blue = new Car({ color: "blue", topSpeed:  90, seats: 2, weight: 2500, gasTank: 10 })
+Car.carsProduced
+---
+// Each object keeps its own data and can do things independently
+red.goFaster(20)
+red.driveForward()
+red.info()
+---
+blue.goFaster(10)
+blue.turnLeft()
+blue.info()
+---
+// They are two different objects
+red === blue
+---
+// Our "factory" can build many cars at once
+const cars = Car.buildMany(3, { color: "white" })
+cars.length
+\`\`\`
+
+As you run the example code in the REPL, you can see that each object keeps track of its own color, speed, heading, and steering angle.
+
+You can also see that each object can do things without affecting the other objects.
+
+For example, when we call the \`nr: goFaster\` method on the \`nr: red\` object, it only affects the \`nr: red\` object's speed, not the \`nr: blue\` object's speed.
+`,
+    previousSection: 'loops',
     nextSection: 'types',
   },
   {
     id: 'types',
     title: 'Sets and Types',
-    order: 11,
+    order: 12,
     content: `## Sets
 A set is a collection of unique values. Think of it as a bag where each distinct element appears at most once.
 ### This is a set of three numbers:
@@ -1624,13 +1780,13 @@ JavaScript has a bunch of built-in types and core objects:
 * \`nr: Array\`
 * and many more
 `,
-    previousSection: 'conditionals',
+    previousSection: 'classes-and-objects',
     nextSection: 'next-steps',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 11,
+    order: 13,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice

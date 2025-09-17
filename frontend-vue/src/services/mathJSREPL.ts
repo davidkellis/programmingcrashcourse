@@ -25,53 +25,121 @@ class MathJSREPLService {
    * Parse code and synthesize an expression representing the value of the last statement.
    * Falls back to null if unsupported or parse fails.
    */
-  private extractLastExpressionWithParser(code: string): { expr: string; isSafeToReevaluate: boolean; stmtStart: number; stmtEnd: number; mode: 'replace' | 'append' } | null {
+  private extractLastExpressionWithParser(code: string): {
+    expr: string
+    isSafeToReevaluate: boolean
+    stmtStart: number
+    stmtEnd: number
+    mode: 'replace' | 'append'
+  } | null {
     try {
       const program = acorn.parse(code, {
         ecmaVersion: 'latest',
-        sourceType: 'script'
+        sourceType: 'script',
       }) as unknown as { body: Array<Pick<acorn.Node, 'type'> & { start: number; end: number }> }
 
       const src = code
 
-      const stmtToExpr = (s: (Pick<acorn.Node, 'type'> & { start: number; end: number }) | null | undefined): { expr: string; isSafeToReevaluate: boolean; stmtStart: number; stmtEnd: number; mode: 'replace' | 'append' } | null => {
+      const stmtToExpr = (
+        s: (Pick<acorn.Node, 'type'> & { start: number; end: number }) | null | undefined,
+      ): {
+        expr: string
+        isSafeToReevaluate: boolean
+        stmtStart: number
+        stmtEnd: number
+        mode: 'replace' | 'append'
+      } | null => {
         if (!s) return null
         const type = (s as acorn.Node).type as string
         switch (type) {
           case 'EmptyStatement':
             return null
           case 'ExpressionStatement': {
-            const node = s as unknown as { start: number; end: number; expression: { start: number; end: number; type?: string } }
+            const node = s as unknown as {
+              start: number
+              end: number
+              expression: { start: number; end: number; type?: string }
+            }
             const exprStr = src.slice(node.expression.start, node.expression.end)
             const exprType = (node.expression as unknown as { type?: string }).type || ''
             // Most expressions are safe to re-evaluate for display purposes
             // Only avoid re-evaluation for truly side-effecting operations
-            const sideEffecting = exprType === 'UpdateExpression' || exprType === 'AssignmentExpression'
+            const sideEffecting =
+              exprType === 'UpdateExpression' || exprType === 'AssignmentExpression'
             // CallExpression, AwaitExpression, YieldExpression are now considered safe for result display
-            return { expr: exprStr, isSafeToReevaluate: !sideEffecting, stmtStart: node.start, stmtEnd: node.end, mode: 'replace' }
+            return {
+              expr: exprStr,
+              isSafeToReevaluate: !sideEffecting,
+              stmtStart: node.start,
+              stmtEnd: node.end,
+              mode: 'replace',
+            }
           }
           case 'VariableDeclaration': {
-            const node = s as unknown as { start: number; end: number; declarations: Array<{ id: { name?: string }, init?: unknown }> }
+            const node = s as unknown as {
+              start: number
+              end: number
+              declarations: Array<{ id: { name?: string }; init?: unknown }>
+            }
             const last = node.declarations[node.declarations.length - 1]
-            return last?.id && 'name' in last.id && (last.id as { name?: string }).name ? { expr: (last.id as { name: string }).name, isSafeToReevaluate: true, stmtStart: node.start, stmtEnd: node.end, mode: 'append' } : null
+            return last?.id && 'name' in last.id && (last.id as { name?: string }).name
+              ? {
+                  expr: (last.id as { name: string }).name,
+                  isSafeToReevaluate: true,
+                  stmtStart: node.start,
+                  stmtEnd: node.end,
+                  mode: 'append',
+                }
+              : null
           }
           case 'FunctionDeclaration':
           case 'ClassDeclaration': {
             const node = s as unknown as { start: number; end: number; id?: { name?: string } }
-            return node.id && node.id.name ? { expr: node.id.name, isSafeToReevaluate: true, stmtStart: node.start, stmtEnd: node.end, mode: 'append' } : null
+            return node.id && node.id.name
+              ? {
+                  expr: node.id.name,
+                  isSafeToReevaluate: true,
+                  stmtStart: node.start,
+                  stmtEnd: node.end,
+                  mode: 'append',
+                }
+              : null
           }
           case 'BlockStatement': {
-            const node = s as unknown as { body: Array<Pick<acorn.Node, 'type'> & { start: number; end: number }> }
+            const node = s as unknown as {
+              body: Array<Pick<acorn.Node, 'type'> & { start: number; end: number }>
+            }
             const body = node.body
-            return body && body.length ? stmtToExpr(body[body.length - 1] as (Pick<acorn.Node, 'type'> & { start: number; end: number })) : null
+            return body && body.length
+              ? stmtToExpr(
+                  body[body.length - 1] as Pick<acorn.Node, 'type'> & {
+                    start: number
+                    end: number
+                  },
+                )
+              : null
           }
           case 'IfStatement': {
-            const node = s as unknown as { test: { start: number; end: number }, consequent: unknown, alternate: unknown }
+            const node = s as unknown as {
+              test: { start: number; end: number }
+              consequent: unknown
+              alternate: unknown
+            }
             const test = src.slice(node.test.start, node.test.end)
-            const c1 = stmtToExpr(node.consequent as (Pick<acorn.Node, 'type'> & { start: number; end: number }))
-            const c2 = stmtToExpr(node.alternate as (Pick<acorn.Node, 'type'> & { start: number; end: number }))
+            const c1 = stmtToExpr(
+              node.consequent as Pick<acorn.Node, 'type'> & { start: number; end: number },
+            )
+            const c2 = stmtToExpr(
+              node.alternate as Pick<acorn.Node, 'type'> & { start: number; end: number },
+            )
             if (c1 && c2) {
-              return { expr: `((${test}) ? (${c1.expr}) : (${c2.expr}))`, isSafeToReevaluate: c1.isSafeToReevaluate && c2.isSafeToReevaluate, stmtStart: s.start, stmtEnd: s.end, mode: 'replace' }
+              return {
+                expr: `((${test}) ? (${c1.expr}) : (${c2.expr}))`,
+                isSafeToReevaluate: c1.isSafeToReevaluate && c2.isSafeToReevaluate,
+                stmtStart: s.start,
+                stmtEnd: s.end,
+                mode: 'replace',
+              }
             }
             return null
           }
@@ -86,6 +154,78 @@ class MathJSREPLService {
       return stmtToExpr(body[body.length - 1])
     } catch {
       return null
+    }
+  }
+
+  /**
+   * Extract ONLY top-level (Program body) declarations using Acorn, ignoring
+   * variables declared inside functions, class bodies, or blocks.
+   * Falls back to regex-based heuristic on parse failure.
+   */
+  private extractTopLevelDeclarationsWithParser(code: string): string[] {
+    try {
+      const program = acorn.parse(code, {
+        ecmaVersion: 'latest',
+        sourceType: 'script',
+      }) as unknown as { body: Array<acorn.Node & { type: string }> }
+
+      const names: string[] = []
+
+      const collectFromPattern = (pattern: any): void => {
+        if (!pattern) return
+        switch (pattern.type) {
+          case 'Identifier':
+            names.push(pattern.name)
+            break
+          case 'ObjectPattern':
+            for (const prop of pattern.properties || []) {
+              // Handle Property and RestElement
+              if (prop.type === 'Property') {
+                collectFromPattern(prop.value)
+              } else if (prop.type === 'RestElement') {
+                collectFromPattern(prop.argument)
+              }
+            }
+            break
+          case 'ArrayPattern':
+            for (const elem of pattern.elements || []) {
+              if (elem) collectFromPattern(elem)
+            }
+            break
+          case 'AssignmentPattern':
+            collectFromPattern(pattern.left)
+            break
+          case 'RestElement':
+            collectFromPattern(pattern.argument)
+            break
+          default:
+            break
+        }
+      }
+
+      const addDecl = (node: any): void => {
+        if (!node) return
+        if (node.type === 'VariableDeclaration') {
+          for (const d of node.declarations || []) {
+            collectFromPattern(d.id)
+          }
+        } else if (node.type === 'FunctionDeclaration' || node.type === 'ClassDeclaration') {
+          if (node.id && node.id.name) names.push(node.id.name)
+        } else if (
+          node.type === 'ExportNamedDeclaration' ||
+          node.type === 'ExportDefaultDeclaration'
+        ) {
+          if (node.declaration) addDecl(node.declaration)
+        }
+      }
+
+      for (const stmt of program.body) addDecl(stmt as any)
+
+      // De-duplicate while preserving order
+      return Array.from(new Set(names))
+    } catch {
+      // Fallback to heuristic if parsing fails
+      return this.extractVariableDeclarations(code)
     }
   }
 
@@ -122,7 +262,7 @@ class MathJSREPLService {
       functions: {},
       imports: [],
       executionHistory: [],
-      globalScope: {}
+      globalScope: {},
     }
 
     // Initialize the global scope with MathJS modules
@@ -219,7 +359,7 @@ class MathJSREPLService {
       PHI: math.phi,
       INFINITY: Infinity,
       NEGATIVE_INFINITY: -Infinity,
-      NAN: NaN
+      NAN: NaN,
     }
 
     runtime.globalScope = globalScope
@@ -229,7 +369,11 @@ class MathJSREPLService {
   /**
    * Execute code in the stdlib JavaScript environment
    */
-  async executeCode(code: string, _language: Language, sessionId: string): Promise<ExecutionResult> {
+  async executeCode(
+    code: string,
+    _language: Language,
+    sessionId: string,
+  ): Promise<ExecutionResult> {
     await this.initialize()
 
     const runtime = this.runtimes.get(sessionId)
@@ -254,7 +398,8 @@ class MathJSREPLService {
       // Override console methods to capture output
       const formatArg = (arg: unknown): string => {
         try {
-          if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') return String(arg)
+          if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean')
+            return String(arg)
           if (arg === null || arg === undefined) return String(arg)
           if (typeof Set !== 'undefined' && arg instanceof Set) {
             const arr = Array.from(arg as Set<unknown>)
@@ -271,32 +416,32 @@ class MathJSREPLService {
         }
       }
       console.log = (...args: unknown[]) => {
-        const outputStr = args.map(arg => formatArg(arg)).join(' ')
+        const outputStr = args.map((arg) => formatArg(arg)).join(' ')
         capturedOutput.push(outputStr)
         originalConsoleLog(...args)
       }
 
       console.error = (...args: unknown[]) => {
-        const outputStr = args.map(arg => formatArg(arg)).join(' ')
+        const outputStr = args.map((arg) => formatArg(arg)).join(' ')
         capturedOutput.push(`ERROR: ${outputStr}`)
         originalConsoleError(...args)
       }
 
       console.warn = (...args: unknown[]) => {
-        const outputStr = args.map(arg => formatArg(arg)).join(' ')
+        const outputStr = args.map((arg) => formatArg(arg)).join(' ')
         capturedOutput.push(`WARN: ${outputStr}`)
         originalConsoleWarn(...args)
       }
 
       console.info = (...args: unknown[]) => {
-        const outputStr = args.map(arg => formatArg(arg)).join(' ')
+        const outputStr = args.map((arg) => formatArg(arg)).join(' ')
         capturedOutput.push(`INFO: ${outputStr}`)
         originalConsoleInfo(...args)
       }
 
       try {
-        // Extract variable declarations from the code
-        const varDeclarations = this.extractVariableDeclarations(code)
+        // Extract ONLY top-level declarations for persistence
+        const varDeclarations = this.extractTopLevelDeclarationsWithParser(code)
 
         // Prefer AST-based extraction; fall back to heuristic if parsing fails
         const parsed = this.extractLastExpressionWithParser(code)
@@ -321,19 +466,74 @@ class MathJSREPLService {
 
         // Build execution context via string concatenation to avoid template collisions
         const restoreLines = Object.keys(runtime.variables)
-          .filter((key) => !['console', 'Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Function', 'RegExp', 'Error', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'math', '__result__'].includes(key))
+          .filter(
+            (key) =>
+              ![
+                'console',
+                'Math',
+                'Date',
+                'JSON',
+                'Array',
+                'Object',
+                'String',
+                'Number',
+                'Boolean',
+                'Function',
+                'RegExp',
+                'Error',
+                'Promise',
+                'Map',
+                'Set',
+                'WeakMap',
+                'WeakSet',
+                'Symbol',
+                'Proxy',
+                'Reflect',
+                'math',
+                '__result__',
+              ].includes(key),
+          )
           .map((key) => `let ${key} = runtime.variables['${key}'];`)
           .join('\n')
 
         const returnMappingsExisting = Object.keys(runtime.variables)
-          .filter((key) => !['console', 'Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Function', 'RegExp', 'Error', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Symbol', 'Proxy', 'Reflect', 'math', '__result__'].includes(key))
+          .filter(
+            (key) =>
+              ![
+                'console',
+                'Math',
+                'Date',
+                'JSON',
+                'Array',
+                'Object',
+                'String',
+                'Number',
+                'Boolean',
+                'Function',
+                'RegExp',
+                'Error',
+                'Promise',
+                'Map',
+                'Set',
+                'WeakMap',
+                'WeakSet',
+                'Symbol',
+                'Proxy',
+                'Reflect',
+                'math',
+                '__result__',
+              ].includes(key),
+          )
           .map((key) => `${key}: ${key}`)
           .join(',\n')
 
         // Guard access to potentially non-top-level declarations using typeof checks
         // (typeof on an undeclared identifier is safe and returns 'undefined')
         const returnMappingsDeclared = varDeclarations
-          .map((varName: string) => `${varName}: (typeof ${varName} !== 'undefined' ? ${varName} : undefined)`) 
+          .map(
+            (varName: string) =>
+              `${varName}: (typeof ${varName} !== 'undefined' ? ${varName} : undefined)`,
+          )
           .join(',\n')
 
         const parts: string[] = []
@@ -347,7 +547,8 @@ class MathJSREPLService {
         parts.push('return {\n')
         parts.push('  __result__: __result__')
         if (returnMappingsExisting) parts.push(',\n' + returnMappingsExisting)
-        if (returnMappingsDeclared) parts.push((returnMappingsExisting ? ',\n' : ',\n') + returnMappingsDeclared)
+        if (returnMappingsDeclared)
+          parts.push((returnMappingsExisting ? ',\n' : ',\n') + returnMappingsDeclared)
         parts.push('\n};\n')
         parts.push('})()')
 
@@ -355,7 +556,9 @@ class MathJSREPLService {
 
         // Execute the code in an isolated scope to avoid lexical collisions
         // with local variables in this TypeScript function (e.g., 'result').
-        const execFn = new Function('runtime', 'return ' + executionContext) as (runtime: MathJSRuntimeState) => Record<string, unknown>
+        const execFn = new Function('runtime', 'return ' + executionContext) as (
+          runtime: MathJSRuntimeState,
+        ) => Record<string, unknown>
         const execResult = execFn(runtime)
 
         // Update the runtime variables with any new/modified variables (excluding __result__)
@@ -365,7 +568,9 @@ class MathJSREPLService {
           // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           temp.__result__
           const vars: Record<string, unknown> = { ...temp }
-          delete (vars as Record<string, unknown> as Record<string, unknown> & { __result__?: unknown }).__result__
+          delete (
+            vars as Record<string, unknown> as Record<string, unknown> & { __result__?: unknown }
+          ).__result__
           Object.assign(runtime.variables, vars)
         }
 
@@ -375,12 +580,17 @@ class MathJSREPLService {
         }
 
         // Always display the expression result when available
-        if (execResult && typeof execResult === 'object' && Object.prototype.hasOwnProperty.call(execResult, '__result__')) {
-           const value = (execResult as Record<string, unknown>).__result__
+        if (
+          execResult &&
+          typeof execResult === 'object' &&
+          Object.prototype.hasOwnProperty.call(execResult, '__result__')
+        ) {
+          const value = (execResult as Record<string, unknown>).__result__
           if (value !== undefined) {
             const format = (v: unknown): string => {
               try {
-                if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v)
+                if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')
+                  return String(v)
                 if (v === null || v === undefined) return String(v)
                 if (typeof Set !== 'undefined' && v instanceof Set) {
                   const arr = Array.from(v as Set<unknown>)
@@ -403,7 +613,6 @@ class MathJSREPLService {
 
         // Update variables for the return value
         variables = { ...runtime.variables }
-
       } catch (execError: unknown) {
         error = execError instanceof Error ? execError.message : 'JavaScript execution error'
       } finally {
@@ -421,9 +630,8 @@ class MathJSREPLService {
         error,
         variables,
         executionTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       }
-
     } catch (error: unknown) {
       const executionTime = Date.now() - startTime
       return {
@@ -431,7 +639,7 @@ class MathJSREPLService {
         error: error instanceof Error ? error.message : 'Execution failed',
         variables: {},
         executionTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       }
     }
   }
