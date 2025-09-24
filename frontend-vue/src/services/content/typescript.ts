@@ -48,6 +48,142 @@ Let's begin.`,
     nextSection: 'comments',
   },
   {
+    id: 'modules',
+    title: 'Modules and Packages',
+    order: 13,
+    content: `Programs grow. As they do, we group related code so it stays organized and reusable. In TypeScript (like JavaScript), the unit of organization is a module; a collection of modules published together is called a package.
+
+### What is a module? What is a package?
+
+- A **module** is a single file that defines names (functions, classes, constants) you can import in other files.
+- A **package** is a set of modules you can install and reuse. Packages commonly live on npm and are versioned. In Node.js, a package is typically a folder with a \`nr: package.json\`.
+
+Modern TypeScript targets **ES Modules (ESM)**. You load modules with \`nr: import\` and share names with \`nr: export\`. Type information is erased at build time, so runtime behavior matches JavaScript.
+
+### Why use modules and packages?
+
+- **Organization**: split a large program into logical parts (files and folders).
+- **Reusability**: write something once, use it across projects by importing it.
+- **Namespaces**: avoid name clashes; reference things as \`nr: math.add\` or \`nr: utils.formatDate\`.
+- **Ecosystem**: leverage thousands of high‑quality packages instead of reinventing wheels.
+
+### Common import/export forms (ESM)
+
+- Export from a module file: \`nr: export function add(a: number, b: number) { return a + b }\`
+- Default export: \`nr: export default function add(a: number, b: number) { ... }\`
+- Import the whole module: \`nr: import * as math from './math.js'\`
+- Import selected names: \`nr: import { add, mul } from './math.js'\`
+- Import with alias: \`nr: import { format as fmt } from './dates.js'\`
+- Default import: \`nr: import add from './math.js'\`
+- Dynamic import (returns a Promise): \`nr: const { add } = await import('./math.js')\`
+
+Note: In browsers, ESM modules are loaded via \`nr: <script type="module">\` or bundlers; in Node.js, use ESM (\`nr: "type": "module"\` in \`nr: package.json\`) or compatible tooling. Use \`nr: .d.ts\` type packages (e.g., \`nr: @types/dayjs\`) for libraries that ship separate typings.
+
+### Real ESM (import/export) examples
+
+These show how modules actually look across files. They are demonstration-only here; run them in a real project (browser with \`nr: <script type="module">\` or Node with \`nr: "type": "module"\`).
+
+\`\`\`typescript
+nr:
+// title: math.ts — named and default exports
+// description: A module file exporting values for others to import.
+// file: math.ts
+export const pi: number = 3.141592653589793
+export function add(a: number, b: number): number { return a + b }
+export function mul(a: number, b: number): number { return a * b }
+export default function areaOfCircle(r: number): number { return pi * r * r }
+\`\`\`
+
+\`\`\`typescript
+nr:
+// title: app.ts — importing default and named exports
+// description: Another file that imports from ./math.ts
+// file: app.ts
+import area, { pi, add, mul as multiply } from './math.js'
+
+console.log(area(3))       // default import
+console.log(add(2, 3))     // named import
+console.log(multiply(4, 5))
+console.log(pi)
+\`\`\`
+
+\`\`\`html
+nr:
+<!-- title: index.html — running modules in the browser -->
+<!-- description: Use <script type="module"> to enable ESM in browsers. -->
+<!doctype html>
+<html>
+  <body>
+    <script type="module">
+      import area, { add } from './math.js'
+      console.log(area(2))
+      console.log(add(1, 2))
+    </script>
+  </body>
+  </html>
+\`\`\`
+
+\`\`\`json
+nr:
+// title: package.json — enable ESM in Node.js
+// description: Set type: module to use import/export in Node.
+{
+  "type": "module"
+}
+\`\`\`
+
+\`\`\`typescript
+nr:
+// title: Dynamic import — load on demand (Node or modern browsers)
+// description: Dynamically load a module at runtime.
+// file: app-dynamic.ts
+async function main(): Promise<void> {
+  const { add } = await import('./math.js')
+  console.log(add(10, 20))
+}
+main()
+\`\`\`
+
+### Runnable in this REPL: dynamic import from CDN ESM
+
+Because this REPL executes in classic “script” mode (not a module), use dynamic \`nr: import(...)\` to load ESM packages from a CDN and stash them on globals. There is no top‑level \`nr: await\` here, so use \`nr: .then(...)\` and run the follow‑up snippet after it resolves.
+
+\`\`\`javascript
+// title: Load Ramda via dynamic import (namespace, no default export)
+// description: After this resolves, use R.add(...)
+import('https://cdn.jsdelivr.net/npm/ramda@0.31.3/+esm')
+  .then(mod => { R = mod })   // Ramda has named exports only
+  .catch(console.error)
+---
+// Run this after a moment. If you still see the message, run again.
+typeof R === 'object' && R.add ? R.add(2, 3) : 'Still loading… run again'
+\`\`\`
+
+\`\`\`typescript
+// title: Load Day.js via dynamic import (uses default export and types)
+// description: After this resolves, use DAYJS() to create a date.
+import('https://cdn.jsdelivr.net/npm/dayjs@1.11.13/+esm')
+  .then(({ default: dayjs }) => { DAYJS = dayjs as any })
+  .catch(console.error)
+---
+// Run this after a moment. If not ready yet, run again.
+typeof DAYJS === 'function' ? DAYJS().format('YYYY-MM-DD') : 'Still loading… run again'
+\`\`\`
+
+### Examples of popular TypeScript/JavaScript modules/packages
+
+- **\`nr: lodash\`** / **\`nr: lodash-es\`**: utilities for arrays, objects, strings.
+- **\`nr: date-fns\`** / **\`nr: dayjs\`**: date/time helpers.
+- **\`nr: axios\`** / **\`nr: node-fetch\`**: HTTP requests.
+- **\`nr: uuid\`**: generate unique identifiers.
+- **\`nr: react\`**, **\`nr: vue\`**, **\`nr: svelte\`**: UI frameworks built as packages.
+- Node built-ins (Node.js only): **\`nr: fs\`**, **\`nr: path\`**, **\`nr: url\`**.
+
+You will see different environments (browser vs Node.js) and build tools (Vite, Webpack) handle modules slightly differently, but the ideas are the same: export what a file provides and import what you need.`,
+    previousSection: 'types',
+    nextSection: 'next-steps',
+  },
+  {
     id: 'comments',
     title: 'Comments',
     order: 2,
@@ -642,6 +778,78 @@ console.log(\`my_age -> \${my_age}\`)   // this prints 10
 my_age = 11
 console.log(\`my_age -> \${my_age}\`)   // this prints 11
 \`\`\`
+
+## Variable scope
+
+Every variable binding lives in exactly one of three scopes:
+
+- Local function scope: names created inside the current function.
+- Enclosing function scope(s): names defined in any outer function that wraps the current one.
+- Module (global) scope: names defined at the top level of the file (the module).
+
+Name lookup is lexical (based on where code is written) and happens in this order:
+1. local
+2. enclosing (nearest outward)
+3. global (module)
+
+\`\`\`typescript
+// title: Local vs module (global)
+let animal: string = "cat"         // module/global
+
+function showAnimals(): void {
+  let animal: string = "dog"       // local to showAnimals
+  console.log("inside ->", animal)
+}
+
+showAnimals()
+---
+console.log("outside ->", animal)
+\`\`\`
+
+\`\`\`typescript
+// title: Enclosing scope — inner reads outer
+function outer(): string {
+  let message: string = "hi from outer"
+  function inner(): string {
+    return message  // reads the outer name
+  }
+  return inner()
+}
+---
+outer()
+\`\`\`
+
+To change a name from an outer scope, do not redeclare it with \`nr: let\`/\`nr: const\` (that would create a new, shadowing name). Assign to it instead.
+
+For example:
+
+\`\`\`typescript
+// title: Shadowing vs reassigning outer
+let name: string = "Joe"
+
+function setLocalName(): void {
+  let name: string = "Bob"           // shadow — local only
+  console.log("inside setLocalName:", name)
+}
+
+function setOuterName(): void {
+  name = "Jill"                      // reassign the outer 'name'
+  console.log("inside setOuterName:", name)
+}
+
+console.log("initial name:", name)
+---
+setLocalName()
+console.log("after setLocalName:", name)
+---
+setOuterName()
+console.log("after setOuterName:", name)
+---
+setLocalName()
+console.log("after setLocalName:", name)
+\`\`\`
+
+Note: In TypeScript (and JavaScript), blocks (\`nr: if\`, \`nr: for\`, \`nr: while\`, and any \`nr: { ... }\`) create a new scope for names declared with \`nr: let\` and \`nr: const\`. Functions always create a new scope. Avoid using \`nr: var\` in modern code; it is function-scoped and can be surprising.
 
 `,
     previousSection: 'operators',

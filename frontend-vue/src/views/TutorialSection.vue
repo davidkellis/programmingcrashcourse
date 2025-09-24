@@ -1,52 +1,53 @@
 <template>
+  <div class="toc-rail">
+    <div
+      v-if="tocOpen"
+      class="toc-panel"
+      :class="{ open: tocOpen }"
+      :style="{ top: `${tocTop}px` }"
+      role="navigation"
+      aria-label="Navigation (click to close)"
+    >
+      <button
+        type="button"
+        class="toc-header"
+        :aria-expanded="tocOpen"
+        aria-controls="toc-list"
+        @click="tocOpen = !tocOpen"
+        title="Toggle table of contents"
+      >
+        <span>Navigation (click to close)</span>
+        <span class="toc-chevron" :class="{ open: tocOpen }" aria-hidden="true"></span>
+      </button>
+      <div v-if="headings.length === 0" class="toc-empty">No subsections</div>
+      <ul v-else class="toc-list" id="toc-list">
+        <li
+          v-for="h in headings"
+          :key="h.id"
+          :class="['toc-item', `level-${h.level}`, { active: h.id === activeHeadingId }]"
+        >
+          <button type="button" class="toc-link" @click.stop.prevent="scrollToHeading(h.id)">
+            {{ h.text }}
+          </button>
+        </li>
+      </ul>
+    </div>
+    <!-- Always-visible Notion-like handle to reveal the ToC -->
+    <button
+      v-else
+      class="toc-handle"
+      :style="{ top: `${tocTop}px` }"
+      title="On this page"
+      aria-label="Open table of contents"
+      @click="tocOpen = true"
+    >
+      <span class="line line-1"></span>
+      <span class="line line-2"></span>
+      <span class="line line-3"></span>
+    </button>
+  </div>
   <div class="tutorial-section">
     <!-- Floating ToC rail -->
-    <div class="toc-rail">
-      <div
-        class="toc-panel"
-        :class="{ open: tocOpen }"
-        :style="{ top: `${tocTop}px` }"
-        role="navigation"
-        aria-label="Navigation (click to close)"
-      >
-        <button
-          type="button"
-          class="toc-header"
-          :aria-expanded="tocOpen"
-          aria-controls="toc-list"
-          @click="tocOpen = !tocOpen"
-          title="Toggle table of contents"
-        >
-          <span>Navigation (click to close)</span>
-          <span class="toc-chevron" :class="{ open: tocOpen }" aria-hidden="true"></span>
-        </button>
-        <div v-if="headings.length === 0" class="toc-empty">No subsections</div>
-        <ul v-else class="toc-list" id="toc-list">
-          <li
-            v-for="h in headings"
-            :key="h.id"
-            :class="['toc-item', `level-${h.level}`, { active: h.id === activeHeadingId }]"
-          >
-            <button type="button" class="toc-link" @click.stop.prevent="scrollToHeading(h.id)">
-              {{ h.text }}
-            </button>
-          </li>
-        </ul>
-      </div>
-      <!-- Always-visible Notion-like handle to reveal the ToC -->
-      <button
-        class="toc-handle"
-        v-show="!tocOpen"
-        :style="{ top: `${tocTop}px` }"
-        title="On this page"
-        aria-label="Open table of contents"
-        @click="tocOpen = true"
-      >
-        <span class="line line-1"></span>
-        <span class="line line-2"></span>
-        <span class="line line-3"></span>
-      </button>
-    </div>
     <div class="section-header">
       <h1 :id="slugify(sectionTitle)">{{ sectionTitle }}</h1>
     </div>
@@ -72,6 +73,7 @@ import type { TutorialSection, CodeSnippet, CodeSnippetGroup } from '@/types'
 import MarkdownIt from 'markdown-it'
 import AceCodeBlock from '@/components/AceCodeBlock.vue'
 import CodeSnippetGroupBlock from '@/components/CodeSnippetGroupBlock.vue'
+import BattleBotExercise from '@/components/BattleBotExercise.vue'
 
 interface Props {
   sectionId: string
@@ -103,6 +105,10 @@ type MountedInlineSnippet = { unmount: () => void; el: HTMLElement }
 const mountedInlineSnippets = ref<MountedInlineSnippet[]>([])
 const inlineSnippetIds = ref<string[]>([])
 
+// Track custom component mounts (e.g., Battle Bot exercise)
+type MountedCustom = { unmount: () => void; el: HTMLElement }
+const mountedCustomComponents = ref<MountedCustom[]>([])
+
 // ToC state
 type HeadingItem = { id: string; text: string; level: number; top: number }
 const headings = ref<HeadingItem[]>([])
@@ -113,10 +119,28 @@ let resizeListener: ((e: Event) => void) | null = null
 let scrollContainer: HTMLElement | null = null
 let prevScrollEl: HTMLElement | null = null
 const tocTop = ref<number>(0)
+const tocPanelRight = ref<number>(20)
+const tocHandleRight = ref<number>(8)
 
 const updateTocTop = () => {
-  // Place handle/panel just below the sticky header
-  tocTop.value = getHeaderOffset() + 12
+  // Stick just below the header within the scrollable content pane
+  const sc = getScrollContainer()
+  const scrollY = sc ? (sc as HTMLElement).scrollTop : 0
+  tocTop.value = scrollY + getHeaderOffset()
+
+  // Recompute right offsets so we dock to the outer content container
+  try {
+    const contentWrapper = document.querySelector('.content-wrapper') as HTMLElement | null
+    const contentPane = document.querySelector('.content-pane') as HTMLElement | null
+    const container = contentWrapper || contentPane
+    if (container) {
+      const rect = container.getBoundingClientRect()
+      const viewportRight = window.innerWidth
+      const distanceFromRight = Math.max(0, viewportRight - rect.right)
+      tocPanelRight.value = Math.max(20, distanceFromRight + 20)
+      tocHandleRight.value = Math.max(8, distanceFromRight + 8)
+    }
+  } catch {}
 }
 
 const getScrollContainer = (): HTMLElement | null => {
@@ -189,14 +213,18 @@ const getMarkdown = (): MarkdownIt => {
     return `<span class="inline-code-wrapper"><code>${safeCode}</code><button class="inline-run-button" data-code-id="${codeId}" title="Run">➤</button></span>`
   }
 
-  md.renderer.rules.fence = (tokens: Array<{ info: string; content: string }>, idx: number) => {
-    const token = tokens[idx]
+  md.renderer.rules.fence = (
+    tokens: Array<{ info: string; content: string }>,
+    fenceIdx: number,
+  ) => {
+    const token = tokens[fenceIdx]
     if (!token) return ''
     const language = token.info || ''
     const code = token.content
 
-    // Detect no-run directive at the very start of the fenced block content.
-    // Supported prefixes mirror inline behavior: "norun:", "no-run:", "nr:".
+    // Detect no-run directive on the first significant line (after optional title/description
+    // comments). Supports lines either plain (nr:) or wrapped in HTML comments (<!-- nr: -->),
+    // and also JS/Python comment leaders (//, #).
     const noRunPrefixes = ['norun:', 'no-run:', 'nr:']
     const escapeHtml = (str: string) =>
       str
@@ -206,23 +234,50 @@ const getMarkdown = (): MarkdownIt => {
         .replace(/\"/g, '&quot;')
         .replace(/'/g, '&#39;')
 
-    // Check first non-empty line for a no-run directive
     const lines = code.split(/\r?\n/)
-    const firstLineRaw = lines[0] ?? ''
-    const firstLine = firstLineRaw.trim()
-    const matchedPrefix = noRunPrefixes.find((p) => firstLine.startsWith(p))
-    const hasNoRun = Boolean(matchedPrefix)
+    const normalize = (line: string): string => {
+      let t = (line || '').trim()
+      const html = t.match(/^<!--\s*([\s\S]*?)\s*-->$/)
+      if (html) t = (html[1] || '').trim()
+      t = t.replace(/^(?:#|\/\/)+\s*/, '').trim()
+      return t
+    }
+
+    let idx = 0
+    let foundTitle = ''
+    let foundDesc = ''
+    while (idx < lines.length) {
+      const t = normalize(lines[idx] || '')
+      if (t === '') {
+        idx++
+        continue
+      }
+      const lower = t.toLowerCase()
+      if (lower.startsWith('title:')) {
+        foundTitle = t.replace(/^title:\s*/i, '').trim()
+        idx++
+        continue
+      }
+      if (lower.startsWith('description:')) {
+        foundDesc = t.replace(/^description:\s*/i, '').trim()
+        idx++
+        continue
+      }
+      break
+    }
+
+    let hasNoRun = false
+    if (idx < lines.length) {
+      const firstNorm = normalize(lines[idx] || '')
+      hasNoRun = noRunPrefixes.some((p) => firstNorm.startsWith(p))
+    }
 
     if (hasNoRun) {
-      // Remove directive and preserve remainder if present on the same line.
-      // If directive is alone on its own line, also skip an optional immediate blank line.
-      let startIdx = 1
-      const remainder = matchedPrefix ? firstLine.slice(matchedPrefix.length).trim() : ''
-      if (!remainder && lines[1] != null && lines[1].trim() === '') startIdx = 2
-      const displayLines = [] as string[]
-      if (remainder) displayLines.push(remainder)
-      displayLines.push(...lines.slice(startIdx))
-      const displayCode = displayLines.join('\n')
+      // Remove the directive and any leading title/description comments.
+      // Start code after the directive line; skip a following blank line.
+      let startCodeIdx = idx + 1
+      if ((lines[startCodeIdx] || '').trim() === '') startCodeIdx += 1
+      const displayCode = lines.slice(startCodeIdx).join('\n')
 
       if (import.meta.env.DEV) {
         try {
@@ -234,8 +289,10 @@ const getMarkdown = (): MarkdownIt => {
       }
 
       const escaped = escapeHtml(displayCode)
-      const langClass = language ? ` class="language-${language}"` : ''
-      return `<pre class="md-code-block no-run"><code${langClass}>${escaped}</code></pre>`
+      const languageClass = language ? ` language-${language}` : ''
+      const header = `
+        <div class=\"code-toolbar single-snippet-toolbar\">\n          <span class=\"code-context\"><strong>${escapeHtml(foundTitle || '')}</strong></span>\n          ${foundDesc ? `<span class=\"group-description\">${escapeHtml(foundDesc)}</span>` : ''}\n        </div>`
+      return `<div class=\"code-example is-single-snippet\">${header}\n          <div class=\"snippet-row\">\n            <div class=\"snippet-main\">\n              <code class=\"snippet-code-preview${languageClass}\">${escaped}</code>\n            </div>\n          </div>\n        </div>`
     }
 
     // Default: render Ace editor placeholder for runnable blocks
@@ -504,6 +561,18 @@ const clearMountedInlineSnippets = () => {
   mountedInlineSnippets.value = []
 }
 
+const clearMountedCustomComponents = () => {
+  mountedCustomComponents.value.forEach(({ unmount, el }) => {
+    try {
+      unmount()
+    } catch {}
+    try {
+      el.remove()
+    } catch {}
+  })
+  mountedCustomComponents.value = []
+}
+
 // Parse inline snippets from markdown content
 const parseInlineSnippets = (content: string): CodeSnippet[] => {
   const snippets: CodeSnippet[] = []
@@ -577,24 +646,30 @@ const mountInlineSnippetGroups = () => {
         .split('---')
         .map((section) => section.trim())
         .filter((section) => section.length > 0)
+      // Build snippets with support for leading no-run directive on each section
+      const builtSnippets = sections.map((section, index) => {
+        const lines = section.split(/\r?\n/)
+        const firstLineRaw = (lines[0] || '').trim()
+        // Strip common comment leaders then check directive
+        const firstLine = firstLineRaw.replace(/^\s*(?:#|\/\/)+\s*/, '').trim()
+        const noRun = ['norun:', 'no-run:', 'nr:'].some((p) => firstLine.startsWith(p))
+        const cleaned = noRun ? lines.slice(1).join('\n') : section
+        return {
+          id: `${groupId}_${index}`,
+          code: cleaned,
+          language: inlineLanguage,
+          isExecutable: noRun ? false : true,
+          context: '',
+        }
+      })
       group = {
         id: groupId,
         title: inlineTitle,
         description: inlineDescription || '',
         collapsedByDefault: false,
         continueOnError: false,
-        snippets: sections.map((section, index) => ({
-          id: `${groupId}_${index}`,
-          code: section,
-          language: inlineLanguage,
-          isExecutable: true,
-          context: '',
-        })),
+        snippets: builtSnippets,
       }
-    } else {
-      // Legacy: find from codeItems
-      const items = section.value?.codeItems || []
-      group = items.find((it) => isGroup(it) && it.id === groupId) as CodeSnippetGroup | undefined
     }
 
     const mountEl = document.createElement('div')
@@ -651,24 +726,57 @@ const mountInlineSnippets = () => {
       // Create snippet from inline data
       const decodedCode = decodeURIComponent(inlineCode)
 
-      // Remove duplicate title comment from code if it matches the title
+      // Remove duplicate title comment (JS-style) if present, then detect no-run directive
       let cleanedCode = decodedCode.trim()
       const titleComment = `// ${inlineTitle}`
-      console.log('[DEBUG] Title:', inlineTitle)
-      console.log('[DEBUG] Original code:', cleanedCode)
-      console.log('[DEBUG] Looking for comment:', titleComment)
       if (cleanedCode.startsWith(titleComment)) {
         cleanedCode = cleanedCode.substring(titleComment.length).trim()
-        console.log('[DEBUG] Cleaned code:', cleanedCode)
-      } else {
-        console.log('[DEBUG] Comment not found at start')
+      }
+
+      // no-run detection: skip leading title/description comments (//, #, or <!-- -->),
+      // then examine the first non-empty line. Support plain 'nr:' lines or
+      // comment-wrapped nr-lines.
+      const noRunPrefixes = ['norun:', 'no-run:', 'nr:']
+      const lines = cleanedCode.split(/\r?\n/)
+      const normalize = (line: string): string => {
+        let t = (line || '').trim()
+        const html = t.match(/^<!--\s*([\s\S]*?)\s*-->$/)
+        if (html) t = (html[1] || '').trim()
+        t = t.replace(/^(?:#|\/\/)+\s*/, '').trim()
+        return t
+      }
+      // find index of first significant line (skip title/description comment lines and blanks)
+      let idx = 0
+      while (idx < lines.length) {
+        const t = normalize(lines[idx] || '')
+        if (t === '') {
+          idx++
+          continue
+        }
+        const lower = t.toLowerCase()
+        if (lower.startsWith('title:') || lower.startsWith('description:')) {
+          idx++
+          continue
+        }
+        break
+      }
+      let hasNoRun = false
+      if (idx < lines.length) {
+        const first = normalize(lines[idx] || '')
+        hasNoRun = noRunPrefixes.some((p) => first.startsWith(p))
+      }
+      if (hasNoRun) {
+        // remove directive line and an immediate following blank line
+        const out = lines.slice(0, idx).concat(lines.slice(idx + 1))
+        if ((out[idx] || '').trim() === '') out.splice(idx, 1)
+        cleanedCode = out.join('\n')
       }
 
       snippet = {
         id: snippetId,
         code: cleanedCode,
         language: inlineLanguage,
-        isExecutable: true,
+        isExecutable: hasNoRun ? false : true,
         context: inlineDescription ? inlineDescription.trim() : inlineTitle,
       }
     } else {
@@ -741,16 +849,20 @@ const mountInlineSnippets = () => {
     // For single snippets, just show the code without the title comment since it's already in the header
     codeEl.textContent = snippet.code
 
-    const btn = document.createElement('button')
-    btn.className = 'run-button run-micro'
-    btn.textContent = 'Run'
-
-    const onClick = () => runCodeExample(snippet!.code)
-    btn.addEventListener('click', onClick)
+    // Optionally add Run button if executable
+    let btn: HTMLButtonElement | null = null
+    let onClick: (() => void) | null = null
+    if (snippet.isExecutable !== false) {
+      btn = document.createElement('button')
+      btn.className = 'run-button run-micro'
+      btn.textContent = 'Run'
+      onClick = () => runCodeExample(snippet!.code)
+      btn.addEventListener('click', onClick)
+    }
 
     snippetMain.appendChild(codeEl)
     row.appendChild(snippetMain)
-    row.appendChild(btn)
+    if (btn) row.appendChild(btn)
 
     wrapper.appendChild(toolbar)
     wrapper.appendChild(row)
@@ -766,7 +878,7 @@ const mountInlineSnippets = () => {
     mountedInlineSnippets.value.push({
       unmount: () => {
         try {
-          btn.removeEventListener('click', onClick)
+          if (btn && onClick) btn.removeEventListener('click', onClick)
         } catch {}
       },
       el: mountEl,
@@ -1058,7 +1170,10 @@ const attachScrollHandlers = () => {
     prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
   scrollContainer = newEl
   if (resizeListener) window.removeEventListener('resize', resizeListener)
-  scrollListener = () => updateActiveHeading()
+  scrollListener = () => {
+    updateTocTop()
+    updateActiveHeading()
+  }
   resizeListener = () => {
     updateTocTop()
     recomputeHeadingPositions()
@@ -1120,6 +1235,33 @@ const scrollToHeading = (id: string) => {
   window.setTimeout(() => updateActiveHeading(), 100)
 }
 
+// Mount custom components referenced via placeholders in markdown content
+const mountCustomComponents = () => {
+  if (!contentRef.value) return
+  // Battle Bot exercise placeholder(s) inside content
+  const placeholders = contentRef.value.querySelectorAll('.battle-bot-placeholder')
+  if (placeholders.length === 0) return
+  Array.from(placeholders).forEach((ph) => {
+    const mountEl = document.createElement('div')
+    mountEl.className = 'battle-bot-mount'
+    try {
+      // Replace inline so placement is exactly where the placeholder is
+      ph.parentNode?.replaceChild(mountEl, ph)
+    } catch (e) {
+      console.warn('[CustomMount] Failed to replace placeholder for BattleBot', e)
+      return
+    }
+
+    try {
+      const app = createApp(BattleBotExercise)
+      app.mount(mountEl)
+      mountedCustomComponents.value.push({ unmount: () => app.unmount(), el: mountEl })
+    } catch (e) {
+      console.error('[CustomMount] Failed to mount BattleBotExercise', e)
+    }
+  })
+}
+
 onMounted(() => {
   loadSection()
 
@@ -1173,6 +1315,8 @@ watch(
           mountInlineSnippetGroups()
           // Mount inline single snippets at their placeholders
           mountInlineSnippets()
+          // Mount custom components (Battle Bot exercise, etc.)
+          mountCustomComponents()
         }, 120)
       })
     }, 50) // 50ms debounce
@@ -1192,6 +1336,7 @@ onUnmounted(() => {
   clearMountedAceBlocks()
   clearMountedInlineGroups()
   clearMountedInlineSnippets()
+  clearMountedCustomComponents()
   if (prevScrollEl && scrollListener)
     prevScrollEl.removeEventListener('scroll', scrollListener as EventListener)
   if (resizeListener) window.removeEventListener('resize', resizeListener)
@@ -1260,23 +1405,23 @@ const handleCodeBlockClick = (event: Event) => {
   height: auto;
   overflow: visible;
   background: #fbfbfc;
+  position: relative;
 }
 
-/* Floating ToC rail */
+/* Floating ToC rail (now on the right edge of the content pane) */
 .toc-rail {
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
+  position: absolute; /* strictly inside content pane */
+  right: 8px; /* dock to the right edge of the content pane */
+  height: 0; /* height controlled by children; top is set inline */
   width: 44px; /* includes handle width */
-  z-index: 20;
+  z-index: 20; /* under the REPL which is outside this pane */
 }
 
 .toc-panel {
   position: absolute;
-  left: 8px; /* appear closer to the handle/left edge */
-  top: 80px; /* below sticky header */
-  transform: translateX(-100%);
+  right: 20px; /* 20px inside content pane */
+  top: 0;
+  transform: translateX(0); /* default position; visibility controlled by .open */
   transition:
     transform 0.2s ease,
     opacity 0.2s ease;
@@ -1293,7 +1438,7 @@ const handleCodeBlockClick = (event: Event) => {
 }
 
 .toc-panel.open {
-  transform: translateX(0);
+  opacity: 0.98;
 }
 
 .toc-header {
@@ -1388,7 +1533,7 @@ const handleCodeBlockClick = (event: Event) => {
 /* ToC handle: visible hint for discoverability */
 .toc-handle {
   position: absolute;
-  left: 8px;
+  right: 8px;
   top: 90px; /* overridden by inline style bound to tocTop */
   width: 36px;
   height: 64px;
@@ -1444,7 +1589,7 @@ const handleCodeBlockClick = (event: Event) => {
   padding-bottom: 0.25rem;
   border-bottom: 2px solid #e5e7eb;
   max-width: 920px;
-  margin: 0 auto 1rem auto;
+  margin: 0 0 1rem 0; /* left-align within content column */
 }
 
 .section-header h1 {
@@ -1456,11 +1601,20 @@ const handleCodeBlockClick = (event: Event) => {
 
 .section-content {
   max-width: 920px;
-  margin: 0 auto;
+  margin: 0; /* left-align within content column */
   display: block;
   width: 100%;
   min-width: 0;
   position: relative;
+}
+.battle-bot-mount {
+  /* Full-bleed centered container at placeholder position */
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
 .content-wrapper-centered {
   display: flex;

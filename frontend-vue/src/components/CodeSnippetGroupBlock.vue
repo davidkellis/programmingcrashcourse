@@ -8,7 +8,9 @@
         <span v-if="group.description" class="group-description">{{ group.description }}</span>
       </div>
       <span class="toolbar-spacer"></span>
-      <button @click="runGroup" class="run-button run-group-button">Run Group</button>
+      <button v-if="canRunGroup" @click="runGroup" class="run-button run-group-button">
+        Run Group
+      </button>
     </div>
 
     <!-- Compact, scannable list -->
@@ -19,7 +21,13 @@
             composePreview(snippet)
           }}</code>
         </div>
-        <button @click="runSnippet(snippet.code)" class="run-button run-micro">Run</button>
+        <button
+          v-if="snippet.isExecutable !== false"
+          @click="runSnippet(snippet.code)"
+          class="run-button run-micro"
+        >
+          Run
+        </button>
       </div>
     </div>
   </div>
@@ -52,16 +60,25 @@ const runGroup = () => {
   })
 }
 
+// Hide the Run Group button if the group is explicitly marked non-runnable (custom flag)
+// or if none of the snippets are executable
+import { computed } from 'vue'
+const canRunGroup = computed(() => {
+  const explicit = (props.group as unknown as { runnable?: boolean }).runnable
+  if (explicit === false) return false
+  return props.group.snippets.some((s) => (s as { isExecutable?: boolean }).isExecutable !== false)
+})
+
 // Preview that preserves line breaks for multi-line content
 const preview = (code: string) => {
   const trimmed = code.trim()
   const lines = trimmed.split('\n')
-  
+
   // If single line, collapse whitespace as before
   if (lines.length === 1) {
     return trimmed.replace(/\s+/g, ' ')
   }
-  
+
   // For multi-line, preserve line breaks and show full content
   return trimmed
 }

@@ -241,7 +241,7 @@ const size = ref({ width: 350, height: 300 })
 const isResizing = ref(false)
 const startResizeData = ref({ x: 0, y: 0, startSize: { width: 0, height: 0 } })
 
-const DEFAULT_PERCENT = 0.3
+const DEFAULT_PERCENT = 0.33
 const currentSizeRatio = ref(DEFAULT_PERCENT)
 
 const setDefaultSizeFromViewport = () => {
@@ -644,7 +644,7 @@ onUnmounted(() => {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  z-index: 1000;
+  z-index: 1500;
 }
 
 /* Pane mode removes fixed positioning and fills grid cell */
@@ -794,13 +794,13 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.1rem 0.3rem;
   background: transparent;
   border: none;
   border-right: 1px solid #6b7280;
   color: #e5e7eb;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.6rem;
   font-weight: 600;
   transition: all 0.2s;
   position: relative;
@@ -869,8 +869,9 @@ onUnmounted(() => {
   white-space: pre;
 }
 .repl-output {
-  margin-left: 2rem;
+  padding-left: 2rem;
   color: #d1d5db;
+  background: #111827;
 }
 .repl-output pre {
   margin: 0;

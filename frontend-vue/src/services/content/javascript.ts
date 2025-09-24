@@ -448,6 +448,78 @@ my_age = 11
 console.log(\`my_age -> \${my_age}\`)   // this prints 11
 \`\`\`
 
+## Variable scope
+
+Every variable binding lives in exactly one of three scopes:
+
+- Local function scope: names created inside the current function.
+- Enclosing function scope(s): names defined in any outer function that wraps the current one.
+- Module (global) scope: names defined at the top level of the file (the module).
+
+Name lookup is lexical (based on where code is written) and happens in this order:
+1. local
+2. enclosing (nearest outward)
+3. global (module)
+
+\`\`\`javascript
+// title: Local vs module (global)
+let animal = "cat"         // module/global
+
+function showAnimals() {
+  let animal = "dog"       // local to showAnimals
+  console.log("inside ->", animal)
+}
+
+showAnimals()
+---
+console.log("outside ->", animal)
+\`\`\`
+
+\`\`\`javascript
+// title: Enclosing scope — inner reads outer
+function outer() {
+  let message = "hi from outer"
+  function inner() {
+    return message  // reads the outer name
+  }
+  return inner()
+}
+---
+outer()
+\`\`\`
+
+To change a name from an outer scope, do not redeclare it with \`nr: let\`/\`nr: const\` (that would create a new, shadowing name). Assign to it instead.
+
+For example:
+
+\`\`\`javascript
+// title: Shadowing vs reassigning outer
+let name = "Joe"
+
+function setLocalName() {
+  let name = "Bob"           // shadow — local only
+  console.log("inside setLocalName:", name)
+}
+
+function setOuterName() {
+  name = "Jill"              // reassign the outer 'name'
+  console.log("inside setOuterName:", name)
+}
+
+console.log("initial name:", name)
+---
+setLocalName()
+console.log("after setLocalName:", name)
+---
+setOuterName()
+console.log("after setOuterName:", name)
+---
+setLocalName()
+console.log("after setLocalName:", name)
+\`\`\`
+
+Note: In JavaScript, blocks (\`nr: if\`, \`nr: for\`, \`nr: while\`, and any \`nr: { ... }\`) create a new scope for names declared with \`nr: let\` and \`nr: const\`. Functions always create a new scope. Avoid using \`nr: var\` in modern code; it is function-scoped and can be surprising.
+
 `,
     previousSection: 'operators',
     nextSection: 'expressions',
@@ -1781,12 +1853,169 @@ JavaScript has a bunch of built-in types and core objects:
 * and many more
 `,
     previousSection: 'classes-and-objects',
+    nextSection: 'modules',
+  },
+  {
+    id: 'modules',
+    title: 'Modules and Packages',
+    order: 13,
+    content: `Programs grow. As they do, we group related code so it stays organized and reusable. In JavaScript, the unit of organization is a module; a collection of modules published together is called a package.
+
+### What is a module? What is a package?
+
+- A **module** is a single file that defines names (functions, classes, constants) you can import in other files.
+- A **package** is a set of modules you can install and reuse. Packages commonly live on npm and are versioned. In Node.js, a package is typically a folder with a \`nr: package.json\`.
+
+Modern JavaScript uses **ES Modules (ESM)**. You load modules with \`nr: import\` and share names with \`nr: export\`.
+
+### Why use modules and packages?
+
+- **Organization**: split a large program into logical parts (files and folders).
+- **Reusability**: write something once, use it across projects by importing it.
+- **Namespaces**: avoid name clashes; reference things as \`nr: math.add\` or \`nr: utils.formatDate\`.
+- **Ecosystem**: leverage thousands of high‑quality packages instead of reinventing wheels.
+
+### Common import/export forms (ESM)
+
+- Export from a module file: \`nr: export function add(a,b) { return a + b }\`
+- Default export: \`nr: export default function add(a,b) { ... }\`
+- Import the whole module: \`nr: import * as math from './math.js'\`
+- Import selected names: \`nr: import { add, mul } from './math.js'\`
+- Import with alias: \`nr: import { format as fmt } from './dates.js'\`
+- Default import: \`nr: import add from './math.js'\`
+- Dynamic import (returns a Promise): \`nr: const { add } = await import('./math.js')\`
+
+Note: In browsers, ESM modules are loaded via \`nr: <script type="module">\` or bundlers; in Node.js, use ESM (\`nr: "type": "module"\` in \`nr: package.json\`) or compatible tooling.
+
+### Real ESM (import/export) examples
+
+These show how modules actually look across files. They are demonstration-only here; run them in a real project (browser with \`nr: <script type="module">\` or Node with \`nr: "type": "module"\`).
+
+\`\`\`javascript
+// title: math.js — named and default exports
+// description: A module file exporting values for others to import.
+nr:
+// file: math.js
+export const pi = 3.141592653589793
+export function add(a, b) { return a + b }
+export function mul(a, b) { return a * b }
+export default function areaOfCircle(r) { return pi * r * r }
+\`\`\`
+
+\`\`\`javascript
+// title: app.js — importing default and named exports
+// description: Another file that imports from ./math.js
+nr:
+// file: app.js
+import area, { pi, add, mul as multiply } from './math.js'
+
+console.log(area(3))       // default import
+console.log(add(2, 3))     // named import
+console.log(multiply(4, 5))
+console.log(pi)
+\`\`\`
+
+\`\`\`html
+<!-- title: index.html — running modules in the browser -->
+<!-- description: Use <script type="module"> to enable ESM in browsers. -->
+nr:
+<!doctype html>
+<html>
+  <body>
+    <script type="module">
+      import area, { add } from './math.js'
+      console.log(area(2))
+      console.log(add(1, 2))
+    </script>
+  </body>
+</html>
+\`\`\`
+
+\`\`\`json
+// title: package.json — enable ESM in Node.js
+// description: Set type: module to use import/export in Node.
+nr:
+{
+  "type": "module"
+}
+\`\`\`
+
+\`\`\`javascript
+// title: Dynamic import — load on demand (Node or modern browsers)
+// description: Dynamically load a module at runtime.
+nr:
+// file: app-dynamic.js
+async function main() {
+  const { add } = await import('./math.js')
+  console.log(add(10, 20))
+}
+main()
+\`\`\`
+
+### Runnable in this REPL: dynamic import from CDN ESM
+
+Because this REPL executes in classic “script” mode (not a module), use dynamic \`nr: import(...)\` to load ESM packages from a CDN and stash them on globals. There is no top‑level \`nr: await\` here, so use \`nr: .then(...)\` and run the follow‑up snippet after it resolves.
+
+\`\`\`javascript
+// title: Load Ramda via dynamic import (namespace, no default export)
+// description: After this resolves, use R.add(...)
+import('https://cdn.jsdelivr.net/npm/ramda@0.31.3/+esm')
+  .then(mod => { R = mod })   // Ramda has named exports only
+  .catch(console.error)
+---
+// Run this after a moment. If you still see the message, run again.
+typeof R === 'object' && R.add ? R.add(2, 3) : 'Still loading… run again'
+\`\`\`
+
+\`\`\`javascript
+// title: Load Day.js via dynamic import (uses default export)
+// description: After this resolves, use DAYJS() to create a date.
+import('https://cdn.jsdelivr.net/npm/dayjs@1.11.13/+esm')
+  .then(({ default: dayjs }) => { DAYJS = dayjs })
+  .catch(console.error)
+---
+// Run this after a moment. If not ready yet, run again.
+typeof DAYJS === 'function' ? DAYJS().format('YYYY-MM-DD') : 'Still loading… run again'
+\`\`\`
+
+### Examples of popular JavaScript modules/packages
+
+- **\`nr: lodash\`** / **\`nr: lodash-es\`**: utilities for arrays, objects, strings.
+- **\`nr: date-fns\`** / **\`nr: dayjs\`**: date/time helpers.
+- **\`nr: axios\`** / **\`nr: node-fetch\`**: HTTP requests.
+- **\`nr: uuid\`**: generate unique identifiers.
+- **\`nr: react\`**, **\`nr: vue\`**, **\`nr: svelte\`**: UI frameworks built as packages.
+- Node built-ins (Node.js only): **\`nr: fs\`**, **\`nr: path\`**, **\`nr: url\`**.
+
+You will see different environments (browser vs Node.js) and build tools (Vite, Webpack) handle modules slightly differently, but the ideas are the same: export what a file provides and import what you need.`,
+    previousSection: 'types',
+    nextSection: 'exercise-battle-bot',
+  },
+  {
+    id: 'exercise-battle-bot',
+    title: 'Exercise: Battle Bot',
+    order: 14,
+    content: `Build your own tank AI and battle against the built-in bots.
+
+This interactive arena renders right here. Use the editor below the arena to define a class that extends \`nr: Tank\`, then call \`nr: registerUserTank(YourClass, { name: "Player", color: "#ff7f0e" })\`. Click Run to add your bot to the roster, then press "New Battle" to see it fight.
+
+<div class="battle-bot-placeholder"></div>
+
+### Tips
+
+- Use **movement helpers**: \`nr: driveTo(x, y)\`, \`nr: goForward(n)\`, \`nr: turnTo(deg)\`, \`nr: facePoint(x, y)\`, \`nr: followPath(points, { loop, speed })\`.
+- Use **scanning**: \`nr: this.getScannedRobots()\` returns nearest-first objects with \`nr: bearing\` (degrees relative to your heading), \`nr: distance\`, and \`nr: energy\`.
+- Use **combat**: \`nr: this.fire(power)\` where power is ~1..3, and **cooldown** regulates rate of fire.
+- Energy below 5 disables movement/turning; hitting opponents restores some energy.
+
+When you are happy with your bot, try Best of 3 to see who is champion.`,
+    previousSection: 'modules',
     nextSection: 'next-steps',
   },
   {
     id: 'next-steps',
     title: 'Next Steps',
-    order: 13,
+    order: 15,
     content: `You're off to a great start. Here are some suggested next steps:
 
   ### Practice
@@ -1797,6 +2026,6 @@ JavaScript has a bunch of built-in types and core objects:
 
   ### Where to go next
   - Learn loops, arrays/objects methods, async/await, and modules.`,
-    previousSection: 'types',
+    previousSection: 'exercise-battle-bot',
   },
 ]

@@ -155,12 +155,12 @@ False
 
 ### Objects (instances of classes)
 
-- What they are used for: representing real-world things with data (attributes) and behavior (methods), like a \`Dog\`, \`Car\`, or \`BankAccount\`.
-- Example: creating an instance of a simple class.
+- What they are used for: representing real-world things with data (attributes) and behavior (methods), like a \`nr: Dog\`, \`nr: Car\`, or \`nr: BankAccount\`.
+- Example: creating an instance of a simple \`nr: Dog\` class.
 
 \`\`\`python
 # title: Objects — class instances
-# description: Define a simple class, create an instance, and evaluate it.
+# description: Define a simple \`nr: Dog\` class, create an instance, and evaluate it.
 class Dog:
   def __init__(self, name):
     self.name = name
@@ -478,6 +478,77 @@ print(f"my_age -> \{my_age}")   # this prints 10
 my_age = 11
 print(f"my_age -> \{my_age}")   # this prints 11
 \`\`\`
+
+## Variable scope
+
+Every variable binding lives in exactly one of three scopes:
+
+- Local function scope: names created inside the current function.
+- Enclosing function scope(s): names defined in any outer function that wraps the current one.
+- Module (global) scope: names defined at the top level of the file (the module).
+
+Name lookup is lexical (based on where code is written) and happens in this order:
+1. local
+2. enclosing (nearest outward)
+3. global (module)
+
+\`\`\`python
+# title: Local vs module (global)
+animal = "cat"         # module/global
+
+def show_animals():
+  animal = "dog"       # local to show_animals
+  print("inside ->", animal)
+
+show_animals()
+---
+print("outside ->", animal)
+\`\`\`
+
+\`\`\`python
+# title: Enclosing scope — inner reads outer
+def outer():
+  message = "hi from outer"
+  def inner():
+    return message  # reads the outer name
+  return inner()
+---
+outer()
+\`\`\`
+
+To change a name from an outer scope, be explicit:
+- Use \`nr: global\` to rebind a top-level (module) name.
+- Use \`nr: nonlocal\` to rebind a name from an enclosing function.
+
+For example:
+
+\`\`\`python
+# title: Global and nonlocal scope
+name = "Joe"
+
+def set_local_name():
+  name = "Bob"
+  print(f"inside set_local_name: \{name}")
+
+def set_global_name():
+  global name
+  name = "Jill"
+  print(f"inside set_global_name: \{name}")
+
+print(f"initial name: \{name}")
+---
+set_local_name()
+print(f"after set_local_name: \{name}")
+---
+set_global_name()
+print(f"after set_global_name: \{name}")
+---
+set_local_name()
+print(f"after set_local_name: \{name}")
+\`\`\`
+
+
+Note: \`nr: if\`, \`nr: for\`, and \`nr: while\` blocks do not create a new scope in Python; functions do.
 
 `,
     previousSection: 'operators',
@@ -1744,6 +1815,77 @@ Python has a bunch of built in types:
 * and many more
 `,
     previousSection: 'classes-and-objects',
+    nextSection: 'modules',
+  },
+  {
+    id: 'modules',
+    title: 'Modules and Packages',
+    order: 13,
+    content: `Programs grow. As they do, we group related code together so it stays organized and reusable. In Python, the unit of organization is a module; a collection of modules in a folder (with an optional \`nr: __init__.py\`) is called a package.
+
+### What is a module? What is a package?
+
+- A **module** is just a single \`nr: .py\` file that defines names (functions, classes, variables) you can import.
+- A **package** is a directory that contains one or more modules. Packages let you nest and organize modules hierarchically.
+
+You load modules and packages with \`nr: import\` so you can use the names they provide.
+
+### Why use modules and packages?
+
+- **Organization**: keep related code together; split a large program into logical parts.
+- **Reusability**: write something once, import it in many places.
+- **Avoid name clashes**: names live in the module’s own namespace; you reference them as \`nr: module.name\`.
+- **Discoverability**: standard library and third‑party packages give you well-tested building blocks.
+
+### Importing modules — the basic forms
+
+- \`nr: import <module>\` — import the whole module; use names as \`nr: module.name\`.
+- \`nr: import <module> as <alias>\` — import with a shorter name.
+- \`nr: from <module> import <name>\` — import specific names directly.
+- \`nr: from <package> import <module>\` — import a submodule from a package.
+
+\`\`\`python
+# title: Using standard library modules
+# description: Import modules and call their functions.
+import math
+math.pi
+---
+math.sqrt(81)
+---
+import random
+random.randint(1, 6)
+---
+from datetime import date, timedelta
+date.today() + timedelta(days=3)
+---
+from statistics import mean
+mean([10, 20, 30])
+\`\`\`
+
+\`\`\`python
+# title: Import forms — alias and selective import
+# description: Use aliases and import selected names.
+import math as m
+m.factorial(5)
+---
+from random import choice
+choice(["red", "green", "blue"])  # picks one
+---
+from collections import Counter
+Counter("banana")  # counts letters
+\`\`\`
+
+### Examples of popular modules in Python
+
+- **\`nr: math\`**: mathematical functions and constants (\`nr: sqrt\`, \`nr: sin\`, \`nr: pi\`).
+- **\`nr: random\`**: random numbers and selections (\`nr: randint\`, \`nr: choice\`).
+- **\`nr: datetime\`**: dates and times (\`nr: datetime\`, \`nr: date\`, \`nr: timedelta\`).
+- **\`nr: pathlib\`**: object-oriented file paths (\`nr: Path\`).
+- **\`nr: statistics\`**: mean/median/mode.
+- **\`nr: json\`**: encode/decode JSON data.
+
+You will also see third‑party packages installed with tools like \`nr: pip\` (for example, \`nr: requests\` for HTTP, \`nr: numpy\` for arrays). The ideas are the same: you import what you need and use its names.`,
+    previousSection: 'types',
     nextSection: 'next-steps',
   },
 ]

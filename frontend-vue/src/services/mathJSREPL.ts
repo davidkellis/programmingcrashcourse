@@ -230,6 +230,91 @@ class MathJSREPLService {
   }
 
   /**
+   * Rewrite ONLY top-level declarations into assignments so that names bind to
+   * properties of the persistent runtime scope when executed inside
+   * `with(runtime.variables) { ... }`.
+   *
+   * Examples (top-level only):
+   *   - `let x = 1`      -> `x = 1;`
+   *   - `const y = f()`  -> `y = f();`
+   *   - `let x, y = 2`   -> `x = undefined; y = 2;`
+   *   - `function f(){}` -> `f = function f(){}`
+   *   - `class C {}`     -> `C = (class C {})`
+   *   - Destructuring: `let {a,b} = obj` -> `({a,b} = obj);`
+   */
+  private rewriteTopLevelToAssignments(code: string): string {
+    try {
+      const program = acorn.parse(code, {
+        ecmaVersion: 'latest',
+        sourceType: 'script',
+      }) as unknown as {
+        body: Array<acorn.Node & { type: string; start: number; end: number }>
+      }
+
+      const src = code
+      const pieces: string[] = []
+      let cursor = 0
+
+      const slice = (start: number, end: number): string => src.slice(start, end)
+
+      const makeVarAssigns = (decl: any): string => {
+        const assigns: string[] = []
+        for (const d of decl.declarations || []) {
+          const id = d.id
+          const init = d.init ? slice(d.init.start, d.init.end) : 'undefined'
+          const idSrc = slice(id.start, id.end)
+          const left =
+            id.type === 'ObjectPattern' || id.type === 'ArrayPattern' ? `(${idSrc})` : idSrc
+          assigns.push(`${left} = ${init};`)
+        }
+        // If there were zero declarators (odd but valid), do nothing
+        return assigns.join('\n')
+      }
+
+      for (const node of program.body) {
+        // Append untouched code up to this node
+        pieces.push(slice(cursor, node.start))
+
+        switch ((node as any).type) {
+          case 'VariableDeclaration': {
+            const rewritten = makeVarAssigns(node as any)
+            pieces.push(rewritten)
+            break
+          }
+          case 'FunctionDeclaration': {
+            const fn: any = node
+            const name = fn.id && fn.id.name ? String(fn.id.name) : ''
+            const fnSrc = slice(fn.start, fn.end) // `function name(...) { ... }`
+            // Assign a named function expression to persist on scope
+            pieces.push(`${name} = ${fnSrc};`)
+            break
+          }
+          case 'ClassDeclaration': {
+            const cls: any = node
+            const name = cls.id && cls.id.name ? String(cls.id.name) : ''
+            const clsSrc = slice(cls.start, cls.end) // `class Name ... {}`
+            // Wrap in parens so it's an expression in assignment position
+            pieces.push(`${name} = (${clsSrc});`)
+            break
+          }
+          default: {
+            // Leave other statements unchanged
+            pieces.push(slice(node.start, node.end))
+          }
+        }
+
+        cursor = node.end
+      }
+
+      pieces.push(slice(cursor, src.length))
+      return pieces.join('')
+    } catch {
+      // On any parse failure, return the original code unchanged
+      return code
+    }
+  }
+
+  /**
    * Initialize the MathJS REPL service
    */
   async initialize(): Promise<void> {
@@ -440,10 +525,7 @@ class MathJSREPLService {
       }
 
       try {
-        // Extract ONLY top-level declarations for persistence
-        const varDeclarations = this.extractTopLevelDeclarationsWithParser(code)
-
-        // Prefer AST-based extraction; fall back to heuristic if parsing fails
+        // Prefer AST-based extraction for last expression; fall back if needed
         const parsed = this.extractLastExpressionWithParser(code)
         let bodyCode: string
         if (parsed && parsed.expr && parsed.isSafeToReevaluate) {
@@ -458,98 +540,17 @@ class MathJSREPLService {
           // Safer fallback: run code as-is without result capture
           bodyCode = code
         }
+        // Transform top-level declarations to assignments so names persist on scope
+        const transformedBody = this.rewriteTopLevelToAssignments(bodyCode)
 
-        // Bind the runtime variable store into the eval scope so we can reference
-        // original objects (like Set/Map) without JSON-serializing them
-        // Use a local alias and reference it inside the template by name.
-        // const SCOPE = runtime.variables
-
-        // Build execution context via string concatenation to avoid template collisions
-        const restoreLines = Object.keys(runtime.variables)
-          .filter(
-            (key) =>
-              ![
-                'console',
-                'Math',
-                'Date',
-                'JSON',
-                'Array',
-                'Object',
-                'String',
-                'Number',
-                'Boolean',
-                'Function',
-                'RegExp',
-                'Error',
-                'Promise',
-                'Map',
-                'Set',
-                'WeakMap',
-                'WeakSet',
-                'Symbol',
-                'Proxy',
-                'Reflect',
-                'math',
-                '__result__',
-              ].includes(key),
-          )
-          .map((key) => `let ${key} = runtime.variables['${key}'];`)
-          .join('\n')
-
-        const returnMappingsExisting = Object.keys(runtime.variables)
-          .filter(
-            (key) =>
-              ![
-                'console',
-                'Math',
-                'Date',
-                'JSON',
-                'Array',
-                'Object',
-                'String',
-                'Number',
-                'Boolean',
-                'Function',
-                'RegExp',
-                'Error',
-                'Promise',
-                'Map',
-                'Set',
-                'WeakMap',
-                'WeakSet',
-                'Symbol',
-                'Proxy',
-                'Reflect',
-                'math',
-                '__result__',
-              ].includes(key),
-          )
-          .map((key) => `${key}: ${key}`)
-          .join(',\n')
-
-        // Guard access to potentially non-top-level declarations using typeof checks
-        // (typeof on an undeclared identifier is safe and returns 'undefined')
-        const returnMappingsDeclared = varDeclarations
-          .map(
-            (varName: string) =>
-              `${varName}: (typeof ${varName} !== 'undefined' ? ${varName} : undefined)`,
-          )
-          .join(',\n')
-
+        // Build execution context and run inside a single persistent scope object
         const parts: string[] = []
         parts.push('(function() {\n')
-        parts.push('// Restore existing variables from the runtime\n')
-        if (restoreLines) parts.push(restoreLines + '\n')
-        parts.push('\n// Execute the user code (with optional __result__ capture)\n')
-        parts.push('let __result__ = undefined;\n')
-        parts.push(bodyCode + '\n')
-        parts.push('\n// Return all variables and the optional result\n')
-        parts.push('return {\n')
-        parts.push('  __result__: __result__')
-        if (returnMappingsExisting) parts.push(',\n' + returnMappingsExisting)
-        if (returnMappingsDeclared)
-          parts.push((returnMappingsExisting ? ',\n' : ',\n') + returnMappingsDeclared)
-        parts.push('\n};\n')
+        parts.push('const __SCOPE__ = new Proxy(runtime.variables, { has: () => true });\n')
+        parts.push('with (__SCOPE__) {\n')
+        parts.push(transformedBody + '\n')
+        parts.push('}\n')
+        parts.push('return {};\n')
         parts.push('})()')
 
         const executionContext = parts.join('')
@@ -561,31 +562,18 @@ class MathJSREPLService {
         ) => Record<string, unknown>
         const execResult = execFn(runtime)
 
-        // Update the runtime variables with any new/modified variables (excluding __result__)
-        if (execResult && typeof execResult === 'object') {
-          const temp = execResult as Record<string, unknown>
-          // Access to indicate usage
-          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-          temp.__result__
-          const vars: Record<string, unknown> = { ...temp }
-          delete (
-            vars as Record<string, unknown> as Record<string, unknown> & { __result__?: unknown }
-          ).__result__
-          Object.assign(runtime.variables, vars)
-        }
+        // No merge required — code ran under `with (runtime.variables)` and wrote directly
 
         // Capture any output
         if (capturedOutput.length > 0) {
           output = capturedOutput.join('\n')
         }
 
-        // Always display the expression result when available
-        if (
-          execResult &&
-          typeof execResult === 'object' &&
-          Object.prototype.hasOwnProperty.call(execResult, '__result__')
-        ) {
-          const value = (execResult as Record<string, unknown>).__result__
+        // Always display the expression result when available (read from scope)
+        if (Object.prototype.hasOwnProperty.call(runtime.variables, '__result__')) {
+          const value = (runtime.variables as Record<string, unknown>)['__result__']
+          // Clean up to avoid leaking into user scope snapshot
+          delete (runtime.variables as Record<string, unknown>)['__result__']
           if (value !== undefined) {
             const format = (v: unknown): string => {
               try {
@@ -611,7 +599,7 @@ class MathJSREPLService {
           }
         }
 
-        // Update variables for the return value
+        // Update variables snapshot
         variables = { ...runtime.variables }
       } catch (execError: unknown) {
         error = execError instanceof Error ? execError.message : 'JavaScript execution error'

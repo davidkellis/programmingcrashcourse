@@ -37,3 +37,7 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## todo
+
+we need to revise the new component to not put a modal dialog up because it prevents the user from interacting with the tutorial content. We also need to revise the exercise content such that it renders the scoreboard and speed controls above or below the tank battle canvas because the scoreboard and speed control do not fit within the tutorial content section (per the attached image)

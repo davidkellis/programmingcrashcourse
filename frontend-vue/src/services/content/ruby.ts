@@ -48,6 +48,78 @@ Let's begin.`,
     nextSection: 'comments',
   },
   {
+    id: 'modules',
+    title: 'Modules and Packages',
+    order: 13,
+    content: `Programs grow. As they do, we group related code together so it stays organized and reusable. In Ruby, the unit of organization is a file (a module or code inside a module/class); a collection of files in a folder published together is called a gem.
+
+### What is a module? What is a package?
+
+- A **module** in Ruby is a namespace (defined with \`nr: module Name\`) and/or a single \`nr: .rb\` file. Modules can hold methods, constants, and classes, and they help organize names and share code via mixins.
+- A **package** is a library you can install and reuse. Ruby packages are distributed as **gems** and installed with \`nr: gem install <name>\` or declared in a \`nr: Gemfile\` and installed with Bundler (\`nr: bundle install\`).
+
+You load files with \`nr: require\` and, in modern Ruby, you can also use \`nr: require_relative\` to load a file relative to the current file.
+
+### Why use modules and packages?
+
+- **Organization**: keep related code together; split a large program into logical parts.
+- **Reusability**: write something once, import it in many places.
+- **Avoid name clashes**: names live in a module’s own namespace; you reference them as \`nr: ModuleName::Thing\`.
+- **Discoverability**: the standard library and the RubyGems ecosystem give you well‑tested building blocks.
+
+### Importing code — the basic forms
+
+- \`nr: require 'json'\` — load a standard library or gem by name.
+- \`nr: require_relative 'utils'\` — load a local file \`nr: utils.rb\` relative to the current file.
+- Namespacing with modules: \`nr: module MyLib; class Tool; end; end\` then refer to \`nr: MyLib::Tool\`.
+
+\`\`\`ruby
+# title: Using standard library and namespacing
+# description: Require modules and call their functions.
+require 'json'
+JSON.generate({ a: 1, b: 2 })
+---
+require 'date'
+Date.today.next_day(3)
+---
+module MyLib
+  PI = 3.14159
+  def self.area_of_circle(r)
+    PI * r * r
+  end
+end
+---
+MyLib.area_of_circle(3)
+\`\`\`
+
+\`\`\`ruby
+# title: require_relative and organizing local code
+# description: Load a sibling file and use its names.
+nr:
+# file: math_utils.rb
+module MathUtils
+  def self.add(a, b) = a + b
+end
+---
+nr:
+# file: app.rb
+require_relative 'math_utils'
+MathUtils.add(7, 5)
+\`\`\`
+
+### Examples of popular modules/gems in Ruby
+
+- **\`nr: json\`**: encode/decode JSON data.
+- **\`nr: date\`**/**\`nr: time\`**: dates and times.
+- **\`nr: set\`**: a Set collection type.
+- **\`nr: net/http\`**: basic HTTP client in stdlib.
+- Gems: **\`nr: httparty\`**, **\`nr: faraday\`** (HTTP), **\`nr: activesupport\`** (utilities), **\`nr: sequel\`**/**\`nr: activerecord\`** (database).
+
+You will also see third‑party gems installed with tools like \`nr: gem\` or Bundler. The ideas are the same: you require what you need and use its names.`,
+    previousSection: 'types',
+    nextSection: 'next-steps',
+  },
+  {
     id: 'comments',
     title: 'Comments',
     order: 2,
@@ -597,6 +669,78 @@ puts "my_age -> #{my_age}"   # this prints 10
 my_age = 11
 puts "my_age -> #{my_age}"   # this prints 11
 \`\`\`
+
+## Variable scope
+
+Every variable binding lives in exactly one of three scopes:
+
+- Local method scope: names created inside the current method.
+- Enclosing scope: blocks/procs/lambdas can read names from their enclosing method.
+- Global/module scope: names at the top level (like constants) or true globals (\`nr: $name\`). Note: top‑level local variables are not visible inside methods.
+
+Name lookup is lexical (based on where code is written) and happens in this order:
+1. local
+2. enclosing (nearest outward)
+3. global/module
+
+\`\`\`ruby
+# title: Local vs top-level
+animal = "cat"         # top-level local
+
+def show_animals
+  animal = "dog"       # local to the method
+  puts "inside -> #{animal}"
+end
+
+show_animals
+---
+puts "outside -> #{animal}"
+\`\`\`
+
+\`\`\`ruby
+# title: Enclosing scope — inner reads outer
+def outer
+  message = "hi from outer"
+  inner = -> { message }  # reads the outer name
+  inner.call
+end
+---
+outer
+\`\`\`
+
+To change a name from an outer scope:
+- Methods have their own local scope and do not see top‑level locals.
+- Blocks/lambdas close over (capture) surrounding locals; assigning rebinds the outer name.
+
+For example:
+
+\`\`\`ruby
+# title: Method vs closure rebinding
+name = "Joe"
+
+def set_method_local_name
+  name = "Bob"               # method-local; does not change outer 'name'
+  puts "inside set_method_local_name: #{name}"
+end
+
+set_closure_name = -> {
+  name = "Jill"              # reassigns the captured outer 'name'
+  puts "inside set_closure_name: #{name}"
+}
+
+puts "initial name: #{name}"
+---
+set_method_local_name()
+puts "after set_method_local_name: #{name}"
+---
+set_closure_name.call
+puts "after set_closure_name: #{name}"
+---
+set_method_local_name()
+puts "after set_method_local_name: #{name}"
+\`\`\`
+
+Note: In Ruby, methods always create a new scope. Blocks (\`nr: do..end\` or \`nr: { }\`) create an inner scope for block parameters/locals and can read and rebind surrounding locals.
 
 `,
     previousSection: 'operators',
