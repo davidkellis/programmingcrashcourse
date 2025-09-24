@@ -171,55 +171,70 @@ class MathJSREPLService {
 
       const names: string[] = []
 
-      const collectFromPattern = (pattern: any): void => {
+      const collectFromPattern = (pattern: acorn.Node): void => {
         if (!pattern) return
         switch (pattern.type) {
-          case 'Identifier':
-            names.push(pattern.name)
+          case 'Identifier': {
+            const identifier = pattern as acorn.Node & { name: string }
+            names.push(identifier.name)
             break
-          case 'ObjectPattern':
-            for (const prop of pattern.properties || []) {
+          }
+          case 'ObjectPattern': {
+            const objectPattern = pattern as acorn.Node & { properties?: Array<acorn.Node> }
+            for (const prop of objectPattern.properties || []) {
               // Handle Property and RestElement
               if (prop.type === 'Property') {
-                collectFromPattern(prop.value)
+                const property = prop as acorn.Node & { value: acorn.Node }
+                collectFromPattern(property.value)
               } else if (prop.type === 'RestElement') {
-                collectFromPattern(prop.argument)
+                const restElement = prop as acorn.Node & { argument: acorn.Node }
+                collectFromPattern(restElement.argument)
               }
             }
             break
-          case 'ArrayPattern':
-            for (const elem of pattern.elements || []) {
+          }
+          case 'ArrayPattern': {
+            const arrayPattern = pattern as acorn.Node & { elements?: Array<acorn.Node | null> }
+            for (const elem of arrayPattern.elements || []) {
               if (elem) collectFromPattern(elem)
             }
             break
-          case 'AssignmentPattern':
-            collectFromPattern(pattern.left)
+          }
+          case 'AssignmentPattern': {
+            const assignmentPattern = pattern as acorn.Node & { left: acorn.Node }
+            collectFromPattern(assignmentPattern.left)
             break
-          case 'RestElement':
-            collectFromPattern(pattern.argument)
+          }
+          case 'RestElement': {
+            const restElement = pattern as acorn.Node & { argument: acorn.Node }
+            collectFromPattern(restElement.argument)
             break
+          }
           default:
             break
         }
       }
 
-      const addDecl = (node: any): void => {
+      const addDecl = (node: acorn.Node): void => {
         if (!node) return
         if (node.type === 'VariableDeclaration') {
-          for (const d of node.declarations || []) {
+          const varDecl = node as acorn.Node & { declarations?: Array<{ id: acorn.Node }> }
+          for (const d of varDecl.declarations || []) {
             collectFromPattern(d.id)
           }
         } else if (node.type === 'FunctionDeclaration' || node.type === 'ClassDeclaration') {
-          if (node.id && node.id.name) names.push(node.id.name)
+          const namedNode = node as acorn.Node & { id?: { name?: string } }
+          if (namedNode.id && namedNode.id.name) names.push(namedNode.id.name)
         } else if (
           node.type === 'ExportNamedDeclaration' ||
           node.type === 'ExportDefaultDeclaration'
         ) {
-          if (node.declaration) addDecl(node.declaration)
+          const exportNode = node as acorn.Node & { declaration?: acorn.Node }
+          if (exportNode.declaration) addDecl(exportNode.declaration)
         }
       }
 
-      for (const stmt of program.body) addDecl(stmt as any)
+      for (const stmt of program.body) addDecl(stmt)
 
       // De-duplicate while preserving order
       return Array.from(new Set(names))
@@ -257,9 +272,15 @@ class MathJSREPLService {
 
       const slice = (start: number, end: number): string => src.slice(start, end)
 
-      const makeVarAssigns = (decl: any): string => {
+      const makeVarAssigns = (decl: acorn.Node): string => {
         const assigns: string[] = []
-        for (const d of decl.declarations || []) {
+        const varDecl = decl as acorn.Node & {
+          declarations?: Array<{
+            id: acorn.Node & { start: number; end: number; type: string }
+            init?: acorn.Node & { start: number; end: number }
+          }>
+        }
+        for (const d of varDecl.declarations || []) {
           const id = d.id
           const init = d.init ? slice(d.init.start, d.init.end) : 'undefined'
           const idSrc = slice(id.start, id.end)
@@ -275,14 +296,14 @@ class MathJSREPLService {
         // Append untouched code up to this node
         pieces.push(slice(cursor, node.start))
 
-        switch ((node as any).type) {
+        switch (node.type) {
           case 'VariableDeclaration': {
-            const rewritten = makeVarAssigns(node as any)
+            const rewritten = makeVarAssigns(node)
             pieces.push(rewritten)
             break
           }
           case 'FunctionDeclaration': {
-            const fn: any = node
+            const fn = node as acorn.Node & { id?: { name?: string }; start: number; end: number }
             const name = fn.id && fn.id.name ? String(fn.id.name) : ''
             const fnSrc = slice(fn.start, fn.end) // `function name(...) { ... }`
             // Assign a named function expression to persist on scope
@@ -290,7 +311,7 @@ class MathJSREPLService {
             break
           }
           case 'ClassDeclaration': {
-            const cls: any = node
+            const cls = node as acorn.Node & { id?: { name?: string }; start: number; end: number }
             const name = cls.id && cls.id.name ? String(cls.id.name) : ''
             const clsSrc = slice(cls.start, cls.end) // `class Name ... {}`
             // Wrap in parens so it's an expression in assignment position
@@ -560,7 +581,7 @@ class MathJSREPLService {
         const execFn = new Function('runtime', 'return ' + executionContext) as (
           runtime: MathJSRuntimeState,
         ) => Record<string, unknown>
-        const execResult = execFn(runtime)
+        execFn(runtime)
 
         // No merge required — code ran under `with (runtime.variables)` and wrote directly
 
